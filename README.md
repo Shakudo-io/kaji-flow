@@ -465,6 +465,8 @@ To remove oh-my-opencode:
 - **frontend-ui-ux-engineer** (`google/gemini-3-pro-high`): A designer turned developer. Builds gorgeous UIs. Gemini excels at creative, beautiful UI code.
 - **document-writer** (`google/gemini-3-flash`): Technical writing expert. Gemini is a wordsmith—writes prose that flows.
 - **multimodal-looker** (`google/gemini-3-flash`): Visual content specialist. Analyzes PDFs, images, diagrams to extract information.
+- **unity-engineer** (`anthropic/claude-sonnet-4-5`): Unity game development specialist. Handles C# scripting, MonoBehaviour patterns, ScriptableObjects, and Unity architecture. Knows when to delegate spatial tasks.
+- **unity-spatial-engineer** (`google/gemini-3-pro`): Unity 3D/spatial specialist. Expert in physics, cameras, navigation, 3D math, and animation systems requiring spatial understanding.
 
 The main agent invokes these automatically, but you can call them explicitly:
 
@@ -489,6 +491,53 @@ These workflows are possible with OhMyOpenCode.
 Run subagents in the background. The main agent gets notified on completion. Wait for results if needed.
 
 **Make your agents work like your team works.**
+
+### Unity Game Development
+
+Full Unity development support with specialized agents and hooks. Your agents now understand MonoBehaviour lifecycle, physics systems, and Unity-specific patterns.
+
+#### Unity Agents
+
+| Agent | Model | Specialty |
+|-------|-------|-----------|
+| `@unity-engineer` | Claude Sonnet 4.5 | C# scripting, MonoBehaviour, ScriptableObject, events, game logic |
+| `@unity-spatial-engineer` | Gemini 3 Pro | Physics, Rigidbody, raycasting, cameras, navigation, 3D math |
+
+Use them directly:
+```
+Ask @unity-engineer to create a player controller with jump mechanics
+Ask @unity-spatial-engineer to implement a smooth orbit camera
+```
+
+Or let the main agent route automatically based on task type.
+
+#### Unity Anti-Pattern Checker
+
+Catches common Unity mistakes before they become bugs:
+
+| Level | Pattern | Message |
+|-------|---------|---------|
+| ❌ Error | `new MonoBehaviour()` | Use `AddComponent<T>()` |
+| ❌ Error | `new ScriptableObject()` | Use `CreateInstance<T>()` |
+| ❌ Error | `using UnityEditor;` in runtime | Wrap with `#if UNITY_EDITOR` |
+| ⚠️ Warn | `GetComponent` in Update | Cache in `Awake()` |
+| ⚠️ Warn | `Camera.main` in loop | Cache the reference |
+| ⚠️ Warn | `tag == "Player"` | Use `CompareTag()` |
+| ⚠️ Warn | Empty `Update()` method | Delete unused methods |
+
+#### Unity Context Injector
+
+Automatically detects Unity projects and injects context:
+- Unity version and render pipeline
+- Installed packages (Input System, Cinemachine, etc.)
+- Project-specific settings
+
+#### Project Templates
+
+Copy `templates/unity-project/` to your Unity project root for:
+- `AGENTS.md` - Agent routing guide and coding conventions
+- `.claude/rules/unity-csharp.md` - C# best practices
+- `.claude/rules/unity-physics.md` - Physics and 3D math rules
 
 ### The Tools: Your Teammates Deserve Better
 
@@ -773,7 +822,7 @@ Or disable via `disabled_agents` in `~/.config/opencode/oh-my-opencode.json` or 
 }
 ```
 
-Available agents: `oracle`, `librarian`, `explore`, `frontend-ui-ux-engineer`, `document-writer`, `multimodal-looker`
+Available agents: `oracle`, `librarian`, `explore`, `frontend-ui-ux-engineer`, `document-writer`, `multimodal-looker`, `unity-engineer`, `unity-spatial-engineer`
 
 ### Sisyphus Agent
 
@@ -824,7 +873,7 @@ Disable specific built-in hooks via `disabled_hooks` in `~/.config/opencode/oh-m
 }
 ```
 
-Available hooks: `todo-continuation-enforcer`, `context-window-monitor`, `session-recovery`, `session-notification`, `comment-checker`, `grep-output-truncator`, `tool-output-truncator`, `directory-agents-injector`, `directory-readme-injector`, `empty-task-response-detector`, `think-mode`, `anthropic-auto-compact`, `rules-injector`, `background-notification`, `auto-update-checker`, `startup-toast`, `keyword-detector`, `agent-usage-reminder`, `non-interactive-env`, `interactive-bash-session`, `empty-message-sanitizer`
+Available hooks: `todo-continuation-enforcer`, `context-window-monitor`, `session-recovery`, `session-notification`, `comment-checker`, `grep-output-truncator`, `tool-output-truncator`, `directory-agents-injector`, `directory-readme-injector`, `empty-task-response-detector`, `think-mode`, `anthropic-auto-compact`, `rules-injector`, `background-notification`, `auto-update-checker`, `startup-toast`, `keyword-detector`, `agent-usage-reminder`, `non-interactive-env`, `interactive-bash-session`, `empty-message-sanitizer`, `unity-anti-pattern-checker`, `unity-context-injector`
 
 ### MCPs
 
