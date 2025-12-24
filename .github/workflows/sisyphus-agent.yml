@@ -16,11 +16,12 @@ on:
 jobs:
   agent:
     runs-on: ubuntu-latest
-    # @sisyphus-dev-ai mention only (exclude self)
+    # @sisyphus-dev-ai mention only (maintainers, exclude self)
     if: |
       github.event_name == 'workflow_dispatch' ||
       (contains(github.event.comment.body || github.event.review.body, '@sisyphus-dev-ai') && 
-       (github.event.comment.user.login || github.event.review.user.login) != 'sisyphus-dev-ai')
+       (github.event.comment.user.login || github.event.review.user.login) != 'sisyphus-dev-ai' &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association || github.event.review.author_association))
     
     # Minimal default GITHUB_TOKEN permissions
     permissions:
