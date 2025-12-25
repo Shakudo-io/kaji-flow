@@ -40,6 +40,7 @@ import {
   loadProjectAgents,
 } from "./features/claude-code-agent-loader";
 import { loadMcpConfigs } from "./features/claude-code-mcp-loader";
+import { loadAllPluginComponents } from "./features/claude-code-plugin-loader";
 import {
   setMainSession,
   getMainSessionID,
@@ -368,6 +369,20 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
         }
       }
 
+      const pluginComponents = (pluginConfig.claude_code?.plugins ?? true)
+        ? await loadAllPluginComponents()
+        : { commands: {}, skills: {}, agents: {}, mcpServers: {}, hooksConfigs: [], plugins: [], errors: [] };
+
+      if (pluginComponents.plugins.length > 0) {
+        log(`Loaded ${pluginComponents.plugins.length} Claude Code plugins`, {
+          plugins: pluginComponents.plugins.map(p => `${p.name}@${p.version}`),
+        });
+      }
+
+      if (pluginComponents.errors.length > 0) {
+        log(`Plugin load errors`, { errors: pluginComponents.errors });
+      }
+
       const builtinAgents = createBuiltinAgents(
         pluginConfig.disabled_agents,
         pluginConfig.agents,
@@ -377,6 +392,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 
       const userAgents = (pluginConfig.claude_code?.agents ?? true) ? loadUserAgents() : {};
       const projectAgents = (pluginConfig.claude_code?.agents ?? true) ? loadProjectAgents() : {};
+      const pluginAgents = pluginComponents.agents;
 
       const isSisyphusEnabled = pluginConfig.sisyphus_agent?.disabled !== true;
       const builderEnabled = pluginConfig.sisyphus_agent?.builder_enabled ?? false;
@@ -437,6 +453,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
           ...Object.fromEntries(Object.entries(builtinAgents).filter(([k]) => k !== "Sisyphus")),
           ...userAgents,
           ...projectAgents,
+          ...pluginAgents,
           ...filteredConfigAgents,  // Filtered config agents (excludes build/plan if replaced)
           // Demote build/plan to subagent mode when replaced
           ...(replaceBuild ? { build: { ...config.agent?.build, mode: "subagent" } } : {}),
@@ -447,6 +464,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
           ...builtinAgents,
           ...userAgents,
           ...projectAgents,
+          ...pluginAgents,
           ...config.agent,
         };
       }
@@ -485,10 +503,12 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
       const mcpResult = (pluginConfig.claude_code?.mcp ?? true)
         ? await loadMcpConfigs()
         : { servers: {} };
+
       config.mcp = {
         ...config.mcp,
         ...createBuiltinMcps(pluginConfig.disabled_mcps),
         ...mcpResult.servers,
+        ...pluginComponents.mcpServers,
       };
 
       const userCommands = (pluginConfig.claude_code?.commands ?? true) ? loadUserCommands() : {};
@@ -507,6 +527,8 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
         ...projectCommands,
         ...projectSkills,
         ...opencodeProjectCommands,
+        ...pluginComponents.commands,
+        ...pluginComponents.skills,
       };
     },
 
