@@ -1,3 +1,11 @@
+export interface GithubSkillSource {
+  repo: string
+  ref?: string
+  path: string
+  name: string
+  version?: string
+}
+
 export interface BuiltinSkill {
   name: string
   description: string
@@ -10,4 +18,6 @@ export interface BuiltinSkill {
   model?: string
   subtask?: boolean
   argumentHint?: string
+  source?: GithubSkillSource
+  autoServer?: boolean
 }
