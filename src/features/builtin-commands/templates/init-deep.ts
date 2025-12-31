@@ -5,20 +5,70 @@ Generate comprehensive AGENTS.md files across project hierarchy. Combines root-l
 ## Usage
 
 \`\`\`
-/init-deep                      # Analyze and generate hierarchical AGENTS.md
-/init-deep --create-new         # Force create from scratch (ignore existing)
+/init-deep                      # Update mode: Modify existing + create new where needed
+/init-deep --create-new         # Fresh start: Read existing → Remove all → Rewrite from scratch
 /init-deep --max-depth=2        # Limit to N directory levels (default: 3)
 \`\`\`
+
+### Flag Behavior
+
+| Flag | Read Existing | Remove Existing | Create New Files |
+|------|--------------|-----------------|------------------|
+| (default) | ✓ Yes | ✗ No | ✓ Yes (where warranted) |
+| --create-new | ✓ Yes (for context) | ✓ Yes (after reading) | ✓ Yes (all locations) |
+
+<important>
+**--create-new does NOT mean "ignore existing"**. It means:
+1. READ all existing AGENTS.md files to understand what was documented
+2. REMOVE all existing files after reading
+3. REWRITE everything from scratch, using the gathered context
+
+This preserves institutional knowledge while ensuring fresh, consistent documentation.
+</important>
+
+---
+
+## Operating Modes
+
+| Mode | Behavior |
+|------|----------|
+| **Update (default)** | Read existing → Identify gaps → Update existing + Create new where complexity > threshold |
+| **Create New** | Read existing → Delete all → Regenerate entire hierarchy from scratch |
+
+<update-mode>
+**Update Mode** is NOT read-only. It:
+1. Reads all existing AGENTS.md files
+2. Analyzes current codebase structure
+3. **Updates** existing AGENTS.md files with new information
+4. **Creates** new AGENTS.md files in directories that now warrant them (score > 15)
+5. Does NOT delete existing files that are still relevant
+</update-mode>
 
 ---
 
 ## Core Principles
 
+- **Existing First**: ALWAYS read existing AGENTS.md files before any other analysis
+- **LSP-First**: Use LSP tools as PRIMARY method for code understanding (semantic > text search)
+- **Update Creates**: Update mode can CREATE new files, not just modify existing ones
 - **Telegraphic Style**: Sacrifice grammar for concision ("Project uses React" → "React 18")
 - **Predict-then-Compare**: Predict standard → find actual → document ONLY deviations
 - **Hierarchy Aware**: Parent covers general, children cover specific
 - **No Redundancy**: Child AGENTS.md NEVER repeats parent content
-- **LSP-First**: Use LSP tools for accurate code intelligence when available (semantic > text search)
+
+---
+
+## Execution Order
+
+<critical>
+**MANDATORY ORDER - DO NOT SKIP OR REORDER:**
+1. **Discovery**: Find & READ all existing AGENTS.md files (ALWAYS FIRST)
+2. **LSP Analysis**: Semantic code understanding (PRIMARY method)
+3. **Supplementary Analysis**: Bash + Explore agents (SECONDARY)
+4. **Scoring**: Determine which directories need AGENTS.md
+5. **Generation**: Create/update AGENTS.md files
+6. **Review**: Deduplicate and validate
+</critical>
 
 ---
 
@@ -32,7 +82,8 @@ Generate comprehensive AGENTS.md files across project hierarchy. Combines root-l
 
 \`\`\`
 TodoWrite([
-  { id: "p1-analysis", content: "Parallel project structure & complexity analysis", status: "pending", priority: "high" },
+  { id: "p0-discovery", content: "Discover and READ all existing AGENTS.md files", status: "pending", priority: "high" },
+  { id: "p1-analysis", content: "LSP-first structural analysis + supplementary context gathering", status: "pending", priority: "high" },
   { id: "p2-scoring", content: "Score directories, determine AGENTS.md locations", status: "pending", priority: "high" },
   { id: "p3-root", content: "Generate root AGENTS.md with Predict-then-Compare", status: "pending", priority: "high" },
   { id: "p4-subdirs", content: "Generate subdirectory AGENTS.md files in parallel", status: "pending", priority: "high" },
@@ -42,46 +93,138 @@ TodoWrite([
 
 ---
 
-## Phase 1: Parallel Project Analysis
+## Phase 0.5: Discover & Read Existing AGENTS.md
+
+**Mark "p0-discovery" as in_progress.**
+
+<critical>
+**THIS MUST BE THE FIRST ANALYSIS STEP.** Before ANY LSP analysis, explore agents, or bash commands.
+Understanding existing documentation is essential for BOTH update mode AND --create-new mode.
+</critical>
+
+### Step 1: Find ALL existing AGENTS.md files
+
+\`\`\`bash
+# Find all existing AGENTS.md files (including CLAUDE.md for compatibility)
+find . -type f \\( -name "AGENTS.md" -o -name "CLAUDE.md" \\) \\
+  -not -path '*/node_modules/*' \\
+  -not -path '*/venv/*' \\
+  -not -path '*/.git/*' \\
+  -not -path '*/dist/*' \\
+  -not -path '*/build/*' \\
+  2>/dev/null | sort
+\`\`\`
+
+### Step 2: Read EACH existing file
+
+For every AGENTS.md found, use the Read tool to capture its content:
+
+\`\`\`
+EXISTING_AGENTS = {}
+
+for each file in found_files:
+  content = Read(filePath=file)
+  EXISTING_AGENTS[file] = {
+    path: file,
+    content: content,
+    directory: dirname(file),
+    sections: extractSections(content)  // OVERVIEW, STRUCTURE, CONVENTIONS, etc.
+  }
+\`\`\`
+
+### Step 3: Analyze existing documentation coverage
+
+\`\`\`
+EXISTING_COVERAGE = {
+  root_exists: "./AGENTS.md" in EXISTING_AGENTS,
+  documented_directories: [dirs with AGENTS.md],
+  undocumented_directories: [],  // To be filled in Phase 2
+  total_files: len(EXISTING_AGENTS),
+  key_insights: []  // Extract notable patterns, anti-patterns, conventions from existing files
+}
+\`\`\`
+
+### Step 4: Extract key insights from existing files
+
+For each existing AGENTS.md, extract and preserve:
+- Project-specific conventions mentioned
+- Anti-patterns documented
+- Unique styles described
+- Commands and deployment info
+- Any "NOTES" or gotchas
+
+\`\`\`
+KEY_INSIGHTS_FROM_EXISTING = [
+  // Examples:
+  // "Project uses BDD-style test comments (#given, #when, #then)" - from existing AGENTS.md
+  // "Bun-only package manager (anti-pattern: npm/yarn)" - from existing AGENTS.md
+  // "Hook naming convention: createXXXHook" - from existing AGENTS.md
+]
+\`\`\`
+
+### Output Format
+
+\`\`\`
+EXISTING_AGENTS_ANALYSIS = {
+  files_found: [
+    { path: "./AGENTS.md", lines: 150, has_sections: ["OVERVIEW", "STRUCTURE", "CONVENTIONS"] },
+    { path: "./src/hooks/AGENTS.md", lines: 80, has_sections: ["OVERVIEW", "HOOK CATEGORIES"] }
+  ],
+  key_insights: [
+    "Project uses BDD-style test comments (#given, #when, #then)",
+    "Bun-only package manager (anti-pattern: npm/yarn)",
+    "Hook naming convention: createXXXHook"
+  ],
+  coverage_gaps: [],  // Directories that might need AGENTS.md - filled in Phase 2
+}
+\`\`\`
+
+### Mode-Specific Behavior After Discovery
+
+<mode-handling>
+**Update Mode (default):**
+- Preserve EXISTING_AGENTS content as baseline
+- Use KEY_INSIGHTS_FROM_EXISTING to inform new content
+- Merge new findings with existing documentation
+- CREATE new AGENTS.md files where scoring warrants
+
+**--create-new Mode:**
+- Still use EXISTING_AGENTS for context (don't ignore institutional knowledge)
+- Delete all existing AGENTS.md files AFTER reading them
+- Regenerate ALL files from scratch using gathered context + new analysis
+
+\`\`\`bash
+# --create-new: After reading all existing files, remove them
+if [[ "$ARGUMENTS" == *"--create-new"* ]]; then
+  echo "Mode: --create-new detected"
+  echo "Existing files read and context preserved. Now removing all AGENTS.md files..."
+  find . -type f -name "AGENTS.md" \\
+    -not -path '*/node_modules/*' \\
+    -not -path '*/.git/*' \\
+    -exec rm -v {} \\;
+  echo "All existing AGENTS.md files removed. Will regenerate from scratch."
+fi
+\`\`\`
+</mode-handling>
+
+**Mark "p0-discovery" as completed.**
+
+---
+
+## Phase 1: LSP-First Structural Analysis
 
 **Mark "p1-analysis" as in_progress.**
 
-Launch **ALL tasks simultaneously**:
+<critical>
+**LSP is the PRIMARY tool for codebase understanding.** Use LSP for semantic accuracy.
+Bash and explore agents provide SUPPLEMENTARY context where LSP cannot reach.
+</critical>
 
-<parallel-tasks>
+Launch **ALL tasks simultaneously**, but prioritize LSP results:
 
-### Structural Analysis (bash - run in parallel)
-\`\`\`bash
-# Task A: Directory depth analysis
-find . -type d -not -path '*/\\.*' -not -path '*/node_modules/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' -not -path '*/dist/*' -not -path '*/build/*' | awk -F/ '{print NF-1}' | sort -n | uniq -c
+<parallel-tasks priority="lsp-first">
 
-# Task B: File count per directory  
-find . -type f -not -path '*/\\.*' -not -path '*/node_modules/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -30
-
-# Task C: Code concentration
-find . -type f \\( -name "*.py" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.go" -o -name "*.rs" -o -name "*.java" \\) -not -path '*/node_modules/*' -not -path '*/venv/*' | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -20
-
-# Task D: Existing knowledge files
-find . -type f \\( -name "AGENTS.md" -o -name "CLAUDE.md" \\) -not -path '*/node_modules/*' 2>/dev/null
-\`\`\`
-
-### Context Gathering (Explore agents - background_task in parallel)
-
-\`\`\`
-background_task(agent="explore", prompt="Project structure: PREDICT standard {lang} patterns → FIND package.json/pyproject.toml/go.mod → REPORT deviations only")
-
-background_task(agent="explore", prompt="Entry points: PREDICT typical (main.py, index.ts) → FIND actual → REPORT non-standard organization")
-
-background_task(agent="explore", prompt="Conventions: FIND .cursor/rules, .cursorrules, eslintrc, pyproject.toml → REPORT project-specific rules DIFFERENT from defaults")
-
-background_task(agent="explore", prompt="Anti-patterns: FIND comments with 'DO NOT', 'NEVER', 'ALWAYS', 'LEGACY', 'DEPRECATED' → REPORT forbidden patterns")
-
-background_task(agent="explore", prompt="Build/CI: FIND .github/workflows, Makefile, justfile → REPORT non-standard build/deploy patterns")
-
-background_task(agent="explore", prompt="Test patterns: FIND pytest.ini, jest.config, test structure → REPORT unique testing conventions")
-\`\`\`
-
-### Code Intelligence Analysis (LSP tools - run in parallel)
+### Code Intelligence Analysis (LSP tools - PRIMARY)
 
 LSP provides semantic understanding beyond text search. Use for accurate code mapping.
 
@@ -124,9 +267,51 @@ CODE_INTELLIGENCE = {
 }
 \`\`\`
 
+<lsp-priority>
+**LSP Results Take Precedence**: When LSP provides symbol information, prefer it over:
+- grep/regex pattern matching
+- AST-grep approximations
+- explore agent text searches
+
+LSP provides:
+- Accurate symbol types (class, function, interface, enum)
+- True export/import relationships
+- Precise reference counts
+- Hierarchical document structure
+</lsp-priority>
+
 <critical>
-**LSP Fallback**: If LSP unavailable (no server installed), skip this section and rely on explore agents + AST-grep patterns.
+**LSP Fallback**: If LSP unavailable (no server installed), skip this section and rely on explore agents + AST-grep patterns. Log a warning that semantic analysis is degraded.
 </critical>
+
+### Structural Analysis (bash - SUPPLEMENTARY)
+
+\`\`\`bash
+# Task A: Directory depth analysis
+find . -type d -not -path '*/\\.*' -not -path '*/node_modules/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' -not -path '*/dist/*' -not -path '*/build/*' | awk -F/ '{print NF-1}' | sort -n | uniq -c
+
+# Task B: File count per directory  
+find . -type f -not -path '*/\\.*' -not -path '*/node_modules/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -30
+
+# Task C: Code concentration
+find . -type f \\( -name "*.py" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.go" -o -name "*.rs" -o -name "*.java" \\) -not -path '*/node_modules/*' -not -path '*/venv/*' | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -20
+\`\`\`
+
+### Context Gathering (Explore agents - SUPPLEMENTARY)
+
+\`\`\`
+background_task(agent="explore", prompt="Project structure: PREDICT standard {lang} patterns → FIND package.json/pyproject.toml/go.mod → REPORT deviations only")
+
+background_task(agent="explore", prompt="Entry points: PREDICT typical (main.py, index.ts) → FIND actual → REPORT non-standard organization")
+
+background_task(agent="explore", prompt="Conventions: FIND .cursor/rules, .cursorrules, eslintrc, pyproject.toml → REPORT project-specific rules DIFFERENT from defaults")
+
+background_task(agent="explore", prompt="Anti-patterns: FIND comments with 'DO NOT', 'NEVER', 'ALWAYS', 'LEGACY', 'DEPRECATED' → REPORT forbidden patterns")
+
+background_task(agent="explore", prompt="Build/CI: FIND .github/workflows, Makefile, justfile → REPORT non-standard build/deploy patterns")
+
+background_task(agent="explore", prompt="Test patterns: FIND pytest.ini, jest.config, test structure → REPORT unique testing conventions")
+\`\`\`
 
 </parallel-tasks>
 
@@ -170,23 +355,44 @@ For each directory in candidates:
 \`\`\`
 </lsp-scoring>
 
-### Decision Rules
+### Decision Rules (applies to BOTH modes)
 
-| Score | Action |
-|-------|--------|
-| **Root (.)** | ALWAYS create AGENTS.md |
-| **High (>15)** | Create dedicated AGENTS.md |
-| **Medium (8-15)** | Create if distinct domain |
-| **Low (<8)** | Skip, parent sufficient |
+| Score | Update Mode | Create New Mode |
+|-------|-------------|-----------------|
+| **Root (.)** | Update existing or create if missing | Always create |
+| **High (>15)** | Update existing OR create new | Always create |
+| **Medium (8-15)** | Update if exists, create if distinct domain | Create if distinct domain |
+| **Low (<8)** | Keep existing as-is, don't create new | Skip |
+
+### Comparing Against Existing Coverage
+
+\`\`\`
+# From Phase 0.5:
+existing_dirs = EXISTING_COVERAGE.documented_directories
+
+# From Phase 2 scoring:
+warranted_dirs = [d for d in candidates if d.score > 15 or (d.score > 8 and d.is_distinct_domain)]
+
+# Identify gaps and overlaps:
+GAPS = warranted_dirs - existing_dirs  // New AGENTS.md needed
+OVERLAP = warranted_dirs ∩ existing_dirs  // Update existing
+OBSOLETE = existing_dirs - warranted_dirs  // May no longer be needed (warn only)
+\`\`\`
 
 ### Output Format
 
 \`\`\`
 AGENTS_LOCATIONS = [
-  { path: ".", type: "root" },
-  { path: "src/api", score: 18, reason: "high complexity, 45 files" },
-  { path: "src/hooks", score: 12, reason: "distinct domain, unique patterns" },
+  { path: ".", type: "root", action: "update" },
+  { path: "src/api", score: 18, reason: "high complexity, 45 files", action: "create" },
+  { path: "src/hooks", score: 12, reason: "distinct domain, unique patterns", action: "update" },
 ]
+
+COVERAGE_REPORT = {
+  to_create: ["src/api"],
+  to_update: [".", "src/hooks"],
+  obsolete_warning: []  // Directories with existing AGENTS.md but low score
+}
 \`\`\`
 
 **Mark "p2-scoring" as completed.**
@@ -198,6 +404,14 @@ AGENTS_LOCATIONS = [
 **Mark "p3-root" as in_progress.**
 
 Root AGENTS.md gets **full treatment** with Predict-then-Compare synthesis.
+
+<existing-context>
+**For Update Mode**: Review EXISTING_AGENTS["./AGENTS.md"] first.
+- Preserve valid insights that still apply
+- Update outdated information
+- Add new findings from Phase 1 analysis
+- Maintain document structure if already well-organized
+</existing-context>
 
 ### Required Sections
 
@@ -285,6 +499,7 @@ Root AGENTS.md gets **full treatment** with Predict-then-Compare synthesis.
 - [ ] No generic advice ("write clean code")
 - [ ] No obvious info ("tests/ has tests")
 - [ ] Every item is project-specific
+- [ ] KEY_INSIGHTS_FROM_EXISTING preserved where still valid
 
 **Mark "p3-root" as completed.**
 
@@ -298,20 +513,27 @@ For each location in AGENTS_LOCATIONS (except root), launch **parallel document-
 
 \`\`\`typescript
 for (const loc of AGENTS_LOCATIONS.filter(l => l.path !== ".")) {
+  // Determine if this is an update or create based on COVERAGE_REPORT
+  const isUpdate = COVERAGE_REPORT.to_update.includes(loc.path)
+  const existingContent = isUpdate ? EXISTING_AGENTS[loc.path + "/AGENTS.md"]?.content : null
+  
   background_task({
     agent: "document-writer",
     prompt: \\\`
-      Generate AGENTS.md for: \${loc.path}
+      \${isUpdate ? "UPDATE" : "CREATE"} AGENTS.md for: \${loc.path}
       
       CONTEXT:
       - Complexity reason: \${loc.reason}
+      - Action: \${isUpdate ? "update" : "create"}
       - Parent AGENTS.md: ./AGENTS.md (already covers project overview)
+      \${existingContent ? "- EXISTING CONTENT TO PRESERVE/UPDATE:\\n" + existingContent : ""}
       
       CRITICAL RULES:
       1. Focus ONLY on this directory's specific context
       2. NEVER repeat parent AGENTS.md content
       3. Shorter is better - 30-80 lines max
       4. Telegraphic style - sacrifice grammar
+      \${isUpdate ? "5. PRESERVE valid insights from existing content" : ""}
       
       REQUIRED SECTIONS:
       - OVERVIEW (1 line: what this directory does)
@@ -345,6 +567,7 @@ For EACH generated AGENTS.md:
 | Missing required section | ADD it |
 | Over 150 lines (root) / 80 lines (subdir) | TRIM |
 | Verbose explanations | REWRITE telegraphic |
+| Lost key insight from existing | RESTORE it |
 
 ### Cross-Reference Validation
 
@@ -353,6 +576,16 @@ For each child AGENTS.md:
   For each line in child:
     If similar line exists in parent:
       REMOVE from child (parent already covers)
+\`\`\`
+
+### Verify Key Insights Preserved
+
+\`\`\`
+For each insight in KEY_INSIGHTS_FROM_EXISTING:
+  If insight is still valid (verified in Phase 1):
+    Ensure it appears in appropriate AGENTS.md
+  If insight is outdated:
+    Document why it was removed in commit message
 \`\`\`
 
 **Mark "p5-review" as completed.**
@@ -364,14 +597,20 @@ For each child AGENTS.md:
 \`\`\`
 === init-deep Complete ===
 
-Files Generated:
-  ✓ ./AGENTS.md (root, {N} lines)
-  ✓ ./src/hooks/AGENTS.md ({N} lines)
-  ✓ ./src/tools/AGENTS.md ({N} lines)
+Mode: {update | create-new}
+
+Files {Created | Updated}:
+  ✓ ./AGENTS.md (root, {N} lines) [{created | updated}]
+  ✓ ./src/hooks/AGENTS.md ({N} lines) [{created | updated}]
+  ✓ ./src/tools/AGENTS.md ({N} lines) [{created | updated}]
 
 Directories Analyzed: {N}
 AGENTS.md Created: {N}
+AGENTS.md Updated: {N}
 Total Lines: {N}
+
+Key Insights Preserved: {N}
+Key Insights Updated: {N}
 
 Hierarchy:
   ./AGENTS.md
@@ -383,6 +622,8 @@ Hierarchy:
 
 ## Anti-Patterns for THIS Command
 
+- **Skipping Discovery**: NEVER skip Phase 0.5 - always read existing first
+- **Ignoring Existing Content**: Even with --create-new, READ before removing
 - **Over-documenting**: Not every directory needs AGENTS.md
 - **Redundancy**: Child must NOT repeat parent
 - **Generic content**: Remove anything that applies to ALL projects
@@ -391,4 +632,5 @@ Hierarchy:
 - **Verbose style**: "This directory contains..." → just list it
 - **Ignoring LSP**: If LSP available, USE IT - semantic analysis > text grep
 - **LSP without fallback**: Always have explore agent backup if LSP unavailable
-- **Over-referencing**: Don't trace refs for EVERY symbol - focus on exports only`
+- **Over-referencing**: Don't trace refs for EVERY symbol - focus on exports only
+- **Losing institutional knowledge**: Preserve valid insights from existing files`
