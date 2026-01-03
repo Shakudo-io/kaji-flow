@@ -201,14 +201,21 @@ export function createRalphLoopHook(
 
       if (state.session_id && state.session_id !== sessionID) {
         if (checkSessionExists) {
-          const originalSessionExists = await checkSessionExists(state.session_id)
-          if (!originalSessionExists) {
-            clearState(ctx.directory, stateDir)
-            log(`[${HOOK_NAME}] Cleared orphaned state from deleted session`, {
-              orphanedSessionId: state.session_id,
-              currentSessionId: sessionID,
+          try {
+            const originalSessionExists = await checkSessionExists(state.session_id)
+            if (!originalSessionExists) {
+              clearState(ctx.directory, stateDir)
+              log(`[${HOOK_NAME}] Cleared orphaned state from deleted session`, {
+                orphanedSessionId: state.session_id,
+                currentSessionId: sessionID,
+              })
+              return
+            }
+          } catch (err) {
+            log(`[${HOOK_NAME}] Failed to check session existence`, {
+              sessionId: state.session_id,
+              error: String(err),
             })
-            return
           }
         }
         return
