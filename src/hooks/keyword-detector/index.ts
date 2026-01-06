@@ -1,6 +1,6 @@
 import type { PluginInput } from "@opencode-ai/plugin"
 import { detectKeywordsWithType, extractPromptText, removeCodeBlocks } from "./detector"
-import { log } from "../../shared"
+import { hasPartOrigin, log } from "../../shared"
 
 export * from "./detector"
 export * from "./constants"
@@ -20,6 +20,10 @@ export function createKeywordDetectorHook(ctx: PluginInput) {
         parts: Array<{ type: string; text?: string; [key: string]: unknown }>
       }
     ): Promise<void> => {
+      if (hasPartOrigin(output.parts, "background-notification")) {
+        return
+      }
+
       const promptText = extractPromptText(output.parts)
       const detectedKeywords = detectKeywordsWithType(removeCodeBlocks(promptText), input.agent)
 

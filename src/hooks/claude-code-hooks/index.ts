@@ -26,7 +26,7 @@ import {
 import { cacheToolInput, getToolInput } from "./tool-input-cache"
 import { recordToolUse, recordToolResult, getTranscriptPath, recordUserMessage } from "./transcript"
 import type { PluginConfig } from "./types"
-import { log, isHookDisabled } from "../../shared"
+import { hasPartOrigin, log, isHookDisabled } from "../../shared"
 import { injectHookMessage } from "../../features/hook-message-injector"
 import { detectKeywordsWithType, removeCodeBlocks } from "../keyword-detector"
 
@@ -138,7 +138,9 @@ export function createClaudeCodeHooksHook(ctx: PluginInput, config: PluginConfig
           return
         }
 
-        const detectedKeywords = detectKeywordsWithType(removeCodeBlocks(prompt), input.agent)
+        const detectedKeywords = hasPartOrigin(textParts, "background-notification")
+          ? []
+          : detectKeywordsWithType(removeCodeBlocks(prompt), input.agent)
         const keywordMessages = detectedKeywords.map((k) => k.message)
 
         if (keywordMessages.length > 0) {

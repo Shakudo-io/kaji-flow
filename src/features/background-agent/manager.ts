@@ -343,7 +343,13 @@ export class BackgroundManager {
           body: {
             agent: prevMessage?.agent,
             model: modelField,
-            parts: [{ type: "text", text: message }],
+            parts: [
+              {
+                type: "text",
+                text: message,
+                metadata: { origin: "background-notification" },
+              },
+            ],
           },
           query: { directory: this.directory },
         })
