@@ -132,6 +132,37 @@ describe("skill_mcp tool", () => {
         }, mockContext)
       ).rejects.toThrow(/Invalid arguments JSON/)
     })
+
+    it("accepts arguments as object when LLM passes object directly", async () => {
+      // #given
+      loadedSkills = [
+        createMockSkillWithMcp("test-skill", {
+          "test-server": { command: "echo" },
+        }),
+      ]
+      const tool = createSkillMcpTool({
+        manager,
+        getLoadedSkills: () => loadedSkills,
+        getSessionID: () => sessionID,
+      })
+      const callToolMock = mock(() => Promise.resolve([{ type: "text", text: "success" }]))
+      manager.callTool = callToolMock
+
+      // #when
+      await tool.execute({
+        mcp_name: "test-server",
+        tool_name: "some-tool",
+        arguments: { action: "list" } as unknown as string,
+      }, mockContext)
+
+      // #then
+      expect(callToolMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        "some-tool",
+        { action: "list" }
+      )
+    })
   })
 
   describe("tool description", () => {
