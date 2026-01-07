@@ -7,6 +7,7 @@ import * as fs from "node:fs"
 import * as path from "node:path"
 import * as os from "node:os"
 import { log } from "./logger"
+import { parseJsoncSafe } from "./jsonc-parser"
 
 interface OpencodeConfig {
   plugin?: string[]
@@ -22,12 +23,6 @@ const KNOWN_NOTIFICATION_PLUGINS = [
   "@mohak34/opencode-notifier",
   "mohak34/opencode-notifier",
 ]
-
-function stripJsonComments(json: string): string {
-  return json
-    .replace(/\\"|"(?:\\"|[^"])*"|(\/\/.*|\/\*[\s\S]*?\*\/)/g, (m, g) => (g ? "" : m))
-    .replace(/,(\s*[}\]])/g, "$1")
-}
 
 function getWindowsAppdataDir(): string | null {
   return process.env.APPDATA || null
@@ -58,8 +53,10 @@ function loadOpencodePlugins(directory: string): string[] {
     try {
       if (!fs.existsSync(configPath)) continue
       const content = fs.readFileSync(configPath, "utf-8")
-      const config = JSON.parse(stripJsonComments(content)) as OpencodeConfig
-      return config.plugin ?? []
+      const result = parseJsoncSafe<OpencodeConfig>(content)
+      if (result.data) {
+        return result.data.plugin ?? []
+      }
     } catch {
       continue
     }
