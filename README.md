@@ -886,6 +886,26 @@ Use `prompt_append` to add extra instructions without replacing the default syst
 }
 ```
 
+You can also reference external files using `file://` URIs:
+
+```json
+{
+  "agents": {
+    "oracle": {
+      "prompt_append": "file://~/.config/opencode/my-oracle-instructions.md"
+    },
+    "Sisyphus": {
+      "prompt_append": "file://./project-context.md"
+    }
+  }
+}
+```
+
+Supported URI formats:
+- `file:///absolute/path` - Absolute path
+- `file://relative/path` - Relative to project root
+- `file://~/path` - Relative to home directory
+
 You can also override settings for `Sisyphus` (the main orchestrator) and `build` (the default agent) using the same options.
 
 #### Permission Options
