@@ -125,7 +125,7 @@ function mergeAgentConfig(
   if (prompt_append && merged.prompt) {
     let resolved = prompt_append
     if (prompt_append.startsWith("file://")) {
-      const path = prompt_append.slice(7)
+      const path = decodeURIComponent(prompt_append.slice(7))
       const abs = path.startsWith("~/")
         ? resolve(homedir(), path.slice(2))
         : isAbsolute(path)

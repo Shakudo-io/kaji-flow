@@ -8,10 +8,13 @@ import type { AgentConfig } from "@opencode-ai/sdk"
 const TEST_DIR = join(tmpdir(), "utils-test-prompts")
 const TEST_PROMPT_FILE = join(TEST_DIR, "custom-prompt.md")
 const TEST_PROMPT_CONTENT = "Custom prompt from file\nWith multiple lines"
+const TEST_ENCODED_FILE = join(TEST_DIR, "my prompt file.md")
+const TEST_ENCODED_CONTENT = "Prompt from percent-encoded path"
 
 beforeAll(() => {
   mkdirSync(TEST_DIR, { recursive: true })
   writeFileSync(TEST_PROMPT_FILE, TEST_PROMPT_CONTENT)
+  writeFileSync(TEST_ENCODED_FILE, TEST_ENCODED_CONTENT)
 })
 
 afterAll(() => {
@@ -125,6 +128,19 @@ describe("createBuiltinAgents with model overrides", () => {
 
     // #then
     expect(agents.oracle.prompt).toContain("[WARNING: Could not resolve file URI: file://non-existent-prompt.md]")
+  })
+
+  test("resolves file:// URI with percent-encoded path", () => {
+    // #given - filename has space: "my prompt file.md" → "my%20prompt%20file.md"
+    const overrides = {
+      oracle: { prompt_append: "file://my%20prompt%20file.md" },
+    }
+
+    // #when
+    const agents = createBuiltinAgents([], overrides, TEST_DIR)
+
+    // #then
+    expect(agents.oracle.prompt).toContain(TEST_ENCODED_CONTENT)
   })
 
   test("non-model overrides are still applied after factory rebuild", () => {
