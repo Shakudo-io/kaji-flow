@@ -13,6 +13,9 @@ import { createOrchestratorSisyphusAgent, orchestratorSisyphusAgent } from "./or
 import { createMomusAgent } from "./momus"
 import type { AvailableAgent } from "./sisyphus-prompt-builder"
 import { deepMerge } from "../shared"
+import { existsSync, readFileSync } from "fs"
+import { resolve, isAbsolute } from "path"
+import { homedir } from "os"
 import { DEFAULT_CATEGORIES } from "../tools/sisyphus-task/constants"
 import { resolveMultipleSkills } from "../features/opencode-skill-loader/skill-content"
 
@@ -113,13 +116,26 @@ export function createEnvContext(): string {
 
 function mergeAgentConfig(
   base: AgentConfig,
-  override: AgentOverrideConfig
+  override: AgentOverrideConfig,
+  configDir?: string
 ): AgentConfig {
   const { prompt_append, ...rest } = override
   const merged = deepMerge(base, rest as Partial<AgentConfig>)
 
   if (prompt_append && merged.prompt) {
-    merged.prompt = merged.prompt + "\n" + prompt_append
+    let resolved = prompt_append
+    if (prompt_append.startsWith("file://")) {
+      const path = prompt_append.slice(7)
+      const abs = path.startsWith("~/")
+        ? resolve(homedir(), path.slice(2))
+        : isAbsolute(path)
+          ? path
+          : resolve(configDir ?? process.cwd(), path)
+      resolved = existsSync(abs)
+        ? readFileSync(abs, "utf-8")
+        : `[WARNING: Could not resolve file URI: ${prompt_append}]`
+    }
+    merged.prompt = merged.prompt + "\n" + resolved
   }
 
   return merged
@@ -157,7 +173,7 @@ export function createBuiltinAgents(
     }
 
     if (override) {
-      config = mergeAgentConfig(config, override)
+      config = mergeAgentConfig(config, override, directory)
     }
 
     result[name] = config
@@ -184,7 +200,7 @@ export function createBuiltinAgents(
     }
 
     if (sisyphusOverride) {
-      sisyphusConfig = mergeAgentConfig(sisyphusConfig, sisyphusOverride)
+      sisyphusConfig = mergeAgentConfig(sisyphusConfig, sisyphusOverride, directory)
     }
 
     result["Sisyphus"] = sisyphusConfig
@@ -199,7 +215,7 @@ export function createBuiltinAgents(
     })
 
     if (orchestratorOverride) {
-      orchestratorConfig = mergeAgentConfig(orchestratorConfig, orchestratorOverride)
+      orchestratorConfig = mergeAgentConfig(orchestratorConfig, orchestratorOverride, directory)
     }
 
     result["orchestrator-sisyphus"] = orchestratorConfig

@@ -1,6 +1,22 @@
-import { describe, test, expect } from "bun:test"
+import { describe, test, expect, beforeAll, afterAll } from "bun:test"
+import { mkdirSync, writeFileSync, rmSync } from "fs"
+import { join } from "path"
+import { tmpdir } from "os"
 import { createBuiltinAgents } from "./utils"
 import type { AgentConfig } from "@opencode-ai/sdk"
+
+const TEST_DIR = join(tmpdir(), "utils-test-prompts")
+const TEST_PROMPT_FILE = join(TEST_DIR, "custom-prompt.md")
+const TEST_PROMPT_CONTENT = "Custom prompt from file\nWith multiple lines"
+
+beforeAll(() => {
+  mkdirSync(TEST_DIR, { recursive: true })
+  writeFileSync(TEST_PROMPT_FILE, TEST_PROMPT_CONTENT)
+})
+
+afterAll(() => {
+  rmSync(TEST_DIR, { recursive: true, force: true })
+})
 
 describe("createBuiltinAgents with model overrides", () => {
   test("Sisyphus with default model has thinking config", () => {
@@ -70,6 +86,45 @@ describe("createBuiltinAgents with model overrides", () => {
     expect(agents.oracle.thinking).toEqual({ type: "enabled", budgetTokens: 32000 })
     expect(agents.oracle.reasoningEffort).toBeUndefined()
     expect(agents.oracle.textVerbosity).toBeUndefined()
+  })
+
+  test("resolves file:// URI in prompt_append with absolute path", () => {
+    // #given
+    const overrides = {
+      oracle: { prompt_append: `file://${TEST_PROMPT_FILE}` },
+    }
+
+    // #when
+    const agents = createBuiltinAgents([], overrides)
+
+    // #then
+    expect(agents.oracle.prompt).toContain(TEST_PROMPT_CONTENT)
+  })
+
+  test("resolves file:// URI in prompt_append with relative path", () => {
+    // #given
+    const overrides = {
+      oracle: { prompt_append: "file://custom-prompt.md" },
+    }
+
+    // #when
+    const agents = createBuiltinAgents([], overrides, TEST_DIR)
+
+    // #then
+    expect(agents.oracle.prompt).toContain(TEST_PROMPT_CONTENT)
+  })
+
+  test("handles non-existent file:// URI in prompt_append with warning", () => {
+    // #given
+    const overrides = {
+      oracle: { prompt_append: "file://non-existent-prompt.md" },
+    }
+
+    // #when
+    const agents = createBuiltinAgents([], overrides, TEST_DIR)
+
+    // #then
+    expect(agents.oracle.prompt).toContain("[WARNING: Could not resolve file URI: file://non-existent-prompt.md]")
   })
 
   test("non-model overrides are still applied after factory rebuild", () => {
