@@ -43,8 +43,8 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-flash" },
       { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-haiku-4-5" },
       { providers: ["zai-coding-plan"], model: "glm-4.6v" },
-      { providers: ["opencode"], model: "gpt-5-nano" },
       { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2" },
+      { providers: ["opencode"], model: "gpt-5-nano" },
     ],
   },
   prometheus: {

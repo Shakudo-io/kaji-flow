@@ -112,9 +112,9 @@ Each agent has a **provider priority chain**. The system tries providers in orde
 
 ```
 Example: multimodal-looker
-google → anthropic → zai-coding-plan → opencode → openai
-   ↓         ↓              ↓              ↓          ↓
-gemini   haiku         glm-4.6v      gpt-5-nano   gpt-5.2
+google → anthropic → zai-coding-plan → openai → opencode
+   ↓         ↓              ↓             ↓          ↓
+gemini   haiku         glm-4.6v       gpt-5.2   gpt-5-nano
 ```
 
 If you have Gemini, it uses `google/gemini-3-flash`. No Gemini but have Claude? Uses `anthropic/claude-haiku-4-5`. And so on.
