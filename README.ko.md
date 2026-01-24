@@ -16,8 +16,8 @@
 >
 > [!TIP]
 >
-> [![The Orchestrator is now available in beta.](./.github/assets/orchestrator-atlas.png?v=3)](https://github.com/code-yeongyu/oh-my-opencode/releases/tag/v3.0.0-beta.10)
-> > **오케스트레이터가 베타 버전으로 사용 가능합니다. 설치하려면 `oh-my-opencode@3.0.0-beta.10`을 사용하세요.**
+> [![The Orchestrator is now available in beta.](./.github/assets/orchestrator-atlas.png?v=3)](https://github.com/code-yeongyu/oh-my-opencode/releases/tag/v3.0.0-beta.16)
+> > **오케스트레이터가 베타 버전으로 사용 가능합니다. 설치하려면 `oh-my-opencode@3.0.0-beta.16`을 사용하세요.**
 >
 > 함께해요!
 >

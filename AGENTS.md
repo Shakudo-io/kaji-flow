@@ -6,7 +6,7 @@
 
 ## OVERVIEW
 
-OpenCode plugin: multi-model agent orchestration (Claude Opus 4.5, GPT-5.2, Gemini 3 Flash, Grok Code, GLM-4.7). 31 lifecycle hooks, 20+ tools (LSP, AST-Grep, delegation), 10 specialized agents, full Claude Code compatibility. "oh-my-zsh" for OpenCode.
+OpenCode plugin: multi-model agent orchestration (Claude Opus 4.5, GPT-5.2, Gemini 3 Flash, Grok Code, GLM-4.7). 30 lifecycle hooks, 20+ tools (LSP, AST-Grep, delegation), 10 specialized agents, full Claude Code compatibility. "oh-my-zsh" for OpenCode.
 
 ## STRUCTURE
 
@@ -14,7 +14,7 @@ OpenCode plugin: multi-model agent orchestration (Claude Opus 4.5, GPT-5.2, Gemi
 oh-my-opencode/
 ├── src/
 │   ├── agents/        # 10 AI agents - see src/agents/AGENTS.md
-│   ├── hooks/         # 31 lifecycle hooks - see src/hooks/AGENTS.md
+│   ├── hooks/         # 30 lifecycle hooks - see src/hooks/AGENTS.md
 │   ├── tools/         # 20+ tools - see src/tools/AGENTS.md
 │   ├── features/      # Background agents, Claude Code compat - see src/features/AGENTS.md
 │   ├── shared/        # 50 cross-cutting utilities - see src/shared/AGENTS.md
