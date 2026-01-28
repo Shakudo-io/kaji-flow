@@ -80,7 +80,9 @@
           "prometheus-md-only",
           "sisyphus-junior-notepad",
           "start-work",
-          "atlas"
+          "atlas",
+          "loop-detector",
+          "definition-gates"
         ]
       }
     },
