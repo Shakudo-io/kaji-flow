@@ -1,47 +1,53 @@
 import { spawn, type Subprocess } from "bun"
-import { Readable, Writable } from "node:stream"
-import { readFileSync } from "fs"
+import { existsSync, readFileSync } from "fs"
 import { extname, resolve } from "path"
-import { pathToFileURL } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
+import { Readable, Writable } from "node:stream"
 import {
   createMessageConnection,
   StreamMessageReader,
   StreamMessageWriter,
   type MessageConnection,
 } from "vscode-jsonrpc/node"
-import { getLanguageId } from "./config"
+import { getLanguageId, getLspProcessConfig } from "./config"
 import type { Diagnostic, ResolvedServer } from "./types"
 import { log } from "../../shared/logger"
 
-/**
- * Check if the current Bun version is affected by Windows LSP crash bug.
- * Bun v1.3.5 and earlier have a known segmentation fault issue on Windows
- * when spawning LSP servers. This was fixed in Bun v1.3.6.
- * See: https://github.com/oven-sh/bun/issues/25798
- */
-function checkWindowsBunVersion(): { isAffected: boolean; message: string } | null {
-  if (process.platform !== "win32") return null
+type EffectiveLspRuntime = "bun" | "node"
 
-  const version = Bun.version
-  const [major, minor, patch] = version.split(".").map((v) => parseInt(v.split("-")[0], 10))
+function resolveEffectiveRuntime(): { runtime: EffectiveLspRuntime; nodeCommand: string[] } {
+  const { runtime, nodeCommand } = getLspProcessConfig()
+  const effective: EffectiveLspRuntime =
+    runtime === "auto" ? (process.platform === "win32" ? "node" : "bun") : runtime
 
-  // Bun v1.3.5 and earlier are affected
-  if (major < 1 || (major === 1 && minor < 3) || (major === 1 && minor === 3 && patch < 6)) {
-    return {
-      isAffected: true,
-      message:
-        `⚠️  Windows + Bun v${version} detected: Known segmentation fault bug with LSP.\n` +
-        `   This causes crashes when using LSP tools (lsp_diagnostics, lsp_goto_definition, etc.).\n` +
-        `   \n` +
-        `   SOLUTION: Upgrade to Bun v1.3.6 or later:\n` +
-        `   powershell -c "irm bun.sh/install.ps1|iex"\n` +
-        `   \n` +
-        `   WORKAROUND: Use WSL instead of native Windows.\n` +
-        `   See: https://github.com/oven-sh/bun/issues/25798`,
-    }
+  return { runtime: effective, nodeCommand }
+}
+
+function resolveNodeCommand(nodeCommand: string[]): string[] {
+  const [cmd, ...args] = nodeCommand
+
+  // allow absolute/relative paths as-is
+  if (cmd.includes("/") || cmd.includes("\\")) return nodeCommand
+
+  const resolved = Bun.which(cmd)
+  if (!resolved) {
+    throw new Error(
+      "Node.js was not found in PATH. Install Node.js (https://nodejs.org/) or set lsp_process.node_command in oh-my-opencode.json."
+    )
   }
 
-  return null
+  return [resolved, ...args]
+}
+
+function resolveNodeProxyPath(): string {
+  const proxyPath = fileURLToPath(new URL("./lsp/node-proxy.js", import.meta.url))
+  if (!existsSync(proxyPath)) {
+    throw new Error(
+      `LSP Node proxy script not found at: ${proxyPath}\n` +
+        "Please reinstall oh-my-opencode (the package should include dist/lsp/node-proxy.js)."
+    )
+  }
+  return proxyPath
 }
 
 interface ManagedClient {
@@ -266,22 +272,39 @@ export class LSPClient {
   ) {}
 
   async start(): Promise<void> {
-    const windowsCheck = checkWindowsBunVersion()
-    if (windowsCheck?.isAffected) {
-      throw new Error(
-        `LSP server cannot be started safely.\n\n${windowsCheck.message}`
-      )
+    const { runtime, nodeCommand } = resolveEffectiveRuntime()
+
+    let command = this.server.command
+    const env: Record<string, string | undefined> = {
+      ...process.env,
+      ...this.server.env,
     }
 
-    this.proc = spawn(this.server.command, {
+    if (process.platform === "win32") {
+      if (runtime === "node") {
+        log("[LSP] Windows detected: using Node proxy for LSP server spawn (Bun crash workaround)")
+      } else {
+        log(
+          "[LSP] Windows detected: spawning LSP server directly (Bun). If you see crashes, set lsp_process.runtime=\"node\" in oh-my-opencode.json."
+        )
+      }
+    }
+
+    if (runtime === "node") {
+      const resolvedNodeCommand = resolveNodeCommand(nodeCommand)
+      const proxyPath = resolveNodeProxyPath()
+
+      command = [...resolvedNodeCommand, proxyPath]
+      env.OH_MY_OPENCODE_LSP_PROXY_COMMAND = JSON.stringify(this.server.command)
+      env.OH_MY_OPENCODE_LSP_PROXY_CWD = this.root
+    }
+
+    this.proc = spawn(command, {
       stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
       cwd: this.root,
-      env: {
-        ...process.env,
-        ...this.server.env,
-      },
+      env,
     })
 
     if (!this.proc) {
@@ -304,7 +327,7 @@ export class LSPClient {
       async read() {
         try {
           const { done, value } = await stdoutReader.read()
-          if (done) {
+          if (done || !value) {
             this.push(null)
           } else {
             this.push(Buffer.from(value))

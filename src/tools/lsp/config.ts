@@ -13,8 +13,16 @@ interface LspEntry {
   initialization?: Record<string, unknown>
 }
 
+export type LspProcessRuntime = "auto" | "bun" | "node"
+
+export interface LspProcessConfig {
+  runtime?: LspProcessRuntime
+  node_command?: string[]
+}
+
 interface ConfigJson {
   lsp?: Record<string, LspEntry>
+  lsp_process?: LspProcessConfig
 }
 
 type ConfigSource = "project" | "user" | "opencode"
@@ -286,4 +294,32 @@ export function getAllServers(): Array<{
 
 export function getConfigPaths_(): { project: string; user: string; opencode: string } {
   return getConfigPaths()
+}
+
+export function getLspProcessConfig(): { runtime: LspProcessRuntime; nodeCommand: string[] } {
+  const envRuntime = process.env.OH_MY_OPENCODE_LSP_RUNTIME?.trim().toLowerCase()
+  if (envRuntime === "auto" || envRuntime === "bun" || envRuntime === "node") {
+    return { runtime: envRuntime, nodeCommand: ["node"] }
+  }
+
+  const configs = loadAllConfigs()
+  const sources: ConfigSource[] = ["project", "user", "opencode"]
+
+  for (const source of sources) {
+    const cfg = configs.get(source)
+    if (!cfg?.lsp_process) continue
+
+    const runtime = cfg.lsp_process.runtime ?? "auto"
+    const nodeCommand = cfg.lsp_process.node_command ?? ["node"]
+
+    // minimal validation / normalization
+    const normalizedRuntime: LspProcessRuntime =
+      runtime === "bun" || runtime === "node" || runtime === "auto" ? runtime : "auto"
+
+    const normalizedNodeCommand = Array.isArray(nodeCommand) && nodeCommand.length > 0 ? nodeCommand : ["node"]
+
+    return { runtime: normalizedRuntime, nodeCommand: normalizedNodeCommand }
+  }
+
+  return { runtime: "auto", nodeCommand: ["node"] }
 }

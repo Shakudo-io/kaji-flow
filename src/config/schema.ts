@@ -366,6 +366,24 @@ export const SisyphusTasksConfigSchema = z.object({
 export const SisyphusConfigSchema = z.object({
   tasks: SisyphusTasksConfigSchema.optional(),
 })
+
+export const LspProcessRuntimeSchema = z.enum(["auto", "bun", "node"])
+
+export const LspProcessConfigSchema = z.object({
+  /**
+   * LSP process runtime strategy.
+   * - "auto": on Windows use Node proxy; otherwise spawn directly (Bun)
+   * - "bun": always spawn LSP servers directly (may crash on Windows in some Bun builds)
+   * - "node": spawn a Node.js proxy process which then spawns the real LSP server (recommended on Windows)
+   */
+  runtime: LspProcessRuntimeSchema.default("auto"),
+  /**
+   * Command to invoke Node.js for the proxy process.
+   * Example: ["node"] or ["C:/Program Files/nodejs/node.exe", "--no-warnings"]
+   */
+  node_command: z.array(z.string()).min(1).default(["node"]),
+})
+
 export const OhMyOpenCodeConfigSchema = z.object({
   $schema: z.string().optional(),
   /** Enable new task system (default: false) */
@@ -395,6 +413,7 @@ export const OhMyOpenCodeConfigSchema = z.object({
   browser_automation_engine: BrowserAutomationConfigSchema.optional(),
   tmux: TmuxConfigSchema.optional(),
   sisyphus: SisyphusConfigSchema.optional(),
+  lsp_process: LspProcessConfigSchema.optional(),
 })
 
 export type OhMyOpenCodeConfig = z.infer<typeof OhMyOpenCodeConfigSchema>
@@ -424,5 +443,7 @@ export type TmuxConfig = z.infer<typeof TmuxConfigSchema>
 export type TmuxLayout = z.infer<typeof TmuxLayoutSchema>
 export type SisyphusTasksConfig = z.infer<typeof SisyphusTasksConfigSchema>
 export type SisyphusConfig = z.infer<typeof SisyphusConfigSchema>
+export type LspProcessRuntime = z.infer<typeof LspProcessRuntimeSchema>
+export type LspProcessConfig = z.infer<typeof LspProcessConfigSchema>
 
 export { AnyMcpNameSchema, type AnyMcpName, McpNameSchema, type McpName } from "../mcp/types"

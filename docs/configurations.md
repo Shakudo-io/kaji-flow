@@ -1114,6 +1114,33 @@ Each server supports: `command`, `extensions`, `priority`, `env`, `initializatio
 }
 ```
 
+### Windows: Bun LSP crash workaround (Node proxy)
+
+Some Bun builds on Windows can crash (segfault) when spawning LSP servers over stdio.
+See: <https://github.com/oven-sh/bun/issues/25798>
+
+Oh My OpenCode works around this by spawning LSP servers via a **Node.js proxy process** on Windows by default.
+
+You can configure it via `lsp_process`:
+
+```json
+{
+  "lsp_process": {
+    "runtime": "auto",
+    "node_command": ["node"]
+  }
+}
+```
+
+- `runtime`:
+  - `"auto"` (default): Windows → `"node"`, others → `"bun"`
+  - `"node"`: always use Node proxy (recommended on Windows)
+  - `"bun"`: always spawn LSP server directly (may crash on Windows)
+
+You can also override at runtime with an env var:
+
+- `OH_MY_OPENCODE_LSP_RUNTIME=auto|node|bun`
+
 ## Experimental
 
 Opt-in experimental features that may change or be removed in future versions. Use with caution.

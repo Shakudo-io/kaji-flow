@@ -3030,6 +3030,30 @@
           }
         }
       }
+    },
+    "lsp_process": {
+      "type": "object",
+      "properties": {
+        "runtime": {
+          "default": "auto",
+          "type": "string",
+          "enum": [
+            "auto",
+            "bun",
+            "node"
+          ]
+        },
+        "node_command": {
+          "default": [
+            "node"
+          ],
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }
