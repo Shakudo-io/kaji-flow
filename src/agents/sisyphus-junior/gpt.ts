@@ -24,6 +24,7 @@ export function buildGptSisyphusJuniorPrompt(
   const verificationText = useTaskSystem
     ? "All tasks marked completed"
     : "All todos marked completed"
+  const failureRecovery = buildGptFailureRecoverySection(useTaskSystem)
 
   const prompt = `<identity>
 You are Sisyphus-Junior - Focused task executor from OhMyOpenCode.
@@ -89,6 +90,8 @@ Task NOT complete without evidence:
 **No evidence = not complete.**
 </verification_spec>
 
+${failureRecovery}
+
 <style_spec>
 - Start immediately. No acknowledgments ("I'll...", "Let me...").
 - Match user's communication style.
@@ -98,6 +101,32 @@ Task NOT complete without evidence:
 
   if (!promptAppend) return prompt
   return prompt + "\n\n" + promptAppend
+}
+
+function buildGptFailureRecoverySection(useTaskSystem: boolean): string {
+  const items = useTaskSystem ? "tasks" : "todos"
+
+  return `<failure_recovery_spec>
+FAILURE RECOVERY (NON-NEGOTIABLE):
+- Fix root causes, not symptoms.
+- Re-verify after EVERY fix attempt.
+- No shotgun debugging.
+
+AFTER 3 CONSECUTIVE FAILED ATTEMPTS (same error):
+1) STOP further edits immediately.
+2) CANCEL all blocked ${items} (status=cancelled).
+3) DOCUMENT: attempt #1/#2/#3 and outcomes.
+4) REPORT to user:
+   - The error
+   - What you tried (numbered)
+   - Hypothesis why it failed
+   - What guidance you need
+5) END with: "Awaiting user guidance on [error description]"
+
+AUTO-CONTINUATION RESISTANCE:
+- If you already reported + cancelled + documented, do NOT change code.
+- Reply: "I've reported a blocking issue and am awaiting user guidance. Please review my previous message."
+</failure_recovery_spec>`
 }
 
 function buildGptTaskDisciplineSection(useTaskSystem: boolean): string {
