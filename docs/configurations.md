@@ -1063,6 +1063,26 @@ OpenCode provides LSP tools for analysis.
 Oh My OpenCode adds refactoring tools (rename, code actions).
 All OpenCode LSP configs and custom settings (from opencode.json) are supported, plus additional Oh My OpenCode-specific settings.
 
+### Windows Users
+
+On Windows, LSP servers are spawned using Node.js's `child_process` by default instead of Bun's native spawn.
+This provides better stability and avoids segmentation faults that can occur with Bun's spawn on Windows.
+See [oven-sh/bun#25798](https://github.com/oven-sh/bun/issues/25798) for details.
+
+You can control the spawn mode via environment variable:
+
+```bash
+# Use Node spawn (default on Windows, recommended for stability)
+OMO_LSP_SPAWN_MODE=node
+
+# Use Bun spawn (default on non-Windows)
+OMO_LSP_SPAWN_MODE=bun
+```
+
+If you experience LSP crashes on Windows, ensure `OMO_LSP_SPAWN_MODE=node` is set (this is the default).
+
+### Configuration
+
 Add LSP servers via the `lsp` option in `~/.config/opencode/oh-my-opencode.json` or `.opencode/oh-my-opencode.json`:
 
 ```json
@@ -1228,3 +1248,4 @@ Tools that should never be pruned (default):
 | Variable              | Description                                                                                                                                     |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OPENCODE_CONFIG_DIR` | Override the OpenCode configuration directory. Useful for profile isolation with tools like [OCX](https://github.com/kdcokenny/ocx) ghost mode. |
+| `OMO_LSP_SPAWN_MODE`  | LSP server spawn mode: `node` or `bun`. Defaults to `node` on Windows for stability, `bun` elsewhere. See [LSP](#lsp) section for details.      |

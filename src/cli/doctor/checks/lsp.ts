@@ -1,5 +1,6 @@
 import type { CheckResult, CheckDefinition, LspServerInfo } from "../types"
 import { CHECK_IDS, CHECK_NAMES } from "../constants"
+import { getLspSpawnMode } from "../../../tools/lsp/spawn-mode"
 
 const DEFAULT_LSP_SERVERS: Array<{
   id: string
@@ -40,6 +41,9 @@ export async function checkLspServers(): Promise<CheckResult> {
   const stats = getLspServerStats(servers)
   const installedServers = servers.filter((s) => s.installed)
   const missingServers = servers.filter((s) => !s.installed)
+  const spawnMode = getLspSpawnMode()
+
+  const spawnModeInfo = `Spawn mode: ${spawnMode}${process.platform === "win32" ? " (Node recommended for Windows stability)" : ""}`
 
   if (stats.installed === 0) {
     return {
@@ -47,6 +51,7 @@ export async function checkLspServers(): Promise<CheckResult> {
       status: "warn",
       message: "No LSP servers detected",
       details: [
+        spawnModeInfo,
         "LSP tools will have limited functionality",
         ...missingServers.map((s) => `Missing: ${s.id}`),
       ],
@@ -54,6 +59,7 @@ export async function checkLspServers(): Promise<CheckResult> {
   }
 
   const details = [
+    spawnModeInfo,
     ...installedServers.map((s) => `Installed: ${s.id}`),
     ...missingServers.map((s) => `Not found: ${s.id} (optional)`),
   ]
