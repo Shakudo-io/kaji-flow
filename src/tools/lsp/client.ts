@@ -1,7 +1,7 @@
 import { spawn as bunSpawn, type Subprocess } from "bun"
-import { spawn as nodeSpawn, type ChildProcess } from "node:child_process"
+import { spawn as nodeSpawn, spawnSync, type ChildProcess } from "node:child_process"
 import { Readable, Writable } from "node:stream"
-import { readFileSync } from "fs"
+import { existsSync, readFileSync, statSync } from "fs"
 import { extname, resolve } from "path"
 import { pathToFileURL } from "node:url"
 import {
@@ -23,6 +23,51 @@ import { log } from "../../shared/logger"
  */
 function shouldUseNodeSpawnOnWindows(): boolean {
   return process.platform === "win32"
+}
+
+/**
+ * Validate that the working directory exists and is accessible.
+ * This prevents segfaults on Windows when libuv tries to access non-existent directories.
+ * See: https://github.com/oven-sh/bun/issues/25798
+ */
+function validateCwd(cwd: string): { valid: boolean; error?: string } {
+  try {
+    if (!existsSync(cwd)) {
+      return { valid: false, error: `Working directory does not exist: ${cwd}` }
+    }
+    const stats = statSync(cwd)
+    if (!stats.isDirectory()) {
+      return { valid: false, error: `Path is not a directory: ${cwd}` }
+    }
+    return { valid: true }
+  } catch (err) {
+    return { valid: false, error: `Cannot access working directory: ${cwd} (${err instanceof Error ? err.message : String(err)})` }
+  }
+}
+
+/**
+ * Check if a binary is available on Windows using 'where' command.
+ * This prevents crashes when trying to spawn non-existent binaries.
+ */
+function isBinaryAvailableOnWindows(command: string): boolean {
+  if (process.platform !== "win32") return true
+  
+  // If command contains path separator, check file existence directly
+  if (command.includes("/") || command.includes("\\")) {
+    return existsSync(command)
+  }
+  
+  try {
+    const result = spawnSync("where", [command], {
+      shell: true,
+      windowsHide: true,
+      timeout: 5000,
+    })
+    return result.status === 0
+  } catch {
+    // If 'where' fails, assume binary might be available
+    return true
+  }
 }
 
 interface StreamReader {
@@ -163,14 +208,32 @@ function spawnProcess(
   command: string[],
   options: { cwd: string; env: Record<string, string | undefined> }
 ): UnifiedProcess {
+  // Validate CWD to prevent segfaults (critical for Windows, good practice everywhere)
+  const cwdValidation = validateCwd(options.cwd)
+  if (!cwdValidation.valid) {
+    throw new Error(`[LSP] ${cwdValidation.error}`)
+  }
+
   if (shouldUseNodeSpawnOnWindows()) {
-    log("[LSP] Using Node.js child_process on Windows to avoid Bun spawn segfault")
     const [cmd, ...args] = command
+    
+    if (!isBinaryAvailableOnWindows(cmd)) {
+      throw new Error(
+        `[LSP] Binary '${cmd}' not found on Windows. ` +
+        `Ensure the LSP server is installed and available in PATH. ` +
+        `For npm packages, try: npm install -g ${cmd}`
+      )
+    }
+    
+    log("[LSP] Using Node.js child_process on Windows to avoid Bun spawn segfault")
+    
+    // Use shell: true on Windows for proper .cmd/.bat resolution
     const proc = nodeSpawn(cmd, args, {
       cwd: options.cwd,
       env: options.env as NodeJS.ProcessEnv,
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
+      shell: true,
     })
     return wrapNodeProcess(proc)
   }

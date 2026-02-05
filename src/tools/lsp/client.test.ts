@@ -60,4 +60,43 @@ describe("LSPClient", () => {
       }
     })
   })
+
+  describe("start", () => {
+    it("throws error when working directory does not exist", async () => {
+      // #given
+      const nonExistentDir = join(tmpdir(), "lsp-test-nonexistent-" + Date.now())
+      const server: ResolvedServer = {
+        id: "typescript",
+        command: ["typescript-language-server", "--stdio"],
+        extensions: [".ts"],
+        priority: 0,
+      }
+      const client = new LSPClient(nonExistentDir, server)
+
+      // #when / #then
+      await expect(client.start()).rejects.toThrow("Working directory does not exist")
+    })
+
+    it("throws error when path is a file instead of directory", async () => {
+      // #given
+      const dir = mkdtempSync(join(tmpdir(), "lsp-client-test-"))
+      const filePath = join(dir, "not-a-dir.txt")
+      writeFileSync(filePath, "test content")
+
+      const server: ResolvedServer = {
+        id: "typescript",
+        command: ["typescript-language-server", "--stdio"],
+        extensions: [".ts"],
+        priority: 0,
+      }
+      const client = new LSPClient(filePath, server)
+
+      try {
+        // #when / #then
+        await expect(client.start()).rejects.toThrow("Path is not a directory")
+      } finally {
+        rmSync(dir, { recursive: true, force: true })
+      }
+    })
+  })
 })
