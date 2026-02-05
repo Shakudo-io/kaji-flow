@@ -241,7 +241,9 @@ export async function discoverAllSkills(): Promise<LoadedSkill[]> {
     discoverUserClaudeSkills(),
   ])
 
-  return [...opencodeProjectSkills, ...projectSkills, ...opencodeGlobalSkills, ...userSkills]
+  // Priority: opencode-project > opencode > project > user
+  // (OpenCode Global skills take precedence over legacy Claude project skills)
+  return [...opencodeProjectSkills, ...opencodeGlobalSkills, ...projectSkills, ...userSkills]
 }
 
 export async function discoverSkills(options: DiscoverSkillsOptions = {}): Promise<LoadedSkill[]> {
@@ -261,7 +263,8 @@ export async function discoverSkills(options: DiscoverSkillsOptions = {}): Promi
     discoverUserClaudeSkills(),
   ])
 
-  return [...opencodeProjectSkills, ...projectSkills, ...opencodeGlobalSkills, ...userSkills]
+  // Priority: opencode-project > opencode > project > user
+  return [...opencodeProjectSkills, ...opencodeGlobalSkills, ...projectSkills, ...userSkills]
 }
 
 export async function getSkillByName(name: string, options: DiscoverSkillsOptions = {}): Promise<LoadedSkill | undefined> {
