@@ -3,6 +3,7 @@ import { afterEach } from "bun:test"
 import { tmpdir } from "node:os"
 import type { PluginInput } from "@opencode-ai/plugin"
 import type { BackgroundTask, ResumeInput } from "./types"
+import { MIN_IDLE_TIME_MS } from "./constants"
 import { BackgroundManager } from "./manager"
 import { ConcurrencyManager } from "./concurrency"
 
@@ -2406,5 +2407,178 @@ describe("BackgroundManager.completionTimers - Memory Leak Fix", () => {
     // then
     const completionTimers = getCompletionTimers(manager)
     expect(completionTimers.size).toBe(0)
+  })
+})
+
+describe("BackgroundManager.handleEvent - early session.idle deferral", () => {
+  test("should defer and retry when session.idle fires before MIN_IDLE_TIME_MS", async () => {
+    //#given - A running task that started less than MIN_IDLE_TIME_MS ago
+    const sessionID = "session-early-idle"
+    const messagesCalls: string[] = []
+    const realDateNow = Date.now
+    const baseNow = realDateNow()
+
+    const client = {
+      session: {
+        prompt: async () => ({}),
+        abort: async () => ({}),
+        messages: async (args: { path: { id: string } }) => {
+          messagesCalls.push(args.path.id)
+          return {
+            data: [
+              {
+                info: { role: "assistant" },
+                parts: [{ type: "text", text: "ok" }],
+              },
+            ],
+          }
+        },
+        todo: async () => ({ data: [] }),
+      },
+    }
+
+    const manager = new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput)
+    stubNotifyParentSession(manager)
+
+    const task: BackgroundTask = {
+      id: "task-early-idle",
+      sessionID,
+      parentSessionID: "parent-session",
+      parentMessageID: "msg-1",
+      description: "early idle task",
+      prompt: "test",
+      agent: "explore",
+      status: "running",
+      startedAt: new Date(baseNow),
+    }
+    getTaskMap(manager).set(task.id, task)
+
+    //#when - session.idle event fires early
+    try {
+      Date.now = () => baseNow + (MIN_IDLE_TIME_MS - 100)
+      manager.handleEvent({ type: "session.idle", properties: { sessionID } })
+
+      // Advance time so deferred callback (if any) sees elapsed >= MIN_IDLE_TIME_MS
+      Date.now = () => baseNow + (MIN_IDLE_TIME_MS + 10)
+
+      //#then - Idle should be deferred (not dropped), and task should eventually complete
+      expect(task.status).toBe("running")
+      await new Promise((resolve) => setTimeout(resolve, 220))
+      expect(task.status).toBe("completed")
+      expect(messagesCalls).toEqual([sessionID])
+    } finally {
+      Date.now = realDateNow
+      manager.shutdown()
+    }
+  })
+
+  test("should not defer when session.idle fires after MIN_IDLE_TIME_MS", async () => {
+    //#given - A running task that started more than MIN_IDLE_TIME_MS ago
+    const sessionID = "session-late-idle"
+    const client = {
+      session: {
+        prompt: async () => ({}),
+        abort: async () => ({}),
+        messages: async () => ({
+          data: [
+            {
+              info: { role: "assistant" },
+              parts: [{ type: "text", text: "ok" }],
+            },
+          ],
+        }),
+        todo: async () => ({ data: [] }),
+      },
+    }
+
+    const manager = new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput)
+    stubNotifyParentSession(manager)
+
+    const task: BackgroundTask = {
+      id: "task-late-idle",
+      sessionID,
+      parentSessionID: "parent-session",
+      parentMessageID: "msg-1",
+      description: "late idle task",
+      prompt: "test",
+      agent: "explore",
+      status: "running",
+      startedAt: new Date(Date.now() - (MIN_IDLE_TIME_MS + 10)),
+    }
+    getTaskMap(manager).set(task.id, task)
+
+    //#when - session.idle fires
+    manager.handleEvent({ type: "session.idle", properties: { sessionID } })
+
+    //#then - should be processed immediately
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(task.status).toBe("completed")
+
+    manager.shutdown()
+  })
+
+  test("should not process deferred idle if task already completed by other means", async () => {
+    //#given - A running task
+    const sessionID = "session-deferred-noop"
+    let messagesCallCount = 0
+    const realDateNow = Date.now
+    const baseNow = realDateNow()
+
+    const client = {
+      session: {
+        prompt: async () => ({}),
+        abort: async () => ({}),
+        messages: async () => {
+          messagesCallCount += 1
+          return {
+            data: [
+              {
+                info: { role: "assistant" },
+                parts: [{ type: "text", text: "ok" }],
+              },
+            ],
+          }
+        },
+        todo: async () => ({ data: [] }),
+      },
+    }
+
+    const manager = new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput)
+    stubNotifyParentSession(manager)
+
+    const remainingMs = 120
+    const task: BackgroundTask = {
+      id: "task-deferred-noop",
+      sessionID,
+      parentSessionID: "parent-session",
+      parentMessageID: "msg-1",
+      description: "deferred noop task",
+      prompt: "test",
+      agent: "explore",
+      status: "running",
+      startedAt: new Date(baseNow),
+    }
+    getTaskMap(manager).set(task.id, task)
+
+    //#when - session.idle fires early, then task completes before defer timer
+    try {
+      Date.now = () => baseNow + (MIN_IDLE_TIME_MS - remainingMs)
+      manager.handleEvent({ type: "session.idle", properties: { sessionID } })
+      expect(messagesCallCount).toBe(0)
+
+      await tryCompleteTaskForTest(manager, task)
+      expect(task.status).toBe("completed")
+
+      // Advance time so deferred callback (if any) sees elapsed >= MIN_IDLE_TIME_MS
+      Date.now = () => baseNow + (MIN_IDLE_TIME_MS + 10)
+
+      //#then - deferred callback should be a no-op
+      await new Promise((resolve) => setTimeout(resolve, remainingMs + 80))
+      expect(task.status).toBe("completed")
+      expect(messagesCallCount).toBe(0)
+    } finally {
+      Date.now = realDateNow
+      manager.shutdown()
+    }
   })
 })

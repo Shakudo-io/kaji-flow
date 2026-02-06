@@ -88,6 +88,7 @@ export class BackgroundManager {
   private queuesByKey: Map<string, QueueItem[]> = new Map()
   private processingKeys: Set<string> = new Set()
   private completionTimers: Map<string, ReturnType<typeof setTimeout>> = new Map()
+  private deferredIdleTimers: Map<string, ReturnType<typeof setTimeout>> = new Map()
 
   constructor(
     ctx: PluginInput,
@@ -677,7 +678,28 @@ export class BackgroundManager {
       // Edge guard: Require minimum elapsed time (5 seconds) before accepting idle
       const elapsedMs = Date.now() - startedAt.getTime()
       if (elapsedMs < MIN_IDLE_TIME_MS) {
-        log("[background-agent] Ignoring early session.idle, elapsed:", { elapsedMs, taskId: task.id })
+        const remainingMs = MIN_IDLE_TIME_MS - elapsedMs
+        log("[background-agent] Deferring early session.idle, will retry in:", { remainingMs, taskId: task.id })
+
+        const existingTimer = this.deferredIdleTimers.get(task.id)
+        if (existingTimer) {
+          clearTimeout(existingTimer)
+          this.deferredIdleTimers.delete(task.id)
+        }
+
+        const timer = setTimeout(() => {
+          this.deferredIdleTimers.delete(task.id)
+
+          // Re-check: task might have completed by other means (polling, another idle)
+          const currentTask = this.tasks.get(task.id)
+          if (!currentTask || currentTask.status !== "running") return
+          if (currentTask.sessionID !== sessionID) return
+
+          // Re-run the same handler logic with fresh elapsed time.
+          this.handleEvent({ type: "session.idle", properties: { sessionID } })
+        }, remainingMs)
+        timer.unref()
+        this.deferredIdleTimers.set(task.id, timer)
         return
       }
 
@@ -731,11 +753,19 @@ export class BackgroundManager {
          this.concurrencyManager.release(task.concurrencyKey)
          task.concurrencyKey = undefined
        }
+
       const existingTimer = this.completionTimers.get(task.id)
       if (existingTimer) {
         clearTimeout(existingTimer)
         this.completionTimers.delete(task.id)
       }
+
+      const deferredIdleTimer = this.deferredIdleTimers.get(task.id)
+      if (deferredIdleTimer) {
+        clearTimeout(deferredIdleTimer)
+        this.deferredIdleTimers.delete(task.id)
+      }
+
       this.cleanupPendingByParent(task)
       this.tasks.delete(task.id)
       this.clearNotificationsForTask(task.id)
@@ -890,6 +920,12 @@ export class BackgroundManager {
       this.completionTimers.delete(task.id)
     }
 
+    const deferredIdleTimer = this.deferredIdleTimers.get(task.id)
+    if (deferredIdleTimer) {
+      clearTimeout(deferredIdleTimer)
+      this.deferredIdleTimers.delete(task.id)
+    }
+
     this.cleanupPendingByParent(task)
 
     if (abortSession && task.sessionID) {
@@ -1016,6 +1052,12 @@ export class BackgroundManager {
     // Atomically mark as completed to prevent race conditions
     task.status = "completed"
     task.completedAt = new Date()
+
+    const deferredIdleTimer = this.deferredIdleTimers.get(task.id)
+    if (deferredIdleTimer) {
+      clearTimeout(deferredIdleTimer)
+      this.deferredIdleTimers.delete(task.id)
+    }
 
     // Release concurrency BEFORE any async operations to prevent slot leaks
     if (task.concurrencyKey) {
@@ -1510,6 +1552,11 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
       clearTimeout(timer)
     }
     this.completionTimers.clear()
+
+    for (const timer of this.deferredIdleTimers.values()) {
+      clearTimeout(timer)
+    }
+    this.deferredIdleTimers.clear()
 
     this.concurrencyManager.clear()
     this.tasks.clear()
