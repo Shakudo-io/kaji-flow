@@ -1,0 +1,22 @@
+{
+  "name": "kajiflow-windows-x64-baseline",
+  "version": "3.1.1",
+  "description": "Platform-specific binary for kajiflow (windows-x64-baseline, no AVX2)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code-yeongyu/kajiflow"
+  },
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "bin"
+  ],
+  "bin": {
+    "kajiflow": "./bin/kajiflow.exe"
+  }
+}
