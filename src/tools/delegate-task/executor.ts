@@ -2,7 +2,7 @@ import type { BackgroundManager } from "../../features/background-agent"
 import type { CategoriesConfig, GitMasterConfig, BrowserAutomationProvider } from "../../config/schema"
 import type { ModelFallbackInfo } from "../../features/task-toast-manager/types"
 import type { DelegateTaskArgs, ToolContextWithMetadata, OpencodeClient } from "./types"
-import { DEFAULT_CATEGORIES, CATEGORY_DESCRIPTIONS, isPlanAgent } from "./constants"
+import { DEFAULT_CATEGORIES, CATEGORY_DESCRIPTIONS, isPlanAgent, resolvePlanAgentAlias } from "./constants"
 import { getTimingConfig } from "./timing"
 import { parseModelString, getMessageDir, formatDuration, formatDetailedError } from "./helpers"
 import { resolveCategoryConfig } from "./categories"
@@ -969,7 +969,7 @@ Create the work plan directly - that's your job as the planning agent.`,
     }
   }
 
-  let agentToUse = agentName
+  let agentToUse = resolvePlanAgentAlias(agentName)
   let categoryModel: { providerID: string; modelID: string } | undefined
 
   try {

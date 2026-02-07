@@ -550,3 +550,9 @@ export function isPlanAgent(agentName: string | undefined): boolean {
   const lowerName = agentName.toLowerCase().trim()
   return PLAN_AGENT_NAMES.some(name => lowerName === name || lowerName.includes(name))
 }
+
+export function resolvePlanAgentAlias(agentName: string): string {
+  const lowerName = agentName.toLowerCase().trim()
+  if (lowerName === "plan" || lowerName === "planner") return "prometheus"
+  return agentName
+}
