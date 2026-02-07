@@ -494,8 +494,8 @@ function renderPlanAgentCategoryRows(categories: AvailableCategory[]): string[] 
 function renderPlanAgentSkillRows(skills: AvailableSkill[]): string[] {
   const sorted = [...skills].sort((a, b) => a.name.localeCompare(b.name))
   return sorted.map((skill) => {
-    const firstSentence = skill.description.split(".")[0] || skill.description
-    const domain = firstSentence.trim() || skill.name
+    const shortDesc = skill.description.length > 120 ? skill.description.slice(0, 120) + "..." : skill.description
+    const domain = shortDesc.trim() || skill.name
     return `| \`${skill.name}\` | ${domain} |`
   })
 }

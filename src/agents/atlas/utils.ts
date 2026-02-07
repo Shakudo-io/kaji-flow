@@ -20,7 +20,7 @@ No agents available.`
   }
 
   const rows = agents.map((a) => {
-    const shortDesc = a.description.split(".")[0] || a.description
+    const shortDesc = a.description.length > 120 ? a.description.slice(0, 120) + "..." : a.description
     return `| \`${a.name}\` | ${shortDesc} |`
   })
 
@@ -60,12 +60,12 @@ export function buildSkillsSection(skills: AvailableSkill[]): string {
   const customSkills = skills.filter((s) => s.location !== "plugin")
 
   const builtinRows = builtinSkills.map((s) => {
-    const shortDesc = s.description.split(".")[0] || s.description
+    const shortDesc = s.description.length > 120 ? s.description.slice(0, 120) + "..." : s.description
     return `| \`${s.name}\` | ${shortDesc} |`
   })
 
   const customRows = customSkills.map((s) => {
-    const shortDesc = s.description.split(".")[0] || s.description
+    const shortDesc = s.description.length > 120 ? s.description.slice(0, 120) + "..." : s.description
     const source = s.location === "project" ? "project" : "user"
     return `| \`${s.name}\` | ${shortDesc} | ${source} |`
   })
@@ -122,7 +122,7 @@ export function buildDecisionMatrix(agents: AvailableAgent[], userCategories?: R
   )
 
   const agentRows = agents.map((a) => {
-    const shortDesc = a.description.split(".")[0] || a.description
+    const shortDesc = a.description.length > 120 ? a.description.slice(0, 120) + "..." : a.description
     return `| ${shortDesc} | \`agent="${a.name}"\` |`
   })
 

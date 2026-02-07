@@ -100,7 +100,7 @@ export function buildToolSelectionTable(
     .sort((a, b) => costOrder[a.metadata.cost] - costOrder[b.metadata.cost])
 
   for (const agent of sortedAgents) {
-    const shortDesc = agent.description.split(".")[0] || agent.description
+    const shortDesc = agent.description.length > 120 ? agent.description.slice(0, 120) + "..." : agent.description
     rows.push(`| \`${agent.name}\` agent | ${agent.metadata.cost} | ${shortDesc} |`)
   }
 
@@ -206,12 +206,12 @@ export function buildCategorySkillsDelegationGuide(categories: AvailableCategory
   const customSkills = skills.filter((s) => s.location !== "plugin")
 
   const builtinRows = builtinSkills.map((s) => {
-    const desc = s.description.split(".")[0] || s.description
+    const desc = s.description.length > 120 ? s.description.slice(0, 120) + "..." : s.description
     return `| \`${s.name}\` | ${desc} |`
   })
 
   const customRows = customSkills.map((s) => {
-    const desc = s.description.split(".")[0] || s.description
+    const desc = s.description.length > 120 ? s.description.slice(0, 120) + "..." : s.description
     const source = s.location === "project" ? "project" : "user"
     return `| \`${s.name}\` | ${desc} | ${source} |`
   })
@@ -392,7 +392,7 @@ export function buildUltraworkSection(
     if (builtinSkills.length > 0) {
       lines.push("**Built-in Skills** (combine with categories):")
       for (const skill of builtinSkills) {
-        const shortDesc = skill.description.split(".")[0] || skill.description
+        const shortDesc = skill.description.length > 120 ? skill.description.slice(0, 120) + "..." : skill.description
         lines.push(`- \`${skill.name}\`: ${shortDesc}`)
       }
       lines.push("")
@@ -401,7 +401,7 @@ export function buildUltraworkSection(
     if (customSkills.length > 0) {
       lines.push("**User-Installed Skills** (HIGH PRIORITY - user installed these for their workflow):")
       for (const skill of customSkills) {
-        const shortDesc = skill.description.split(".")[0] || skill.description
+        const shortDesc = skill.description.length > 120 ? skill.description.slice(0, 120) + "..." : skill.description
         lines.push(`- \`${skill.name}\`: ${shortDesc}`)
       }
       lines.push("")
