@@ -61,6 +61,14 @@ export class TaskToastManager {
     this.tasks.delete(id)
   }
 
+  removeTasksBySession(sessionId: string): void {
+    for (const [taskId, task] of this.tasks) {
+      if (taskId === sessionId || taskId.startsWith(`${sessionId}/`)) {
+        this.tasks.delete(taskId)
+      }
+    }
+  }
+
   /**
    * Get all running tasks (newest first)
    */

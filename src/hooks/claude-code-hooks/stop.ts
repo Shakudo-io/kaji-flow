@@ -19,6 +19,10 @@ export function getStopHookActive(sessionId: string): boolean {
   return stopHookActiveState.get(sessionId) ?? false
 }
 
+export function clearStopHookState(sessionId: string): void {
+  stopHookActiveState.delete(sessionId)
+}
+
 export interface StopContext {
   sessionId: string
   parentSessionId?: string

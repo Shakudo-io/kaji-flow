@@ -17,6 +17,7 @@ import {
 } from "./user-prompt-submit"
 import {
   executeStopHooks,
+  clearStopHookState,
   type StopContext,
 } from "./stop"
 import {
@@ -353,6 +354,7 @@ export function createClaudeCodeHooksHook(
           sessionErrorState.delete(sessionInfo.id)
           sessionInterruptState.delete(sessionInfo.id)
           sessionFirstMessageProcessed.delete(sessionInfo.id)
+          clearStopHookState(sessionInfo.id)
         }
         return
       }

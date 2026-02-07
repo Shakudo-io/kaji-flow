@@ -93,7 +93,7 @@ import {
 } from "./tools/delegate-task/constants";
 import { BackgroundManager } from "./features/background-agent";
 import { SkillMcpManager } from "./features/skill-mcp-manager";
-import { initTaskToastManager } from "./features/task-toast-manager";
+import { initTaskToastManager, getTaskToastManager } from "./features/task-toast-manager";
 import { TmuxSessionManager } from "./features/tmux-subagent";
 import { clearBoulderState } from "./features/boulder-state";
 import { type HookName } from "./config";
@@ -749,6 +749,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
           clearSessionAgent(sessionInfo.id);
           resetMessageCursor(sessionInfo.id);
           firstMessageVariantGate.clear(sessionInfo.id);
+          getTaskToastManager()?.removeTasksBySession(sessionInfo.id);
           await skillMcpManager.disconnectSession(sessionInfo.id);
           await lspManager.cleanupTempDirectoryClients();
           await tmuxSessionManager.onSessionDeleted({
