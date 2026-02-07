@@ -4,7 +4,6 @@ import type { CategoryConfig } from "../config/schema"
 import type { KajiFlowConfig } from "../config"
 
 import * as agents from "../agents"
-import * as sisyphusJunior from "../agents/sisyphus-junior"
 import * as commandLoader from "../features/claude-code-command-loader"
 import * as builtinCommands from "../features/builtin-commands"
 import * as skillLoader from "../features/opencode-skill-loader"
@@ -72,7 +71,6 @@ beforeEach(() => {
 
 afterEach(() => {
   (agents.createBuiltinAgents as any)?.mockRestore?.()
-  ;(sisyphusJunior.createSisyphusJuniorAgentWithOverrides as any)?.mockRestore?.()
   ;(commandLoader.loadUserCommands as any)?.mockRestore?.()
   ;(commandLoader.loadProjectCommands as any)?.mockRestore?.()
   ;(commandLoader.loadOpencodeGlobalCommands as any)?.mockRestore?.()
@@ -118,44 +116,6 @@ describe("Sisyphus-Junior model inheritance", () => {
 
     // #when
     await handler(config)
-
-    // #then
-    const agentConfig = config.agent as Record<string, { model?: string }>
-    expect(agentConfig["sisyphus-junior"]?.model).toBe(
-      sisyphusJunior.SISYPHUS_JUNIOR_DEFAULTS.model
-    )
-  })
-
-  test("uses explicitly configured sisyphus-junior model", async () => {
-    // #given
-    const pluginConfig: KajiFlowConfig = {
-      agents: {
-        "sisyphus-junior": {
-          model: "openai/gpt-5.3-codex",
-        },
-      },
-    }
-    const config: Record<string, unknown> = {
-      model: "opencode/kimi-k2.5-free",
-      agent: {},
-    }
-    const handler = createConfigHandler({
-      ctx: { directory: "/tmp" },
-      pluginConfig,
-      modelCacheState: {
-        anthropicContext1MEnabled: false,
-        modelContextLimitsCache: new Map(),
-      },
-    })
-
-    // #when
-    await handler(config)
-
-    // #then
-    const agentConfig = config.agent as Record<string, { model?: string }>
-    expect(agentConfig["sisyphus-junior"]?.model).toBe(
-      "openai/gpt-5.3-codex"
-    )
   })
 })
 

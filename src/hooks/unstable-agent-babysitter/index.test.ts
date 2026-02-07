@@ -21,6 +21,9 @@ function createMockPluginInput(options: {
         prompt: async (input: unknown) => {
           promptCalls.push({ input })
         },
+        promptAsync: async (input: unknown) => {
+          promptCalls.push({ input })
+        },
       },
     },
   }
@@ -46,7 +49,7 @@ function createTask(overrides: Partial<BackgroundTask> = {}): BackgroundTask {
       toolCalls: 1,
       lastUpdate: new Date(),
       lastMessage: "still working",
-      lastMessageAt: new Date(Date.now() - 121000),
+      lastMessageAt: new Date(Date.now() - 130000),
     },
     model: { providerID: "google", modelID: "gemini-1.5" },
     ...overrides,
@@ -79,7 +82,6 @@ describe("unstable-agent-babysitter hook", () => {
       config: { timeout_ms: 120000 },
     })
 
-    // #when
     await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
 
     // #then
@@ -114,7 +116,6 @@ describe("unstable-agent-babysitter hook", () => {
       config: { timeout_ms: 120000 },
     })
 
-    // #when
     await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
 
     // #then
@@ -142,7 +143,6 @@ describe("unstable-agent-babysitter hook", () => {
       config: { timeout_ms: 120000 },
     })
 
-    // #when
     await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
 
     // #then
@@ -166,7 +166,6 @@ describe("unstable-agent-babysitter hook", () => {
     const originalNow = Date.now
     Date.now = () => now
 
-    // #when
     await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
     await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
 

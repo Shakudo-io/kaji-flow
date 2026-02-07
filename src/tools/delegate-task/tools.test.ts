@@ -208,7 +208,7 @@ describe("sisyphus-task", () => {
   })
 
   describe("category delegation config validation", () => {
-    test("fills subagent_type as sisyphus-junior when category is provided without subagent_type", async () => {
+    test("fills subagent_type as hephaestus when category is provided without subagent_type", async () => {
       // given
       const { createDelegateTask } = require("./tools")
 
@@ -217,7 +217,7 @@ describe("sisyphus-task", () => {
           id: "task-123",
           status: "pending",
           description: "Test task",
-          agent: "sisyphus-junior",
+          agent: "hephaestus",
           sessionID: "test-session",
         }),
       }
@@ -266,14 +266,14 @@ describe("sisyphus-task", () => {
        await tool.execute(args, toolContext)
 
       // then
-      expect(args.subagent_type).toBe("sisyphus-junior")
+      expect(args.subagent_type).toBe("hephaestus")
     }, { timeout: 10000 })
 
     test("proceeds without error when systemDefaultModel is undefined", async () => {
       // given a mock client with no model in config
       const { createDelegateTask } = require("./tools")
       
-       const mockManager = { launch: async () => ({ id: "task-123", status: "pending", description: "Test task", agent: "sisyphus-junior", sessionID: "test-session" }) }
+       const mockManager = { launch: async () => ({ id: "task-123", status: "pending", description: "Test task", agent: "hephaestus", sessionID: "test-session" }) }
        const mockClient = {
          app: { agents: async () => ({ data: [] }) },
          config: { get: async () => ({}) }, // No model configured
@@ -671,7 +671,7 @@ describe("sisyphus-task", () => {
             id: "task-variant",
             sessionID: "session-variant",
             description: "Variant task",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -735,7 +735,7 @@ describe("sisyphus-task", () => {
             id: "task-default-variant",
             sessionID: "session-default-variant",
             description: "Default variant task",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1358,7 +1358,7 @@ describe("sisyphus-task", () => {
             id: "task-unstable",
             sessionID: "ses_unstable_gemini",
             description: "Unstable gemini task",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1424,7 +1424,7 @@ describe("sisyphus-task", () => {
             id: "task-normal-bg",
             sessionID: "ses_normal_bg",
             description: "Normal background task",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1483,7 +1483,7 @@ describe("sisyphus-task", () => {
             id: "task-unstable-minimax",
             sessionID: "ses_unstable_minimax",
             description: "Unstable minimax task",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1617,7 +1617,7 @@ describe("sisyphus-task", () => {
             id: "task-artistry",
             sessionID: "ses_artistry_gemini",
             description: "Artistry gemini task",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1683,7 +1683,7 @@ describe("sisyphus-task", () => {
             id: "task-writing",
             sessionID: "ses_writing_gemini",
             description: "Writing gemini task",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1749,7 +1749,7 @@ describe("sisyphus-task", () => {
             id: "task-custom-unstable",
             sessionID: "ses_custom_unstable",
             description: "Custom unstable task",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1825,7 +1825,7 @@ describe("sisyphus-task", () => {
             id: "task-fallback",
             sessionID: "ses_fallback_test",
             description: "Fallback test task",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1887,7 +1887,7 @@ describe("sisyphus-task", () => {
             id: "task-ui-model",
             sessionID: "ses_ui_model_test",
             description: "UI model inheritance test",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1937,8 +1937,8 @@ describe("sisyphus-task", () => {
       expect(launchInput.model.modelID).toBe("claude-haiku-4-5")
     })
 
-    test("sisyphus-junior model override takes precedence over category model", async () => {
-      // given - sisyphus-junior override model differs from category default
+    test("hephaestus model override takes precedence over category model", async () => {
+      // given - hephaestus override model differs from category default
       const { createDelegateTask } = require("./tools")
       let launchInput: any
 
@@ -1949,7 +1949,7 @@ describe("sisyphus-task", () => {
             id: "task-override",
             sessionID: "ses_override_test",
             description: "Override precedence test",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -1996,8 +1996,8 @@ describe("sisyphus-task", () => {
       expect(launchInput.model.modelID).toBe("claude-sonnet-4-5")
     })
 
-    test("explicit category model takes precedence over sisyphus-junior model", async () => {
-      // given - explicit category model differs from sisyphus-junior override
+    test("explicit category model takes precedence over hephaestus model", async () => {
+      // given - explicit category model differs from hephaestus override
       const { createDelegateTask } = require("./tools")
       let launchInput: any
 
@@ -2008,7 +2008,7 @@ describe("sisyphus-task", () => {
             id: "task-category-precedence",
             sessionID: "ses_category_precedence_test",
             description: "Category precedence test",
-            agent: "sisyphus-junior",
+            agent: "hephaestus",
             status: "running",
           }
         },
@@ -3066,7 +3066,7 @@ describe("sisyphus-task", () => {
       )
 
       // then - title should follow OpenCode format
-      expect(createBody.title).toBe("Implement feature X (@sisyphus-junior subagent)")
+      expect(createBody.title).toBe("Implement feature X (@hephaestus subagent)")
     }, { timeout: 10000 })
 
     test("sync task output includes <task_metadata> block with session_id", async () => {
@@ -3129,7 +3129,7 @@ describe("sisyphus-task", () => {
           id: "bg_meta_test",
           sessionID: "ses_bg_metadata",
           description: "Background metadata test",
-          agent: "sisyphus-junior",
+          agent: "hephaestus",
           status: "running",
         }),
       }
@@ -3149,7 +3149,7 @@ describe("sisyphus-task", () => {
          manager: mockManager,
          client: mockClient,
          userCategories: {
-           "sisyphus-junior": { model: "anthropic/claude-sonnet-4-5" },
+           "hephaestus": { model: "anthropic/claude-sonnet-4-5" },
          },
        })
 

@@ -829,7 +829,7 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
         const category = typeof args.category === "string" ? args.category : undefined;
         const subagentType = typeof args.subagent_type === "string" ? args.subagent_type : undefined;
         if (category && !subagentType) {
-          args.subagent_type = "sisyphus-junior";
+          args.subagent_type = "hephaestus";
         }
       }
 

@@ -87,6 +87,7 @@ Prompts MUST be in English.`
       const ctx = toolContext as ToolContextWithMetadata
 
       if (args.category && !args.subagent_type) {
+        args.subagent_type = "hephaestus"
       }
       await ctx.metadata?.({
         title: args.description,

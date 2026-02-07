@@ -57,17 +57,6 @@ describe("getAgentDisplayName", () => {
     expect(result).toBe("Prometheus (Plan Builder)")
   })
 
-  it("returns display name for sisyphus-junior", () => {
-    // given config key "sisyphus-junior"
-    const configKey = "sisyphus-junior"
-
-    // when getAgentDisplayName called
-    const result = getAgentDisplayName(configKey)
-
-    // then returns "Sisyphus-Junior"
-    expect(result).toBe("Sisyphus-Junior")
-  })
-
   it("returns display name for metis", () => {
     // given config key "metis"
     const configKey = "metis"
@@ -133,16 +122,13 @@ describe("getAgentDisplayName", () => {
     // then returns "multimodal-looker"
     expect(result).toBe("multimodal-looker")
   })
-})
 
-describe("AGENT_DISPLAY_NAMES", () => {
   it("contains all expected agent mappings", () => {
     // given expected mappings
     const expectedMappings = {
       sisyphus: "Sisyphus (Ultraworker)",
       atlas: "Atlas (Plan Execution Orchestrator)",
       prometheus: "Prometheus (Plan Builder)",
-      "sisyphus-junior": "Sisyphus-Junior",
       metis: "Metis (Plan Consultant)",
       momus: "Momus (Plan Reviewer)",
       oracle: "oracle",
