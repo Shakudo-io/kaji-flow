@@ -295,25 +295,18 @@ export function migrateConfigFile(configPath: string, rawConfig: Record<string, 
     }
   }
 
-  if (rawConfig.disabled_hooks && Array.isArray(rawConfig.disabled_hooks)) {
-    const { migrated, changed, removed } = migrateHookNames(rawConfig.disabled_hooks as string[])
-    if (changed) {
-      rawConfig.disabled_hooks = migrated
-      needsWrite = true
-    }
-    if (removed.length > 0) {
-      log(`Removed obsolete hooks from disabled_hooks: ${removed.join(", ")} (these hooks no longer exist in v3.0.0)`)
-    }
-  }
+   if (rawConfig.disabled_hooks && Array.isArray(rawConfig.disabled_hooks)) {
+     const { migrated, changed, removed } = migrateHookNames(rawConfig.disabled_hooks as string[])
+     if (changed) {
+       rawConfig.disabled_hooks = migrated
+       needsWrite = true
+     }
+     if (removed.length > 0) {
+       log(`Removed obsolete hooks from disabled_hooks: ${removed.join(", ")} (these hooks no longer exist in v3.0.0)`)
+     }
+   }
 
-  if (rawConfig.experimental && typeof rawConfig.experimental === "object") {
-    const exp = rawConfig.experimental as Record<string, unknown>
-    if ("task_system" in exp && exp.task_system !== undefined) {
-      needsWrite = true
-    }
-  }
-
-  if (needsWrite) {
+   if (needsWrite) {
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
       const backupPath = `${configPath}.bak.${timestamp}`
