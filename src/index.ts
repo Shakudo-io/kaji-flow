@@ -15,7 +15,7 @@ import {
   createAnthropicContextWindowLimitRecoveryHook,
   createRulesInjectorHook,
   createBackgroundNotificationHook,
-  createAutoUpdateCheckerHook,
+  
   createKeywordDetectorHook,
   createAgentUsageReminderHook,
   createNonInteractiveEnvHook,
@@ -30,7 +30,6 @@ import {
   createStartWorkHook,
   createAtlasHook,
   createPrometheusMdOnlyHook,
-  createSisyphusJuniorNotepadHook,
   createQuestionLabelTruncatorHook,
   createSubagentQuestionBlockerHook,
   createStopContinuationGuardHook,
@@ -233,13 +232,7 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
   const rulesInjector = isHookEnabled("rules-injector")
     ? safeCreateHook("rules-injector", () => createRulesInjectorHook(ctx), { enabled: safeHookEnabled })
     : null;
-  const autoUpdateChecker = isHookEnabled("auto-update-checker")
-    ? safeCreateHook("auto-update-checker", () => createAutoUpdateCheckerHook(ctx, {
-        showStartupToast: isHookEnabled("startup-toast"),
-        isSisyphusEnabled: pluginConfig.sisyphus_agent?.disabled !== true,
-        autoUpdate: pluginConfig.auto_update ?? true,
-      }), { enabled: safeHookEnabled })
-    : null;
+  const autoUpdateChecker = null;
   const keywordDetector = isHookEnabled("keyword-detector")
     ? safeCreateHook("keyword-detector", () => createKeywordDetectorHook(ctx, contextCollector), { enabled: safeHookEnabled })
     : null;
@@ -284,9 +277,6 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
     ? safeCreateHook("prometheus-md-only", () => createPrometheusMdOnlyHook(ctx), { enabled: safeHookEnabled })
     : null;
 
-  const sisyphusJuniorNotepad = isHookEnabled("sisyphus-junior-notepad")
-    ? safeCreateHook("sisyphus-junior-notepad", () => createSisyphusJuniorNotepadHook(ctx), { enabled: safeHookEnabled })
-    : null;
 
   const tasksTodowriteDisabler = isHookEnabled("tasks-todowrite-disabler")
     ? safeCreateHook("tasks-todowrite-disabler", () => createTasksTodowriteDisablerHook({
@@ -483,7 +473,6 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
     directory: ctx.directory,
     userCategories: pluginConfig.categories,
     gitMasterConfig: pluginConfig.git_master,
-    sisyphusJuniorModel: pluginConfig.agents?.["sisyphus-junior"]?.model,
     browserProvider,
     disabledSkills,
     availableCategories,
@@ -721,7 +710,6 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
     config: configHandler,
 
     event: async (input) => {
-      await autoUpdateChecker?.event(input);
       await claudeCodeHooks?.event?.(input);
       await backgroundNotificationHook?.event(input);
       await sessionNotification?.(input);
@@ -834,7 +822,6 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
       await rulesInjector?.["tool.execute.before"]?.(input, output);
       await tasksTodowriteDisabler?.["tool.execute.before"]?.(input, output);
       await prometheusMdOnly?.["tool.execute.before"]?.(input, output);
-      await sisyphusJuniorNotepad?.["tool.execute.before"]?.(input, output);
       await atlasHook?.["tool.execute.before"]?.(input, output);
 
       if (input.tool === "task") {

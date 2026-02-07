@@ -18,7 +18,6 @@ import { readConnectedProvidersCache } from "../../shared/connected-providers-ca
 import { CATEGORY_MODEL_REQUIREMENTS } from "../../shared/model-requirements"
 import { storeToolMetadata } from "../../features/tool-metadata-store"
 
-const SISYPHUS_JUNIOR_AGENT = "sisyphus-junior"
 
 export interface ExecutorContext {
   manager: BackgroundManager
@@ -926,7 +925,7 @@ Available categories: ${categoryNames.join(", ")}`,
   const isUnstableAgent = resolved.config.is_unstable_agent === true || (unstableModel ? unstableModel.includes("gemini") || unstableModel.includes("minimax") : false)
 
   return {
-    agentToUse: SISYPHUS_JUNIOR_AGENT,
+    agentToUse: "hephaestus",
     categoryModel,
     categoryPromptAppend,
     modelInfo,
@@ -949,11 +948,11 @@ export async function resolveSubagentExecution(
 
   const agentName = args.subagent_type.trim()
 
-  if (agentName.toLowerCase() === SISYPHUS_JUNIOR_AGENT.toLowerCase()) {
+  if (agentName.toLowerCase() === "hephaestus".toLowerCase()) {
     return {
       agentToUse: "",
       categoryModel: undefined,
-      error: `Cannot use subagent_type="${SISYPHUS_JUNIOR_AGENT}" directly. Use category parameter instead (e.g., ${categoryExamples}).
+      error: `Cannot use subagent_type="${"hephaestus"}" directly. Use category parameter instead (e.g., ${categoryExamples}).
 
 Sisyphus-Junior is spawned automatically when you specify a category. Pick the appropriate category for your task domain.`,
     }

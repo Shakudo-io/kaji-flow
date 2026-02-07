@@ -1,5 +1,4 @@
 import { createBuiltinAgents } from "../agents";
-import { createSisyphusJuniorAgentWithOverrides } from "../agents/sisyphus-junior";
 import {
   loadUserCommands,
   loadProjectCommands,
@@ -245,10 +244,6 @@ export function createConfigHandler(deps: ConfigHandlerDeps) {
         sisyphus: builtinAgents.sisyphus,
       };
 
-      agentConfig["sisyphus-junior"] = createSisyphusJuniorAgentWithOverrides(
-        pluginConfig.agents?.["sisyphus-junior"],
-        undefined
-      );
 
       if (builderEnabled) {
         const { name: _buildName, ...buildConfigWithoutName } =
@@ -457,10 +452,6 @@ export function createConfigHandler(deps: ConfigHandlerDeps) {
     if (agentResult["prometheus"]) {
       const agent = agentResult["prometheus"] as AgentWithPermission;
       agent.permission = { ...agent.permission, call_kaji_agent: "deny", task: "allow", question: questionPermission, "task_*": "allow", teammate: "allow" };
-    }
-    if (agentResult["sisyphus-junior"]) {
-      const agent = agentResult["sisyphus-junior"] as AgentWithPermission;
-      agent.permission = { ...agent.permission, task: "allow", "task_*": "allow", teammate: "allow" };
     }
 
     config.permission = {

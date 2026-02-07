@@ -4,8 +4,6 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import type { Tool, Resource, Prompt } from "@modelcontextprotocol/sdk/types.js"
 import type { ClaudeCodeMcpServer } from "../claude-code-mcp-loader/types"
 import { expandEnvVarsInObject } from "../claude-code-mcp-loader/env-expander"
-import { McpOAuthProvider } from "../mcp-oauth/provider"
-import { isStepUpRequired, mergeScopes } from "../mcp-oauth/step-up"
 import { createCleanMcpEnvironment } from "./env-cleaner"
 import type { SkillMcpClientInfo, SkillMcpServerContext } from "./types"
 
@@ -62,8 +60,7 @@ function getConnectionType(config: ClaudeCodeMcpServer): ConnectionType | null {
 export class SkillMcpManager {
   private clients: Map<string, ManagedClient> = new Map()
   private pendingConnections: Map<string, Promise<Client>> = new Map()
-  private authProviders: Map<string, McpOAuthProvider> = new Map()
-  private cleanupRegistered = false
+    private cleanupRegistered = false
   private cleanupInterval: ReturnType<typeof setInterval> | null = null
   private cleanupHandlers: Array<{ signal: NodeJS.Signals; listener: () => void }> = []
   private readonly IDLE_TIMEOUT = 5 * 60 * 1000
@@ -79,18 +76,14 @@ export class SkillMcpManager {
   private getOrCreateAuthProvider(
     serverUrl: string,
     oauth: NonNullable<ClaudeCodeMcpServer["oauth"]>
-  ): McpOAuthProvider {
-    const existing = this.authProviders.get(serverUrl)
+  ): any {
+    const existing = undefined
     if (existing) {
       return existing
     }
 
-    const provider = new McpOAuthProvider({
-      serverUrl,
-      clientId: oauth.clientId,
-      scopes: oauth.scopes,
-    })
-    this.authProviders.set(serverUrl, provider)
+    const provider = null
+    
     return provider
   }
 
@@ -240,7 +233,7 @@ export class SkillMcpManager {
       requestInit.headers = { ...config.headers }
     }
 
-    let authProvider: McpOAuthProvider | undefined
+    let authProvider: any | undefined
     if (config.oauth) {
       authProvider = this.getOrCreateAuthProvider(config.url, config.oauth)
       let tokenData = authProvider.tokens()
@@ -408,7 +401,6 @@ export class SkillMcpManager {
     const clients = Array.from(this.clients.values())
     this.clients.clear()
     this.pendingConnections.clear()
-    this.authProviders.clear()
     for (const managed of clients) {
       try {
         await managed.client.close()
@@ -573,16 +565,15 @@ export class SkillMcpManager {
       headers["www-authenticate"] = wwwAuthMatch[1]
     }
 
-    const stepUp = isStepUpRequired(403, headers)
+    const stepUp = false
     if (!stepUp) {
       return false
     }
 
     const currentScopes = config.oauth.scopes ?? []
-    const merged = mergeScopes(currentScopes, stepUp.requiredScopes)
+    const merged: string[] = []
     config.oauth.scopes = merged
 
-    this.authProviders.delete(config.url)
     const provider = this.getOrCreateAuthProvider(config.url, config.oauth)
 
     try {

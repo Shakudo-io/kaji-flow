@@ -39,10 +39,7 @@ const AGENT_RESTRICTIONS: Record<string, Record<string, boolean>> = {
     read: true,
   },
 
-  "sisyphus-junior": {
-    task: false,
-  },
-}
+  }
 
 export function getAgentToolRestrictions(agentName: string): Record<string, boolean> {
   return AGENT_RESTRICTIONS[agentName]

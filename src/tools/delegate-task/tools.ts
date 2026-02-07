@@ -87,7 +87,6 @@ Prompts MUST be in English.`
       const ctx = toolContext as ToolContextWithMetadata
 
       if (args.category && !args.subagent_type) {
-        args.subagent_type = "sisyphus-junior"
       }
       await ctx.metadata?.({
         title: args.description,
@@ -123,7 +122,7 @@ Prompts MUST be in English.`
         return executeSyncContinuation(args, ctx, options)
       }
 
-      if (args.category && args.subagent_type && args.subagent_type !== "sisyphus-junior") {
+      if (args.category && args.subagent_type && args.subagent_type !== "hephaestus") {
         return `Invalid arguments: Provide EITHER category OR subagent_type, not both.`
       }
 
