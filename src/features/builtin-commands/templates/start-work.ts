@@ -95,6 +95,15 @@ export function createStartWorkHook(ctx: PluginInput) {
 
       const isStartWorkCommand = promptText.includes("<session-context>")
 
+      log(`[start-work] chat.message received`, {
+        sessionID: input.sessionID,
+        promptTextLength: promptText.length,
+        promptTextPreview: promptText.substring(0, 200),
+        isStartWorkCommand,
+        containsSessionContext: promptText.includes("<session-context>"),
+        containsStartWork: promptText.includes("start-work"),
+      })
+
       if (!isStartWorkCommand) {
         return
       }
