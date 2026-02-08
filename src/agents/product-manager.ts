@@ -14,7 +14,7 @@ import {
   categorizeTools,
 } from "./dynamic-agent-prompt-builder"
 
-const MODE: AgentMode = "primary"
+const MODE: AgentMode = "all"
 
 export const productManagerPromptMetadata: AgentPromptMetadata = {
   category: "specialist",
