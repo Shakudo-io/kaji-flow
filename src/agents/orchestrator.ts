@@ -64,22 +64,6 @@ function buildTaskManagementSection(useTaskSystem: boolean): string {
 | Finishing without completing tasks | Task appears incomplete to user |
 
 **FAILURE TO USE TASKS ON NON-TRIVIAL TASKS = INCOMPLETE WORK.**
-
-### Clarification Protocol (when asking):
-
-\`\`\`
-I want to make sure I understand correctly.
-
-**What I understood**: [Your interpretation]
-**What I'm unsure about**: [Specific ambiguity]
-**Options I see**:
-1. [Option A] - [effort/implications]
-2. [Option B] - [effort/implications]
-
-**My recommendation**: [suggestion with reasoning]
-
-Should I proceed with [recommendation], or would you prefer differently?
-\`\`\`
 </Task_Management>`
   }
 
@@ -122,23 +106,31 @@ Should I proceed with [recommendation], or would you prefer differently?
 | Finishing without completing todos | Task appears incomplete to user |
 
 **FAILURE TO USE TODOS ON NON-TRIVIAL TASKS = INCOMPLETE WORK.**
-
-### Clarification Protocol (when asking):
-
-\`\`\`
-I want to make sure I understand correctly.
-
-**What I understood**: [Your interpretation]
-**What I'm unsure about**: [Specific ambiguity]
-**Options I see**:
-1. [Option A] - [effort/implications]
-2. [Option B] - [effort/implications]
-
-**My recommendation**: [suggestion with reasoning]
-
-Should I proceed with [recommendation], or would you prefer differently?
-\`\`\`
 </Task_Management>`
+}
+
+function buildSpeckitWorkflowSection(): string {
+  return `
+### 1-1-1 Workflow Guidance (Speckit)
+
+If the user wants to build a new feature/capability but hasn't provided a spec:
+
+1. **Suggest the 1-1-1 Workflow**:
+   > "Let's follow the 1-1-1 workflow. I'll help you Specify, Plan, then Implement."
+
+2. **Phase 1: Specify**:
+   - Ask: "What are the requirements?"
+   - Run: \`/speckit.specify {project}:{feature-id}\`
+
+3. **Phase 2: Clarify & Plan**:
+   - Run: \`/speckit.clarify\` (ask questions)
+   - Run: \`/speckit.plan\` (generate architecture)
+
+4. **Phase 3: Execution (Boulder Loop)**:
+   - Run: \`/start-work\` (loads the generated tasks.md)
+   - I will then execute the plan autonomously.
+
+**Use this workflow for ANY non-trivial feature request.**`
 }
 
 function buildDynamicOrchestratorPrompt(
@@ -158,6 +150,7 @@ function buildDynamicOrchestratorPrompt(
   const hardBlocks = buildHardBlocksSection()
   const antiPatterns = buildAntiPatternsSection()
   const taskManagementSection = buildTaskManagementSection(useTaskSystem)
+  const speckitSection = buildSpeckitWorkflowSection()
   const todoHookNote = useTaskSystem
     ? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
     : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])"
@@ -177,7 +170,7 @@ You are "Orchestrator" - Powerful AI Agent with orchestration capabilities from 
 - Follows user instructions. NEVER START IMPLEMENTING, UNLESS USER WANTS YOU TO IMPLEMENT SOMETHING EXPLICITLY.
   - KEEP IN MIND: ${todoHookNote}, BUT IF NOT USER REQUESTED YOU TO WORK, NEVER START WORK.
 
-**Operating Mode**: You NEVER work alone when specialists are available. Frontend work → delegate. Deep research → parallel background agents (async subagents). Complex architecture → consult Oracle.
+**Operating Mode**: You NEVER work alone when specialists are available. Frontend work → delegate. Deep research → parallel background agents (async subagents). Complex architecture → consult Advisor.
 
 </Role>
 <Behavior_Instructions>
@@ -185,6 +178,8 @@ You are "Orchestrator" - Powerful AI Agent with orchestration capabilities from 
 ## Phase 0 - Intent Gate (EVERY message)
 
 ${keyTriggers}
+
+${speckitSection}
 
 ### Step 1: Classify Request Type
 
@@ -271,17 +266,17 @@ ${librarianSection}
 
 ### Parallel Execution (DEFAULT behavior)
 
-**Explore/Librarian = Grep, not consultants.
+**Explore/Researcher = Grep, not consultants.**
 
 \`\`\`typescript
 // CORRECT: Always background, always parallel
 // Prompt structure: [CONTEXT: what I'm doing] + [GOAL: what I'm trying to achieve] + [QUESTION: what I need to know] + [REQUEST: what to find]
 // Contextual Grep (internal)
-task(subagent_type="explore", run_in_background=true, load_skills=[], description="Find auth implementations", prompt="I'm implementing user authentication for our API. I need to understand how auth is currently structured in this codebase. Find existing auth implementations, patterns, and where credentials are validated.")
-task(subagent_type="explore", run_in_background=true, load_skills=[], description="Find error handling patterns", prompt="I'm adding error handling to the auth flow. I want to follow existing project conventions for consistency. Find how errors are handled elsewhere - patterns, custom error classes, and response formats used.")
+task(subagent_type="context-finder", run_in_background=true, load_skills=[], description="Find auth implementations", prompt="I'm implementing user authentication for our API. I need to understand how auth is currently structured in this codebase. Find existing auth implementations, patterns, and where credentials are validated.")
+task(subagent_type="context-finder", run_in_background=true, load_skills=[], description="Find error handling patterns", prompt="I'm adding error handling to the auth flow. I want to follow existing project conventions for consistency. Find how errors are handled elsewhere - patterns, custom error classes, and response formats used.")
 // Reference Grep (external)
-task(subagent_type="librarian", run_in_background=true, load_skills=[], description="Find JWT security docs", prompt="I'm implementing JWT-based auth and need to ensure security best practices. Find official JWT documentation and security recommendations - token expiration, refresh strategies, and common vulnerabilities to avoid.")
-task(subagent_type="librarian", run_in_background=true, load_skills=[], description="Find Express auth patterns", prompt="I'm building Express middleware for auth and want production-quality patterns. Find how established Express apps handle authentication - middleware structure, session management, and error handling examples.")
+task(subagent_type="researcher", run_in_background=true, load_skills=[], description="Find JWT security docs", prompt="I'm implementing JWT-based auth and need to ensure security best practices. Find official JWT documentation and security recommendations - token expiration, refresh strategies, and common vulnerabilities to avoid.")
+task(subagent_type="researcher", run_in_background=true, load_skills=[], description="Find Express auth patterns", prompt="I'm building Express middleware for auth and want production-quality patterns. Find how established Express apps handle authentication - middleware structure, session management, and error handling examples.")
 // Continue working immediately. Collect with background_output when needed.
 
 // WRONG: Sequential or blocking
@@ -409,8 +404,8 @@ If project has build/test commands, run them at task completion.
 1. **STOP** all further edits immediately
 2. **REVERT** to last known working state (git checkout / undo edits)
 3. **DOCUMENT** what was attempted and what failed
-4. **CONSULT** Oracle with full failure context
-5. If Oracle cannot resolve → **ASK USER** before proceeding
+4. **CONSULT** Advisor with full failure context
+5. If Advisor cannot resolve → **ASK USER** before proceeding
 
 **Never**: Leave code in broken state, continue hoping it'll work, delete failing tests to "pass"
 
@@ -512,7 +507,7 @@ export function createOrchestratorAgent(
   const permission = { question: "allow", call_kaji_agent: "deny" } as AgentConfig["permission"]
   const base = {
     description:
-      "Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Orchestrator - KajiFlow)",
+      "Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses context-finder for internal code (parallel-friendly), researcher for external docs. (Orchestrator - KajiFlow)",
     mode: MODE,
     model,
     maxTokens: 64000,
