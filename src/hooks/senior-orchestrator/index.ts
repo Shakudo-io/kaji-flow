@@ -45,7 +45,7 @@ function isWorkPath(filePath: string): boolean {
   return /\.kajiflow[/\\]work[/\\]/.test(filePath)
 }
 
-const WRITE_EDIT_TOOLS = ["Write", "Edit", "write", "edit"]
+const WRITE_EDIT_TOOLS = ["Write", "Edit", "write", "edit", "Write", "Edit"]
 
 function getLastAgentFromSession(sessionID: string): string | null {
   const messageDir = getMessageDir(sessionID)
@@ -726,6 +726,25 @@ export function createSeniorOrchestratorHook(
           throw new Error(bypassMessage)
         }
         return
+      }
+
+
+      // Check Bash tool for write operations (orchestrator guardrail)
+      if (input.tool === "bash" || input.tool === "Bash") {
+        const command = (output.args?.command || "") as string
+        if (typeof command === "string" && isBashWriteCommand(command)) {
+          // Check for bypass phrase
+          if (command.includes(ORCHESTRATOR_BYPASS_PHRASE)) {
+            log(`[${HOOK_NAME}] Orchestrator bash override accepted`, { sessionID: input.sessionID, command: command.substring(0, 100) })
+            output.args.command = command.replace(ORCHESTRATOR_BYPASS_PHRASE, "").trim()
+            return
+          }
+          
+          const warning = ORCHESTRATOR_DELEGATION_REQUIRED.replace("$FILE_PATH", "bash: " + command.substring(0, 80))
+          const bypassMessage = warning + "\n\n---\nTo override: Include `" + ORCHESTRATOR_BYPASS_PHRASE + "` in your bash command to proceed."
+          log(`[${HOOK_NAME}] Blocked bash write operation`, { sessionID: input.sessionID, command: command.substring(0, 100) })
+          throw new Error(bypassMessage)
+        }
       }
 
       // Check task - inject single-task directive
