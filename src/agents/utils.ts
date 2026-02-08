@@ -1,3 +1,4 @@
+import { log } from "../shared/logger"
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { BuiltinAgentName, AgentOverrideConfig, AgentOverrides, AgentFactory, AgentPromptMetadata } from "./types"
 import type { CategoriesConfig, CategoryConfig, GitMasterConfig } from "../config/schema"
@@ -237,8 +238,15 @@ export async function createBuiltinAgents(
   const availableModels = await fetchAvailableModels(undefined, {
     connectedProviders: connectedProviders ?? undefined,
   })
-  const isFirstRunNoCache =
+    const isFirstRunNoCache =
     availableModels.size === 0 && (!connectedProviders || connectedProviders.length === 0)
+
+  log("[createBuiltinAgents] Starting agent registration", { 
+    disabledAgents, 
+    availableModelsCount: availableModels.size,
+    isFirstRunNoCache,
+    agentSourcesCount: Object.keys(agentSources).length
+  })
 
   const result: Record<string, AgentConfig> = {}
   const availableAgents: AvailableAgent[] = []
@@ -273,21 +281,26 @@ export async function createBuiltinAgents(
 
   const pendingAgentConfigs: Map<string, AgentConfig> = new Map()
 
-   for (const [name, source] of Object.entries(agentSources)) {
+      for (const [name, source] of Object.entries(agentSources)) {
      const agentName = name as BuiltinAgentName
+     log(`[createBuiltinAgents] Processing ${agentName}`, { agentName })
 
      if (agentName === "orchestrator") continue
      if (agentName === "developer") continue
      if (agentName === "senior-orchestrator") continue
      if (agentName === "planner") continue
-     if (disabledAgents.some((name) => name.toLowerCase() === agentName.toLowerCase())) continue
+          if (disabledAgents.some((name) => name.toLowerCase() === agentName.toLowerCase())) {
+       log(`[createBuiltinAgents] Skipping ${agentName} (disabled)`)
+       continue
+     }
 
      const override = agentOverrides[agentName]
        ?? Object.entries(agentOverrides).find(([key]) => key.toLowerCase() === agentName.toLowerCase())?.[1]
      const requirement = AGENT_MODEL_REQUIREMENTS[agentName]
 
-     if (requirement?.requiresModel && availableModels) {
+          if (requirement?.requiresModel && availableModels) {
        if (!isModelAvailable(requirement.requiresModel, availableModels)) {
+         log(`[createBuiltinAgents] Skipping ${agentName} (model unavailable: ${requirement.requiresModel})`, { availableModels: Array.from(availableModels) })
          continue
        }
      }
@@ -321,7 +334,8 @@ export async function createBuiltinAgents(
 
     config = applyOverrides(config, override, mergedCategories)
 
-    pendingAgentConfigs.set(name, config)
+        pendingAgentConfigs.set(name, config)
+    log(`[createBuiltinAgents] Registered ${name} with model ${config.model}`)
 
     const metadata = agentMetadata[agentName]
     if (metadata) {
