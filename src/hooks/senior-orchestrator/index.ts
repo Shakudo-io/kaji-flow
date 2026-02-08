@@ -675,21 +675,17 @@ export function createSeniorOrchestratorHook(
         return
       }
 
-      // Check Write/Edit tools for orchestrator - inject strong warning
+      // Check Write/Edit tools for orchestrator - throw error on violation
       if (WRITE_EDIT_TOOLS.includes(input.tool)) {
         const filePath = (output.args.filePath ?? output.args.path ?? output.args.file) as string | undefined
         if (filePath && !isWorkPath(filePath)) {
-          // Store filePath for use in tool.execute.after
-          if (input.callID) {
-            pendingFilePaths.set(input.callID, filePath)
-          }
-          const warning = ORCHESTRATOR_DELEGATION_REQUIRED.replace("$FILE_PATH", filePath)
-          output.message = (output.message || "") + warning
-          log(`[${HOOK_NAME}] Injected delegation warning for direct file modification`, {
+          const errorMessage = ORCHESTRATOR_DELEGATION_REQUIRED.replace("$FILE_PATH", filePath)
+          log(`[${HOOK_NAME}] Blocked direct file modification - throwing error`, {
             sessionID: input.sessionID,
             tool: input.tool,
             filePath,
           })
+          throw new Error(errorMessage)
         }
         return
       }
