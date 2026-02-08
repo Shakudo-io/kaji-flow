@@ -2,6 +2,7 @@ import type { PluginInput } from "@opencode-ai/plugin"
 import {
   readBoulderState,
   writeBoulderState,
+  appendSessionId,
   findPlannerPlans,
   getPlanProgress,
   createBoulderState,
@@ -105,10 +106,22 @@ export function createStartWorkHook(ctx: PluginInput) {
       })
 
       if (!isStartWorkCommand) {
-        return
+        // HIJACK LOGIC: Check for speckit.implement even if <session-context> is missing
+        // This handles manual invocation if context injection fails
+        if (promptText.includes("/speckit.implement") || promptText.includes("/start-work")) {
+             log(`[${HOOK_NAME}] Detected slash command via fallback check`, { promptText })
+             // Proceed
+        } else {
+             return
+        }
+      }
+      
+      // Additional check to ensure we only target relevant commands
+      if (!promptText.includes("start-work") && !promptText.includes("speckit.implement") && !promptText.match(KEYWORD_PATTERN)) {
+          return
       }
 
-      log(`[${HOOK_NAME}] Processing start-work command`, {
+      log(`[${HOOK_NAME}] Processing start-work command (Hijacked/Standard)`, {
         sessionID: input.sessionID,
       })
 
@@ -254,7 +267,7 @@ Create a new feature spec with: /speckit.specify {project}:{feature}`
 **Session ID**: ${sessionId}
 **Started**: ${timestamp}
 
-boulder.json has been created. Read the tasks.md and begin execution.`
+Session-scoped boulder state created. Read the tasks.md and begin execution.`
         } else {
           const planList = incompletePlans.map((p, i) => {
             const progress = getPlanProgress(p)
