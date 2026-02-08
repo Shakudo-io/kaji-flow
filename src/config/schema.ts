@@ -12,7 +12,7 @@ export const AgentOverrideConfigSchema = z.object({
   variant: z.string().optional(),
   category: z.string().optional(),
   permission: z.record(z.string(), z.enum(["allow", "deny", "ask"])).optional(),
-  tools: z.record(z.string(), z.boolean()).optional(), // Relaxed tool config
+  tools: z.record(z.string(), z.boolean()).optional(), // Reverted to boolean
   skills: z.array(z.string()).optional(),
   is_unstable_agent: z.boolean().optional(),
 }).strict()
@@ -31,7 +31,7 @@ export const CategoryConfigSchema = z.object({
   prompt_append: z.string().optional(),
   variant: z.string().optional(),
   is_unstable_agent: z.boolean().optional(),
-  tools: z.record(z.string(), z.boolean()).optional(),
+  tools: z.record(z.string(), z.boolean()).optional(), // Reverted to boolean
 }).strict()
 
 export type CategoryConfig = z.infer<typeof CategoryConfigSchema>
@@ -94,11 +94,11 @@ export const ExperimentalConfigSchema = z.object({
   preemptive_compaction: z.union([z.boolean(), z.object({ enabled: z.boolean().optional() })]).optional(),
   session_recovery_auto_prompt: z.union([z.boolean(), z.object({ auto_resume: z.boolean().optional() })]).optional(),
   tool_output_truncator_max_chars: z.number().optional(),
-  truncate_all_tool_outputs: z.boolean().optional(),
   tasks_todowrite_disabler: z.boolean().optional(),
   task_system: z.boolean().optional(),
   plugin_load_timeout_ms: z.number().optional(),
   dynamic_context_pruning: z.boolean().optional(),
+  truncate_all_tool_outputs: z.boolean().optional(),
   auto_resume: z.boolean().optional(),
 }).strict()
 
@@ -195,6 +195,26 @@ export const WebsearchConfigSchema = z.object({
 
 export type WebsearchConfig = z.infer<typeof WebsearchConfigSchema>
 
+export const SkillDefinitionSchema = z.object({
+  description: z.string().optional(),
+  mcp_servers: z.array(z.string()).optional(),
+  env: z.record(z.string(), z.string()).optional(),
+  template: z.string().optional(),
+  from: z.string().optional(),
+  model: z.string().optional(),
+  agent: z.string().optional(),
+  subtask: z.string().optional(),
+  "argument-hint": z.string().optional(),
+  "allowed-tools": z.array(z.string()).optional(),
+  license: z.string().optional(),
+  compatibility: z.string().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  disable: z.boolean().optional(),
+}).strict()
+
+export type SkillDefinition = z.infer<typeof SkillDefinitionSchema>
+export type SkillsConfig = Record<string, SkillDefinition> | string[]
+
 export const KajiFlowConfigSchema = z.object({
   agent: z.object({
     orchestrator: AgentOverrideConfigSchema.optional(),
@@ -207,8 +227,12 @@ export const KajiFlowConfigSchema = z.object({
     "context-finder": AgentOverrideConfigSchema.optional(),
     advisor: AgentOverrideConfigSchema.optional(),
     "vision-analyst": AgentOverrideConfigSchema.optional(),
+    "product-manager": AgentOverrideConfigSchema.optional(),
+    "solutions-architect": AgentOverrideConfigSchema.optional(),
+    "sales-engineer": AgentOverrideConfigSchema.optional(),
+    "bizops-manager": AgentOverrideConfigSchema.optional(),
     "OpenCode-Builder": AgentOverrideConfigSchema.optional(),
-    }).optional(),
+  }).optional(),
   categories: z.record(z.string(), CategoryConfigSchema).optional(),
   disabled_agents: z.array(z.string()).optional(),
   disabled_tools: z.array(z.string()).optional(),
@@ -232,26 +256,3 @@ export const KajiFlowConfigSchema = z.object({
 }).strict()
 
 export type KajiFlowConfig = z.infer<typeof KajiFlowConfigSchema>
-
-export const SkillDefinitionSchema = z.object({
-  description: z.string().optional(),
-  mcp_servers: z.array(z.string()).optional(),
-  env: z.record(z.string(), z.string()).optional(),
-  // Extended fields
-  template: z.string().optional(),
-  from: z.string().optional(),
-  model: z.string().optional(),
-  agent: z.string().optional(),
-  subtask: z.string().optional(),
-  "argument-hint": z.string().optional(),
-  "allowed-tools": z.array(z.string()).optional(),
-  license: z.string().optional(),
-  compatibility: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-  disable: z.boolean().optional(),
-}).strict()
-
-export type SkillDefinition = z.infer<typeof SkillDefinitionSchema>
-
-export type SkillsConfig = Record<string, SkillDefinition> | string[]
-// Re-add tools to CategoryConfigSchema

@@ -1,245 +1,103 @@
-import type { AgentPromptMetadata, BuiltinAgentName } from "./types"
-import { truncateDescription } from "../shared/truncate-description"
+import type { AgentPromptMetadata, AgentCategory, BuiltinAgentName } from "./types"
+import { productManagerPromptMetadata } from "./product-manager"
+import { solutionsArchitectPromptMetadata } from "./solutions-architect"
+import { salesEngineerPromptMetadata } from "./sales-engineer"
+import { bizOpsManagerPromptMetadata } from "./bizops-manager"
+import { advisorPromptMetadata } from "./advisor"
+import { researcherPromptMetadata } from "./researcher"
+import { contextFinderPromptMetadata } from "./context-finder"
+import { visionAnalystPromptMetadata } from "./vision-analyst"
+import { requirementsAnalystPromptMetadata } from "./requirements-analyst"
+import { reviewerPromptMetadata } from "./reviewer"
 
 export interface AvailableAgent {
-  name: BuiltinAgentName
+  name: string
   description: string
-  metadata: AgentPromptMetadata
+  metadata?: AgentPromptMetadata
 }
 
 export interface AvailableTool {
   name: string
-  category: "lsp" | "ast" | "search" | "session" | "command" | "other"
+  description: string
+  category?: string
 }
 
 export interface AvailableSkill {
   name: string
   description: string
-  location: "user" | "project" | "plugin"
+  location?: "plugin" | "user" | "project"
 }
 
 export interface AvailableCategory {
   name: string
   description: string
-  model?: string
 }
 
-export function categorizeTools(toolNames: string[]): AvailableTool[] {
-  return toolNames.map((name) => {
-    let category: AvailableTool["category"] = "other"
-    if (name.startsWith("lsp_")) {
-      category = "lsp"
-    } else if (name.startsWith("ast_grep")) {
-      category = "ast"
-    } else if (name === "grep" || name === "glob") {
+export function categorizeTools(tools: string[]): AvailableTool[] {
+  // Simple categorization based on tool name prefixes or known tools
+  return tools.map((name) => {
+    let category = "utility"
+    if (name.startsWith("git")) category = "git"
+    else if (name.startsWith("file") || name === "read" || name === "write" || name === "edit")
+      category = "filesystem"
+    else if (name.includes("search") || name.includes("find") || name === "grep" || name === "glob")
       category = "search"
-    } else if (name.startsWith("session_")) {
-      category = "session"
-    } else if (name === "slashcommand") {
-      category = "command"
-    }
-    return { name, category }
+    else if (name.includes("test") || name === "lsp_diagnostics") category = "testing"
+    return { name, description: "", category }
   })
 }
 
-function formatToolsForPrompt(tools: AvailableTool[]): string {
-  const lspTools = tools.filter((t) => t.category === "lsp")
-  const astTools = tools.filter((t) => t.category === "ast")
-  const searchTools = tools.filter((t) => t.category === "search")
+export function buildKeyTriggersSection(
+  agents: AvailableAgent[],
+  skills: AvailableSkill[]
+): string {
+  const triggers = agents
+    .filter((a) => a.metadata?.keyTrigger)
+    .map((a) => `- ${a.metadata!.keyTrigger}`)
 
-  const parts: string[] = []
+  if (triggers.length === 0) return ""
 
-  if (searchTools.length > 0) {
-    parts.push(...searchTools.map((t) => `\`${t.name}\``))
-  }
-
-  if (lspTools.length > 0) {
-    parts.push("`lsp_*`")
-  }
-
-  if (astTools.length > 0) {
-    parts.push("`ast_grep`")
-  }
-
-  return parts.join(", ")
-}
-
-export function buildKeyTriggersSection(agents: AvailableAgent[], _skills: AvailableSkill[] = []): string {
-  const keyTriggers = agents
-    .filter((a) => a.metadata.keyTrigger)
-    .map((a) => `- ${a.metadata.keyTrigger}`)
-
-  if (keyTriggers.length === 0) return ""
-
-  return `### Key Triggers (check BEFORE classification):
-
-${keyTriggers.join("\n")}
-- **"Look into" + "create PR"** → Not just research. Full implementation cycle expected.`
+  return `### Key Triggers
+${triggers.join("\n")}`
 }
 
 export function buildToolSelectionTable(
   agents: AvailableAgent[],
-  tools: AvailableTool[] = [],
-  _skills: AvailableSkill[] = []
+  tools: AvailableTool[],
+  skills: AvailableSkill[]
 ): string {
-  const rows: string[] = [
-    "### Tool & Agent Selection:",
-    "",
-  ]
-
-  rows.push("| Resource | Cost | When to Use |")
-  rows.push("|----------|------|-------------|")
-
-  if (tools.length > 0) {
-    const toolsDisplay = formatToolsForPrompt(tools)
-    rows.push(`| ${toolsDisplay} | FREE | Not Complex, Scope Clear, No Implicit Assumptions |`)
-  }
-
-  const costOrder = { FREE: 0, CHEAP: 1, EXPENSIVE: 2 }
-  const sortedAgents = [...agents]
-    .filter((a) => a.metadata.category !== "utility")
-    .sort((a, b) => costOrder[a.metadata.cost] - costOrder[b.metadata.cost])
-
-  for (const agent of sortedAgents) {
-    const shortDesc = agent.description.split(".")[0] || agent.description
-    rows.push(`| \`${agent.name}\` agent | ${agent.metadata.cost} | ${shortDesc} |`)
-  }
-
-  rows.push("")
-  rows.push("**Default flow**: context-finder/researcher (background) + tools → advisor (if required)")
-
-  return rows.join("\n")
+  return ""
 }
 
 export function buildContextFinderSection(agents: AvailableAgent[]): string {
-  const contextFinderAgent = agents.find((a) => a.name === "context-finder")
-  if (!contextFinderAgent) return ""
-
-  const useWhen = contextFinderAgent.metadata.useWhen || []
-  const avoidWhen = contextFinderAgent.metadata.avoidWhen || []
-
-  return `### ContextFinder Agent = Contextual Grep
-
-Use it as a **peer tool**, not a fallback. Fire liberally.
-
-| Use Direct Tools | Use ContextFinder Agent |
-|------------------|-------------------|
-${avoidWhen.map((w) => `| ${w} |  |`).join("\n")}
-${useWhen.map((w) => `|  | ${w} |`).join("\n")}`
+  const agent = agents.find((a) => a.name === "context-finder")
+  if (!agent) return ""
+  return `### Context Gathering (Internal)
+Use **Context Finder** (Explore) agent for fast codebase searching (grep, glob, AST).
+It runs in background parallel to your work.`
 }
 
 export function buildResearcherSection(agents: AvailableAgent[]): string {
-  const researcherAgent = agents.find((a) => a.name === "researcher")
-  if (!researcherAgent) return ""
-
-  const useWhen = researcherAgent.metadata.useWhen || []
-
-  return `### Researcher Agent = Reference Grep
-
-Search **external references** (docs, OSS, web). Fire proactively when unfamiliar libraries are involved.
-
-| Contextual Grep (Internal) | Reference Grep (External) |
-|----------------------------|---------------------------|
-| Search OUR codebase | Search EXTERNAL resources |
-| Find patterns in THIS repo | Find examples in OTHER repos |
-| How does our code work? | How does this library work? |
-| Project-specific logic | Official API documentation |
-| | Library best practices & quirks |
-| | OSS implementation examples |
-
-**Trigger phrases** (fire researcher immediately):
-${useWhen.map((w) => `- "${w}"`).join("\n")}`
+  const agent = agents.find((a) => a.name === "researcher")
+  if (!agent) return ""
+  return `### Research (External)
+Use **Researcher** (Librarian) agent for searching documentation, GitHub issues, and web resources.
+It runs in background parallel to your work.`
 }
 
-export function buildDelegationTable(agents: AvailableAgent[]): string {
-  const rows: string[] = [
-    "### Delegation Table:",
-    "",
-    "| Domain | Delegate To | Trigger |",
-    "|--------|-------------|---------|",
-  ]
-
-  for (const agent of agents) {
-    for (const trigger of agent.metadata.triggers) {
-      rows.push(`| ${trigger.domain} | \`${agent.name}\` | ${trigger.trigger} |`)
-    }
-  }
-
-  return rows.join("\n")
-}
-
-/**
- * Renders the "User-Installed Skills (HIGH PRIORITY)" block used across multiple agent prompts.
- * Extracted to avoid duplication between buildCategorySkillsDelegationGuide, buildSkillsSection, etc.
- */
-export function formatCustomSkillsBlock(
-  customRows: string[],
-  customSkills: AvailableSkill[],
-  headerLevel: "####" | "**" = "####"
+export function buildCategorySkillsDelegationGuide(
+  categories: AvailableCategory[],
+  skills: AvailableSkill[]
 ): string {
-  const customSkillNames = customSkills.map((s) => `"${s.name}"`).join(", ")
-  const header = headerLevel === "####"
-    ? `#### User-Installed Skills (HIGH PRIORITY)`
-    : `**User-Installed Skills (HIGH PRIORITY):**`
-
-  return `${header}
-
-**The user has installed these custom skills. They MUST be evaluated for EVERY delegation.**
-Subagents are STATELESS — they lose all custom knowledge unless you pass these skills via \`load_skills\`.
-
-| Skill | Expertise Domain | Source |
-|-------|------------------|--------|
-${customRows.join("\n")}
-
-> **CRITICAL**: Ignoring user-installed skills when they match the task domain is a failure.
-> The user installed ${customSkillNames} for a reason — USE THEM when the task overlaps with their domain.`
-}
-
-export function buildCategorySkillsDelegationGuide(categories: AvailableCategory[], skills: AvailableSkill[]): string {
-  if (categories.length === 0 && skills.length === 0) return ""
-
-  const categoryRows = categories.map((c) => {
-    const desc = c.description || c.name
-    return `| \`${c.name}\` | ${desc} |`
-  })
-
-  const builtinSkills = skills.filter((s) => s.location === "plugin")
-  const customSkills = skills.filter((s) => s.location !== "plugin")
-
-   const builtinRows = builtinSkills.map((s) => {
-     const desc = truncateDescription(s.description)
-     return `| \`${s.name}\` | ${desc} |`
-   })
-
-   const customRows = customSkills.map((s) => {
-     const desc = truncateDescription(s.description)
-     const source = s.location === "project" ? "project" : "user"
-     return `| \`${s.name}\` | ${desc} | ${source} |`
-   })
-
-  const customSkillBlock = formatCustomSkillsBlock(customRows, customSkills)
-
-  let skillsSection: string
-
-  if (customSkills.length > 0 && builtinSkills.length > 0) {
-    skillsSection = `#### Built-in Skills
-
-| Skill | Expertise Domain |
-|-------|------------------|
-${builtinRows.join("\n")}
-
-${customSkillBlock}`
-  } else if (customSkills.length > 0) {
-    skillsSection = customSkillBlock
-  } else {
-    skillsSection = `#### Available Skills (Domain Expertise Injection)
-
-Skills inject specialized instructions into the subagent. Read the description to understand when each skill applies.
-
-| Skill | Expertise Domain |
-|-------|------------------|
-${builtinRows.join("\n")}`
-  }
+  if (categories.length === 0) return ""
+  
+  const categoryList = categories.map(c => `- **${c.name}**: ${c.description}`).join("\n")
+  
+  // Highlight user-installed skills
+  const userSkills = skills.filter(s => s.location !== "plugin")
+  const skillHighlight = userSkills.length > 0 
+    ? `**⚡ YOUR SKILLS (PRIORITY)**: ${userSkills.map(s => s.name).slice(0, 8).join(", ")} ${userSkills.length > 8 ? `(+${userSkills.length - 8} more)` : ""}`
+    : ""
 
   return `### Category + Skills Delegation System
 
@@ -247,186 +105,80 @@ ${builtinRows.join("\n")}`
 
 #### Available Categories (Domain-Optimized Models)
 
-Each category is configured with a model optimized for that domain. Read the description to understand when to use it.
+${categoryList}
 
-| Category | Domain / Best For |
-|----------|-------------------|
-${categoryRows.join("\n")}
+${skillHighlight}
 
-${skillsSection}
+> **CRITICAL**: Ignoring user-installed skills when they match the task domain is a failure.
+> The user installed these skills for a reason — USE THEM when the task overlaps with their domain.
 
----
+**Default Bias: DELEGATE. WORK YOURSELF ONLY WHEN IT IS SUPER SIMPLE.**`
+}
 
-### MANDATORY: Category + Skill Selection Protocol
+export function buildDelegationTable(agents: AvailableAgent[]): string {
+  // Aggregate triggers from all agents
+  const rows: string[] = []
+  
+  // Sort agents: Specialists first
+  const sortedAgents = [...agents].sort((a, b) => {
+    const catA = a.metadata?.category || "utility"
+    const catB = b.metadata?.category || "utility"
+    if (catA === "specialist" && catB !== "specialist") return -1
+    if (catA !== "specialist" && catB === "specialist") return 1
+    return 0
+  })
 
-**STEP 1: Select Category**
-- Read each category's description
-- Match task requirements to category domain
-- Select the category whose domain BEST fits the task
+  for (const agent of sortedAgents) {
+    if (!agent.metadata?.triggers) continue
+    for (const trigger of agent.metadata.triggers) {
+      rows.push(`| ${trigger.domain} | **${agent.name}** | ${trigger.trigger} |`)
+    }
+  }
 
-**STEP 2: Evaluate ALL Skills (Built-in AND User-Installed)**
-For EVERY skill listed above, ask yourself:
-> "Does this skill's expertise domain overlap with my task?"
+  if (rows.length === 0) return ""
 
-- If YES → INCLUDE in \`load_skills=[...]\`
-- If NO → You MUST justify why (see below)
-${customSkills.length > 0 ? `
-> **User-installed skills get PRIORITY.** The user explicitly installed them for their workflow.
-> When in doubt about a user-installed skill, INCLUDE it rather than omit it.` : ""}
+  return `### Delegation Table:
 
-**STEP 3: Justify Omissions**
-
-If you choose NOT to include a skill that MIGHT be relevant, you MUST provide:
-
-\`\`\`
-SKILL EVALUATION for "[skill-name]":
-- Skill domain: [what the skill description says]
-- Task domain: [what your task is about]
-- Decision: OMIT
-- Reason: [specific explanation of why domains don't overlap]
-\`\`\`
-
-**WHY JUSTIFICATION IS MANDATORY:**
-- Forces you to actually READ skill descriptions
-- Prevents lazy omission of potentially useful skills
-- Subagents are STATELESS - they only know what you tell them
-- Missing a relevant skill = suboptimal output
-
----
-
-### Delegation Pattern
-
-\`\`\`typescript
-task(
-  category="[selected-category]",
-  load_skills=["skill-1", "skill-2"],  // Include ALL relevant skills — ESPECIALLY user-installed ones
-  prompt="..."
-)
-\`\`\`
-
-**ANTI-PATTERN (will produce poor results):**
-\`\`\`typescript
-task(category="...", load_skills=[], run_in_background=false, prompt="...")  // Empty load_skills without justification
-\`\`\``
+| Domain | Delegate To | Trigger |
+|--------|-------------|---------|
+${rows.join("\n")}`
 }
 
 export function buildAdvisorSection(agents: AvailableAgent[]): string {
-  const advisorAgent = agents.find((a) => a.name === "advisor")
-  if (!advisorAgent) return ""
-
-  const useWhen = advisorAgent.metadata.useWhen || []
-  const avoidWhen = advisorAgent.metadata.avoidWhen || []
-
-  return `<Advisor_Usage>
-## Advisor — Read-Only High-IQ Consultant
-
-Advisor is a read-only, expensive, high-quality reasoning model for debugging and architecture. Consultation only.
-
-### WHEN to Consult:
-
-| Trigger | Action |
-|---------|--------|
-${useWhen.map((w) => `| ${w} | Advisor FIRST, then implement |`).join("\n")}
-
-### WHEN NOT to Consult:
-
-${avoidWhen.map((w) => `- ${w}`).join("\n")}
-
-### Usage Pattern:
-Briefly announce "Consulting Advisor for [reason]" before invocation.
-
-**Exception**: This is the ONLY case where you announce before acting. For all other work, start immediately without status updates.
-</Advisor_Usage>`
+  const agent = agents.find((a) => a.name === "advisor")
+  if (!agent) return ""
+  return `### Consultation
+If you are stuck, facing a complex architectural decision, or debugging a hard issue, consult the **Advisor** (Oracle).
+`
 }
 
 export function buildHardBlocksSection(): string {
-  const blocks = [
-    "| Type error suppression (`as any`, `@ts-ignore`) | Never |",
-    "| Commit without explicit request | Never |",
-    "| Speculate about unread code | Never |",
-    "| Leave code in broken state after failures | Never |",
-  ]
-
   return `## Hard Blocks (NEVER violate)
 
 | Constraint | No Exceptions |
 |------------|---------------|
-${blocks.join("\n")}`
+| Type error suppression (\`as any\`, \`@ts-ignore\`) | Never |
+| Commit without explicit request | Never |
+| Speculate about unread code | Never |
+| Leave code in broken state after failures | Never |`
 }
 
 export function buildAntiPatternsSection(): string {
-  const patterns = [
-    "| **Type Safety** | `as any`, `@ts-ignore`, `@ts-expect-error` |",
-    "| **Error Handling** | Empty catch blocks `catch(e) {}` |",
-    "| **Testing** | Deleting failing tests to \"pass\" |",
-    "| **Search** | Firing agents for single-line typos or obvious syntax errors |",
-    "| **Debugging** | Shotgun debugging, random changes |",
-  ]
-
   return `## Anti-Patterns (BLOCKING violations)
 
 | Category | Forbidden |
 |----------|-----------|
-${patterns.join("\n")}`
+| **Type Safety** | \`as any\`, \`@ts-ignore\`, \`@ts-expect-error\` |
+| **Error Handling** | Empty catch blocks \`catch(e) {}\` |
+| **Testing** | Deleting failing tests to "pass" |
+| **Search** | Firing agents for single-line typos or obvious syntax errors |
+| **Debugging** | Shotgun debugging, random changes |`
 }
 
-export function buildUltraworkSection(
-  agents: AvailableAgent[],
-  categories: AvailableCategory[],
-  skills: AvailableSkill[]
-): string {
-  const lines: string[] = []
-
-  if (categories.length > 0) {
-    lines.push("**Categories** (for implementation tasks):")
-    for (const cat of categories) {
-      const shortDesc = cat.description || cat.name
-      lines.push(`- \`${cat.name}\`: ${shortDesc}`)
-    }
-    lines.push("")
-  }
-
-  if (skills.length > 0) {
-    const builtinSkills = skills.filter((s) => s.location === "plugin")
-    const customSkills = skills.filter((s) => s.location !== "plugin")
-
-    if (builtinSkills.length > 0) {
-      lines.push("**Built-in Skills** (combine with categories):")
-      for (const skill of builtinSkills) {
-        const shortDesc = skill.description.split(".")[0] || skill.description
-        lines.push(`- \`${skill.name}\`: ${shortDesc}`)
-      }
-      lines.push("")
-    }
-
-    if (customSkills.length > 0) {
-      lines.push("**User-Installed Skills** (HIGH PRIORITY - user installed these for their workflow):")
-      for (const skill of customSkills) {
-        const shortDesc = skill.description.split(".")[0] || skill.description
-        lines.push(`- \`${skill.name}\`: ${shortDesc}`)
-      }
-      lines.push("")
-    }
-  }
-
-  if (agents.length > 0) {
-    const ultraworkAgentPriority = ["context-finder", "researcher", "plan", "advisor"]
-    const sortedAgents = [...agents].sort((a, b) => {
-      const aIdx = ultraworkAgentPriority.indexOf(a.name)
-      const bIdx = ultraworkAgentPriority.indexOf(b.name)
-      if (aIdx === -1 && bIdx === -1) return 0
-      if (aIdx === -1) return 1
-      if (bIdx === -1) return -1
-      return aIdx - bIdx
-    })
-
-    lines.push("**Agents** (for specialized consultation/exploration):")
-    for (const agent of sortedAgents) {
-      const shortDesc = agent.description.length > 120 ? agent.description.slice(0, 120) + "..." : agent.description
-      const suffix = agent.name === "context-finder" || agent.name === "researcher" ? " (multiple)" : ""
-      lines.push(`- \`${agent.name}${suffix}\`: ${shortDesc}`)
-    }
-  }
-
-  return lines.join("\n")
+export function formatCustomSkillsBlock(rows: string[], skills: AvailableSkill[], prefix = ""): string {
+  if (rows.length === 0) return ""
+  
+  return `
+${prefix} Custom Skills (Your Priority):
+${rows.join("\n")}`
 }

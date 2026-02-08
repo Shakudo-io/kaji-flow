@@ -1,3 +1,4 @@
+import { mapPermissionsToTools } from "./permission-mapper"
 
 import type { PluginInput } from "@opencode-ai/plugin"
 import type {
@@ -327,7 +328,7 @@ export class BackgroundManager {
         ...(launchVariant ? { variant: launchVariant } : {}),
         system: input.skillContent,
         tools: {
-          ...getAgentToolRestrictions(input.agent),
+          ...mapPermissionsToTools(getAgentToolRestrictions(input.agent) || {} as any),
           task: false,
           call_kaji_agent: true,
           question: false,
@@ -586,7 +587,7 @@ export class BackgroundManager {
         ...(resumeModel ? { model: resumeModel } : {}),
         ...(resumeVariant ? { variant: resumeVariant } : {}),
         tools: {
-          ...getAgentToolRestrictions(existingTask.agent),
+          ...mapPermissionsToTools(getAgentToolRestrictions(existingTask.agent) || {} as any),
           task: false,
           call_kaji_agent: true,
           question: false,

@@ -81,6 +81,10 @@ export type BuiltinAgentName =
   | "reviewer"
   | "senior-orchestrator"
   | "planner"
+  | "product-manager"
+  | "solutions-architect"
+  | "sales-engineer"
+  | "bizops-manager"
 
 export type OverridableAgentName =
   | "build"

@@ -1,3 +1,4 @@
+import { mapPermissionsToTools } from "./permission-mapper"
 import type { BackgroundTask, LaunchInput, ResumeInput } from "./types"
 import type { OpencodeClient, OnSubagentSessionCreated, QueueItem } from "./constants"
 import { TMUX_CALLBACK_DELAY_MS } from "./constants"
@@ -144,7 +145,7 @@ export async function startTask(
       ...(launchVariant ? { variant: launchVariant } : {}),
       system: input.skillContent,
       tools: {
-        ...getAgentToolRestrictions(input.agent),
+        ...mapPermissionsToTools(getAgentToolRestrictions(input.agent) || {} as any),
         task: false,
         call_kaji_agent: true,
         question: false,
@@ -228,7 +229,7 @@ export async function resumeTask(
       ...(resumeModel ? { model: resumeModel } : {}),
       ...(resumeVariant ? { variant: resumeVariant } : {}),
       tools: {
-        ...getAgentToolRestrictions(task.agent),
+        ...mapPermissionsToTools(getAgentToolRestrictions(task.agent) || {} as any),
         task: false,
         call_kaji_agent: true,
         question: false,

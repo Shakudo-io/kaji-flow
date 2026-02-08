@@ -957,7 +957,7 @@ Orchestrator-Junior is spawned automatically when you specify a category. Pick t
     }
   }
 
-  if (isPlanAgent(agentName) && isPlanAgent(parentAgent)) {
+  if (isPlanAgent(agentName || "") && isPlanAgent(parentAgent || "")) {
     return {
       agentToUse: "",
       categoryModel: undefined,

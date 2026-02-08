@@ -10,6 +10,10 @@ import { createRequirementsAnalystAgent, requirementsAnalystPromptMetadata } fro
 import { createSeniorOrchestratorAgent, seniorOrchestratorPromptMetadata } from "./senior-orchestrator"
 import { createReviewerAgent, reviewerPromptMetadata } from "./reviewer"
 import { createDeveloperAgent } from "./developer"
+import { createProductManagerAgent, productManagerPromptMetadata } from "./product-manager"
+import { createSolutionsArchitectAgent, solutionsArchitectPromptMetadata } from "./solutions-architect"
+import { createSalesEngineerAgent, salesEngineerPromptMetadata } from "./sales-engineer"
+import { createBizOpsManagerAgent, bizOpsManagerPromptMetadata } from "./bizops-manager"
 import type { AvailableAgent, AvailableCategory, AvailableSkill } from "./dynamic-agent-prompt-builder"
 import { deepMerge, fetchAvailableModels, resolveModelPipeline, AGENT_MODEL_REQUIREMENTS, readConnectedProvidersCache, isModelAvailable, isAnyFallbackModelAvailable, isAnyProviderConnected, migrateAgentConfig } from "../shared"
 import { DEFAULT_CATEGORIES, CATEGORY_DESCRIPTIONS } from "../tools/delegate-task/constants"
@@ -30,29 +34,13 @@ const agentSources: Record<BuiltinAgentName, AgentSource> = {
   "requirements-analyst": createRequirementsAnalystAgent,
   reviewer: createReviewerAgent,
   "senior-orchestrator": createSeniorOrchestratorAgent as unknown as AgentFactory,
-  planner: undefined as unknown as AgentFactory, // Planner is handled specially or not in this map? Legacy had Planner separately?
-  // Checking legacy utils.ts, Planner wasn't in agentSources map. It was likely handled in createBuiltinAgents but skipped?
-  // Legacy code:
-  // const agentSources: ... = {
-  //   orchestrator: createOrchestratorAgent,
-  //   developer: createDeveloperAgent,
-  //   advisor: createAdvisorAgent,
-  //   researcher: createResearcherAgent,
-  //   context-finder: createContextFinderAgent,
-  //   "multimodal-looker": createMultimodalLookerAgent,
-  //   requirements-analyst: createRequirementsAnalystAgent,
-  //   reviewer: createReviewerAgent,
-  //   senior-orchestrator: createSeniorOrchestratorAgent...
-  // }
-  // Planner wasn't in the list. It must be created manually or added later.
-  // Wait, I see "Plan agent demote behavior" tests in config-handler. Maybe it's dynamic?
-  // Let's assume it's not in the loop for now.
+  planner: undefined as unknown as AgentFactory,
+  "product-manager": createProductManagerAgent,
+  "solutions-architect": createSolutionsArchitectAgent,
+  "sales-engineer": createSalesEngineerAgent,
+  "bizops-manager": createBizOpsManagerAgent,
 }
 
-/**
- * Metadata for each agent, used to build Orchestrator's dynamic prompt sections
- * (Delegation Table, Tool Selection, Key Triggers, etc.)
- */
 const agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> = {
   advisor: advisorPromptMetadata,
   researcher: researcherPromptMetadata,
@@ -61,6 +49,10 @@ const agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> = {
   "requirements-analyst": requirementsAnalystPromptMetadata,
   reviewer: reviewerPromptMetadata,
   "senior-orchestrator": seniorOrchestratorPromptMetadata,
+  "product-manager": productManagerPromptMetadata,
+  "solutions-architect": solutionsArchitectPromptMetadata,
+  "sales-engineer": salesEngineerPromptMetadata,
+  "bizops-manager": bizOpsManagerPromptMetadata,
 }
 
 function isFactory(source: AgentSource): source is AgentFactory {
@@ -341,7 +333,7 @@ export async function createBuiltinAgents(
     }
   }
 
-   // Handle Orchestrator (formerly Orchestrator)
+   // Handle Orchestrator
    const orchestratorOverride = agentOverrides["orchestrator"]
    const orchestratorRequirement = AGENT_MODEL_REQUIREMENTS["orchestrator"]
    const hasOrchestratorExplicitConfig = orchestratorOverride !== undefined
@@ -386,7 +378,7 @@ export async function createBuiltinAgents(
     }
    }
 
-  // Handle Developer (formerly Developer)
+  // Handle Developer
   if (!disabledAgents.includes("developer")) {
     const developerOverride = agentOverrides["developer"]
     const developerRequirement = AGENT_MODEL_REQUIREMENTS["developer"]
@@ -442,12 +434,12 @@ export async function createBuiltinAgents(
     }
    }
 
-   // Add pending agents after orchestrator and developer
+   // Add pending agents
    for (const [name, config] of pendingAgentConfigs) {
      result[name] = config
    }
 
-    // Handle SeniorOrchestrator (formerly SeniorOrchestrator)
+    // Handle Senior Orchestrator
     if (!disabledAgents.includes("senior-orchestrator")) {
       const seniorOrchestratorOverride = agentOverrides["senior-orchestrator"]
       const seniorOrchestratorRequirement = AGENT_MODEL_REQUIREMENTS["senior-orchestrator"]

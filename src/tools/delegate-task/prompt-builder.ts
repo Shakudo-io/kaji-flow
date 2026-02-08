@@ -10,12 +10,11 @@ export function buildSystemContent(input: BuildSystemContentInput): string | und
     skillContent,
     categoryPromptAppend,
     agentName,
-    availableCategories,
-    availableSkills,
   } = input
 
-  const planAgentPrepend = isPlanAgent(agentName)
-    ? buildPlanAgentSystemPrepend(availableCategories, availableSkills)
+  const agent = agentName || ""
+  const planAgentPrepend = isPlanAgent(agent)
+    ? buildPlanAgentSystemPrepend(agent)
     : ""
 
   if (!skillContent && !categoryPromptAppend && !planAgentPrepend) {

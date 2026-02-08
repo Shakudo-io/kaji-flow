@@ -25,7 +25,6 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
   },
   developer: {
     fallbackChain: [
-      // Primary: Standard GPT-5.2 (Verified), Fallback: Codex (Unverified/Broken)
       { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "high" },
       { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2-codex", variant: "medium" },
     ],
@@ -38,13 +37,13 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-opus-4-6", variant: "max" },
     ],
   },
-   researcher: {
-     fallbackChain: [
-       { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
-       { providers: ["zai-coding-plan"], model: "glm-4.7" },
-       { providers: ["opencode"], model: "glm-4.7-free" },
-     ],
-   },
+  researcher: {
+    fallbackChain: [
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
+      { providers: ["zai-coding-plan"], model: "glm-4.7" },
+      { providers: ["opencode"], model: "glm-4.7-free" },
+    ],
+  },
   "context-finder": {
     fallbackChain: [
       { providers: ["anthropic", "opencode"], model: "claude-sonnet-4-5-20250929" },
@@ -95,6 +94,34 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["opencode"], model: "kimi-k2.5-free" },
       { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2" },
       { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview" },
+    ],
+  },
+  "product-manager": {
+    fallbackChain: [
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-opus-4-6", variant: "max" },
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "high" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "high" },
+    ],
+  },
+  "solutions-architect": {
+    fallbackChain: [
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-opus-4-6", variant: "max" },
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "high" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "high" },
+    ],
+  },
+  "sales-engineer": {
+    fallbackChain: [
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "medium" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "medium" },
+    ],
+  },
+  "bizops-manager": {
+    fallbackChain: [
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "medium" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "medium" },
     ],
   },
 }
@@ -157,6 +184,34 @@ export const CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
       { providers: ["zai-coding-plan"], model: "glm-4.7" },
       { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2" },
+    ],
+  },
+  "product-management": {
+    fallbackChain: [
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-opus-4-6", variant: "max" },
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "high" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "high" },
+    ],
+  },
+  "solutions-engineering": {
+    fallbackChain: [
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "high" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "high" },
+    ],
+  },
+  "sales": {
+    fallbackChain: [
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "medium" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "medium" },
+    ],
+  },
+  "business-operations": {
+    fallbackChain: [
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "medium" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "medium" },
     ],
   },
 }
