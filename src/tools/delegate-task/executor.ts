@@ -154,6 +154,7 @@ export async function executeSyncContinuation(
   ctx: ToolContextWithMetadata,
   executorCtx: ExecutorContext
 ): Promise<string> {
+  log("[delegate-task] resolveSubagentExecution", { subagent_type: args.subagent_type })
   const { client } = executorCtx
   const toastManager = getTaskToastManager()
   const taskId = `resume_sync_${args.session_id!.slice(0, 8)}`
@@ -795,6 +796,7 @@ export async function resolveCategoryExecution(
   inheritedModel: string | undefined,
   systemDefaultModel: string | undefined
 ): Promise<CategoryResolutionResult> {
+  log("[delegate-task] resolveCategoryExecution", { category: args.category })
   const { client, userCategories } = executorCtx
 
   const connectedProviders = readConnectedProvidersCache()
@@ -939,6 +941,7 @@ export async function resolveSubagentExecution(
   parentAgent: string | undefined,
   categoryExamples: string
 ): Promise<{ agentToUse: string; categoryModel: { providerID: string; modelID: string } | undefined; error?: string }> {
+  log("[delegate-task] resolveSubagentExecution", { subagent_type: args.subagent_type })
   const { client } = executorCtx
 
   if (!args.subagent_type?.trim()) {

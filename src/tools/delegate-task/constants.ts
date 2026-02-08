@@ -11,7 +11,6 @@ export const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   "unspecified-low": "Tasks that don't fit other categories, low effort required",
   "unspecified-high": "Tasks that don't fit other categories, high effort required",
   writing: "Documentation, prose, technical writing",
-  // New Business Categories
   "product-management": "PRDs, User Stories, Prioritization, Market Research (Strategy)",
   "solutions-engineering": "Technical integration guides, PoCs, Architecture Diagrams",
   "sales": "Sales collateral, Battlecards, ROI analysis, Pitch decks",
@@ -21,7 +20,7 @@ export const CATEGORY_DESCRIPTIONS: Record<string, string> = {
 export const DEFAULT_CATEGORIES: Record<string, CategoryConfig> = {
   "visual-engineering": {
     description: CATEGORY_DESCRIPTIONS["visual-engineering"],
-    model: "anthropic/claude-opus-4-6", // Fallback chain handles specific model
+    model: "anthropic/claude-opus-4-6",
     reasoningEffort: "medium",
   },
   ultrabrain: {
@@ -55,7 +54,6 @@ export const DEFAULT_CATEGORIES: Record<string, CategoryConfig> = {
     description: CATEGORY_DESCRIPTIONS.writing,
     model: "anthropic/claude-sonnet-4-5-20250929",
   },
-  // New Business Categories
   "product-management": {
     description: CATEGORY_DESCRIPTIONS["product-management"],
     model: "anthropic/claude-opus-4-6",
@@ -81,8 +79,11 @@ export const DEFAULT_CATEGORIES: Record<string, CategoryConfig> = {
 export const PLAN_AGENT_NAMES = ["plan", "planner"]
 export const PLAN_AGENT_IDS = ["plan", "planner"]
 
+export const CATEGORY_PROMPT_APPENDS: Record<string, string> = {}
+
 export function isPlanAgent(agent: string): boolean {
-  return PLAN_AGENT_NAMES.includes(agent)
+  if (!agent || typeof agent !== 'string') return false
+  return PLAN_AGENT_NAMES.includes(agent.toLowerCase())
 }
 
 export function buildPlanAgentSystemPrepend(agent: string): string {
@@ -90,8 +91,4 @@ export function buildPlanAgentSystemPrepend(agent: string): string {
     return `You are executing a task as the Planner agent. Focus on generating or updating the plan in .kajiflow/work/plans/.\n`
   }
   return ""
-}
-
-export const CATEGORY_PROMPT_APPENDS: Record<string, string> = {
-  // Empty for now, logic is handled in dynamic-agent-prompt-builder for new agents
 }

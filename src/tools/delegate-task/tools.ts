@@ -84,6 +84,7 @@ Prompts MUST be in English.`
       command: tool.schema.string().optional().describe("The command that triggered this task"),
     },
     async execute(args: DelegateTaskArgs, toolContext) {
+      log("[delegate-task] execute called", { args: JSON.stringify(args) })
       const ctx = toolContext as ToolContextWithMetadata
 
       if (args.category && !args.subagent_type) {

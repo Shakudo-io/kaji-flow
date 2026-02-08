@@ -1,6 +1,6 @@
 {
   "name": "kajiflow",
-  "version": "3.5.2",
+  "version": "3.6.0",
   "description": "The Best AI Agent Harness - Batteries-Included OpenCode Plugin with Multi-Model Orchestration, Parallel Background Agents, and Crafted LSP/AST Tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -69,13 +69,13 @@
     "typescript": "^5.7.3"
   },
   "optionalDependencies": {
-    "kajiflow-darwin-arm64": "3.5.2",
-    "kajiflow-darwin-x64": "3.5.2",
-    "kajiflow-linux-arm64": "3.5.2",
-    "kajiflow-linux-arm64-musl": "3.5.2",
-    "kajiflow-linux-x64": "3.5.2",
-    "kajiflow-linux-x64-musl": "3.5.2",
-    "kajiflow-windows-x64": "3.5.2"
+    "kajiflow-darwin-arm64": "3.6.0",
+    "kajiflow-darwin-x64": "3.6.0",
+    "kajiflow-linux-arm64": "3.6.0",
+    "kajiflow-linux-arm64-musl": "3.6.0",
+    "kajiflow-linux-x64": "3.6.0",
+    "kajiflow-linux-x64-musl": "3.6.0",
+    "kajiflow-windows-x64": "3.6.0"
   },
   "trustedDependencies": [
     "@ast-grep/cli",
