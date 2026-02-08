@@ -14,6 +14,27 @@ import { createSystemDirective, SYSTEM_DIRECTIVE_PREFIX, SystemDirectiveTypes } 
 import { isCallerOrchestrator, getMessageDir } from "../../shared/session-utils"
 import type { BackgroundManager } from "../../features/background-agent"
 
+
+const BASH_WRITE_PATTERNS = [
+  /\b(cat|echo|printf)\s+.*>/,
+  /\btee\b/,
+  /\bsed\s+-i/,
+  /\bmv\b/,
+  /\bcp\b/,
+  /\btouch\b/,
+  /\bmkdir\b/,
+  /fs\.writeFileSync/,
+  /fs\.appendFileSync/,
+  /\.writeFileSync/,
+  /\.appendFileSync/,
+]
+
+function isBashWriteCommand(command: string): boolean {
+  return BASH_WRITE_PATTERNS.some(pattern => pattern.test(command))
+}
+
+const ORCHESTRATOR_BYPASS_PHRASE = "ORCHESTRATOR_OVERRIDE: delegation not viable"
+
 export const HOOK_NAME = "senior-orchestrator"
 
 /**
@@ -685,7 +706,24 @@ export function createSeniorOrchestratorHook(
             tool: input.tool,
             filePath,
           })
-          throw new Error(errorMessage)
+          // Check for bypass phrase
+          const toolInput = JSON.stringify(output.args || {})
+          if (toolInput.includes(ORCHESTRATOR_BYPASS_PHRASE)) {
+            // Strip bypass phrase from args and allow through
+            log(`[${HOOK_NAME}] Orchestrator override accepted`, { sessionID: input.sessionID, tool: input.tool, filePath })
+            if (output.args) {
+              for (const key of Object.keys(output.args)) {
+                if (typeof output.args[key] === "string") {
+                  output.args[key] = output.args[key].replace(ORCHESTRATOR_BYPASS_PHRASE, "").trim()
+                }
+              }
+            }
+            return // Allow through
+          }
+          
+          // Soft block: return error with bypass instructions
+          const bypassMessage = errorMessage + "\n\n---\nTo override: Include `" + ORCHESTRATOR_BYPASS_PHRASE + "` in your request to proceed."
+          throw new Error(bypassMessage)
         }
         return
       }
