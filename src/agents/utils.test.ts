@@ -119,7 +119,7 @@ describe("createBuiltinAgents with model overrides", () => {
     )
     const uiSelectedModel = "openai/gpt-5.2"
     const overrides = {
-      senior-orchestrator: { model: "google/antigravity-claude-opus-4-5-thinking" },
+      "senior-orchestrator": { model: "google/antigravity-claude-opus-4-5-thinking" },
     }
 
     try {
@@ -881,7 +881,7 @@ describe("override.category expansion in createBuiltinAgents", () => {
   test("senior-orchestrator override with category expands category properties", async () => {
     // #given
     const overrides = {
-      senior-orchestrator: { category: "ultrabrain" } as any,
+      "senior-orchestrator": { category: "ultrabrain" } as any,
     }
 
     // #when
@@ -913,7 +913,7 @@ describe("agent override tools migration", () => {
   test("tools: { x: false } is migrated to permission: { x: deny }", async () => {
     // #given
     const overrides = {
-      context-finder: { tools: { "jetbrains_*": false } } as any,
+      "context-finder": { tools: { "jetbrains_*": false } } as any,
     }
 
     // #when
@@ -943,7 +943,7 @@ describe("agent override tools migration", () => {
   test("tools config is removed after migration", async () => {
     // #given
     const overrides = {
-      context-finder: { tools: { "some_tool": false } } as any,
+      "context-finder": { tools: { "some_tool": false } } as any,
     }
 
     // #when

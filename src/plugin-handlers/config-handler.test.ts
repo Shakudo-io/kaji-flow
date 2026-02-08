@@ -18,8 +18,8 @@ import * as modelResolver from "../shared/model-resolver"
 
 beforeEach(() => {
   spyOn(agents, "createBuiltinAgents" as any).mockResolvedValue({
-    sisyphus: { name: "orchestrator", prompt: "test", mode: "primary" },
-    oracle: { name: "oracle", prompt: "test", mode: "subagent" },
+    orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
+    advisor: { name: "advisor", prompt: "test", mode: "subagent" },
   })
 
   spyOn(commandLoader, "loadUserCommands" as any).mockResolvedValue({})
@@ -103,7 +103,7 @@ describe("Sisyphus-Junior model inheritance", () => {
     const pluginConfig: KajiFlowConfig = {}
     const config: Record<string, unknown> = {
       model: "opencode/kimi-k2.5-free",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -126,19 +126,19 @@ describe("Plan agent demote behavior", () => {
       mockResolvedValue: (value: Record<string, unknown>) => void
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "orchestrator", prompt: "test", mode: "primary" },
-      hephaestus: { name: "developer", prompt: "test", mode: "primary" },
-      oracle: { name: "oracle", prompt: "test", mode: "subagent" },
-      atlas: { name: "senior-orchestrator", prompt: "test", mode: "primary" },
+      orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
+      developer: { name: "developer", prompt: "test", mode: "primary" },
+      advisor: { name: "advisor", prompt: "test", mode: "subagent" },
+      "senior-orchestrator": { name: "senior-orchestrator", prompt: "test", mode: "primary" },
     })
     const pluginConfig: KajiFlowConfig = {
-      sisyphus_agent: {
+      orchestrator_config: {
         planner_enabled: true,
       },
     }
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -162,7 +162,7 @@ describe("Plan agent demote behavior", () => {
   test("plan agent should be demoted to subagent without inheriting prometheus prompt", async () => {
     // #given
     const pluginConfig: KajiFlowConfig = {
-      sisyphus_agent: {
+      orchestrator_config: {
         planner_enabled: true,
         replace_plan: true,
       },
@@ -200,7 +200,7 @@ describe("Plan agent demote behavior", () => {
   test("plan agent remains unchanged when planner is disabled", async () => {
     // #given
     const pluginConfig: KajiFlowConfig = {
-      sisyphus_agent: {
+      orchestrator_config: {
         planner_enabled: false,
       },
     }
@@ -237,13 +237,13 @@ describe("Plan agent demote behavior", () => {
   test("prometheus should have mode 'all' to be callable via task", async () => {
     // given
     const pluginConfig: KajiFlowConfig = {
-      sisyphus_agent: {
+      orchestrator_config: {
         planner_enabled: true,
       },
     }
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -271,14 +271,14 @@ describe("Agent permission defaults", () => {
       mockResolvedValue: (value: Record<string, unknown>) => void
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "orchestrator", prompt: "test", mode: "primary" },
-      hephaestus: { name: "developer", prompt: "test", mode: "primary" },
-      oracle: { name: "oracle", prompt: "test", mode: "subagent" },
+      orchestrator: { name: "orchestrator", prompt: "test", mode: "primary" },
+      developer: { name: "developer", prompt: "test", mode: "primary" },
+      advisor: { name: "advisor", prompt: "test", mode: "subagent" },
     })
     const pluginConfig: KajiFlowConfig = {}
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -403,7 +403,7 @@ describe("Prometheus direct override priority over category", () => {
   test("direct reasoningEffort takes priority over category reasoningEffort", async () => {
     // given - category has reasoningEffort=xhigh, direct override says "low"
     const pluginConfig: KajiFlowConfig = {
-      sisyphus_agent: {
+      orchestrator_config: {
         planner_enabled: true,
       },
       categories: {
@@ -412,8 +412,8 @@ describe("Prometheus direct override priority over category", () => {
           reasoningEffort: "xhigh",
         },
       },
-      agents: {
-        prometheus: {
+      agent: {
+        planner: {
           category: "test-planning",
           reasoningEffort: "low",
         },
@@ -421,7 +421,7 @@ describe("Prometheus direct override priority over category", () => {
     }
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -444,7 +444,7 @@ describe("Prometheus direct override priority over category", () => {
   test("category reasoningEffort applied when no direct override", async () => {
     // given - category has reasoningEffort but no direct override
     const pluginConfig: KajiFlowConfig = {
-      sisyphus_agent: {
+      orchestrator_config: {
         planner_enabled: true,
       },
       categories: {
@@ -453,15 +453,15 @@ describe("Prometheus direct override priority over category", () => {
           reasoningEffort: "high",
         },
       },
-      agents: {
-        prometheus: {
+      agent: {
+        planner: {
           category: "reasoning-cat",
         },
       },
     }
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -484,7 +484,7 @@ describe("Prometheus direct override priority over category", () => {
   test("direct temperature takes priority over category temperature", async () => {
     // given
     const pluginConfig: KajiFlowConfig = {
-      sisyphus_agent: {
+      orchestrator_config: {
         planner_enabled: true,
       },
       categories: {
@@ -493,8 +493,8 @@ describe("Prometheus direct override priority over category", () => {
           temperature: 0.8,
         },
       },
-      agents: {
-        prometheus: {
+      agent: {
+        planner: {
           category: "temp-cat",
           temperature: 0.1,
         },
@@ -502,7 +502,7 @@ describe("Prometheus direct override priority over category", () => {
     }
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -526,18 +526,18 @@ describe("Prometheus direct override priority over category", () => {
     // #given - prometheus override with prompt_append
     const customInstructions = "## Custom Project Rules\nUse max 2 commits."
     const pluginConfig: KajiFlowConfig = {
-      sisyphus_agent: {
+      orchestrator_config: {
         planner_enabled: true,
       },
-      agents: {
-        prometheus: {
+      agent: {
+        planner: {
           prompt_append: customInstructions,
         },
       },
     }
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -569,13 +569,13 @@ describe("Deadlock prevention - fetchAvailableModels must not receive client", (
     const fetchSpy = spyOn(shared, "fetchAvailableModels" as any).mockResolvedValue(new Set<string>())
 
     const pluginConfig: KajiFlowConfig = {
-      sisyphus_agent: {
+      orchestrator_config: {
         planner_enabled: true,
       },
     }
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const mockClient = {
       provider: { list: () => Promise.resolve({ data: { connected: [] } }) },
@@ -611,7 +611,7 @@ describe("config-handler plugin loading error boundary (#1559)", () => {
     const pluginConfig: KajiFlowConfig = {}
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -640,7 +640,7 @@ describe("config-handler plugin loading error boundary (#1559)", () => {
     }
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -666,7 +666,7 @@ describe("config-handler plugin loading error boundary (#1559)", () => {
     const pluginConfig: KajiFlowConfig = {}
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
@@ -703,7 +703,7 @@ describe("config-handler plugin loading error boundary (#1559)", () => {
     const pluginConfig: KajiFlowConfig = {}
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-6",
-      agent: {},
+      agents: {},
     }
     const handler = createConfigHandler({
       ctx: { directory: "/tmp" },
