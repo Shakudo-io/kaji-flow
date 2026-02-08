@@ -1,3 +1,4 @@
+import pkg from "../package.json";
 import type { Plugin, ToolDefinition } from "@opencode-ai/plugin";
 import type { AvailableSkill } from "./agents/dynamic-agent-prompt-builder";
 import {
@@ -120,7 +121,7 @@ import { createConfigHandler } from "./plugin-handlers";
 import { consumeToolMetadata } from "./features/tool-metadata-store";
 
 const KajiFlowPlugin: Plugin = async (ctx) => {
-  log("[KajiFlowPlugin] ENTRY - plugin loading", {
+  log(`[KajiFlowPlugin] ENTRY - plugin loading v${pkg.version}`, {
     directory: ctx.directory,
   });
   injectServerAuthIntoClient(ctx.client);
