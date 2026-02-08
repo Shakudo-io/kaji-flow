@@ -14,3 +14,5 @@ export { createProductManagerAgent, productManagerPromptMetadata } from "./produ
 export { createSolutionsArchitectAgent, solutionsArchitectPromptMetadata } from "./solutions-architect"
 export { createSalesEngineerAgent, salesEngineerPromptMetadata } from "./sales-engineer"
 export { createBizOpsManagerAgent, bizOpsManagerPromptMetadata } from "./bizops-manager"
+export { createTechnicalWriterAgent, technicalWriterPromptMetadata } from "./technical-writer"
+export { createBusinessWriterAgent, businessWriterPromptMetadata } from "./business-writer"

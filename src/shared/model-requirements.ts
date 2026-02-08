@@ -70,7 +70,21 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "high" },
       { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview" },
     ],
-  },  "senior-orchestrator": {
+  },  "technical-writer": {
+    fallbackChain: [
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "high" },
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "medium" },
+    ],
+  },
+  "business-writer": {
+    fallbackChain: [
+      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "high" },
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
+      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "medium" },
+    ],
+  },
+  "senior-orchestrator": {
     fallbackChain: [
       { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
       { providers: ["kimi-for-coding"], model: "k2p5" },

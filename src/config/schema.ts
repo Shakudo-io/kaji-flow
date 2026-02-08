@@ -231,6 +231,8 @@ export const KajiFlowConfigSchema = z.object({
     "sales-engineer": AgentOverrideConfigSchema.optional(),
     "bizops-manager": AgentOverrideConfigSchema.optional(),
     "OpenCode-Builder": AgentOverrideConfigSchema.optional(),
+    "technical-writer": AgentOverrideConfigSchema.optional(),
+    "business-writer": AgentOverrideConfigSchema.optional(),
   }).optional(),
   categories: z.record(z.string(), CategoryConfigSchema).optional(),
   disabled_agents: z.array(z.string()).optional(),

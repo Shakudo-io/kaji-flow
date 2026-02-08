@@ -1,3 +1,5 @@
+import { createTechnicalWriterAgent, technicalWriterPromptMetadata } from "./technical-writer"
+import { createBusinessWriterAgent, businessWriterPromptMetadata } from "./business-writer"
 import { readOpenCodeConfigProviders } from "../shared/opencode-config-reader"
 import { log } from "../shared/logger"
 import type { AgentConfig } from "@opencode-ai/sdk"
@@ -37,6 +39,8 @@ const agentSources: Record<BuiltinAgentName, AgentSource> = {
   "solutions-architect": createSolutionsArchitectAgent,
   "sales-engineer": createSalesEngineerAgent,
   "bizops-manager": createBizOpsManagerAgent,
+  "technical-writer": createTechnicalWriterAgent,
+  "business-writer": createBusinessWriterAgent,
 }
 
 const agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> = {
@@ -49,6 +53,8 @@ const agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> = {
   "solutions-architect": solutionsArchitectPromptMetadata,
   "sales-engineer": salesEngineerPromptMetadata,
   "bizops-manager": bizOpsManagerPromptMetadata,
+  "technical-writer": technicalWriterPromptMetadata,
+  "business-writer": businessWriterPromptMetadata,
 }
 
 function isFactory(source: AgentSource): source is AgentFactory {

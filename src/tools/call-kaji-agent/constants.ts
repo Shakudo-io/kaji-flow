@@ -9,6 +9,8 @@ export const ALLOWED_SUBAGENTS = [
   "solutions-architect",
   "sales-engineer",
   "bizops-manager",
+  "technical-writer",
+  "business-writer",
 ]
 
 export const CALL_KAJI_AGENT_DESCRIPTION = `Spawn specialist subagents. run_in_background REQUIRED (true=async with task_id, false=sync).
