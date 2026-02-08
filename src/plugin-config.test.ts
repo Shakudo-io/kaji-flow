@@ -81,21 +81,21 @@ describe("mergeConfigs", () => {
     it("should deep merge agents", () => {
       const base: KajiFlowConfig = {
         agents: {
-          oracle: { model: "openai/gpt-5.2" },
+          advisor: { model: "openai/gpt-5.2" },
         },
       };
 
       const override: KajiFlowConfig = {
         agents: {
-          oracle: { temperature: 0.5 },
+          advisor: { temperature: 0.5 },
           explore: { model: "anthropic/claude-haiku-4-5" },
         },
       };
 
       const result = mergeConfigs(base, override);
 
-      expect(result.agents?.oracle?.model).toBe("openai/gpt-5.2");
-      expect(result.agents?.oracle?.temperature).toBe(0.5);
+      expect(result.agents?.advisor?.model).toBe("openai/gpt-5.2");
+      expect(result.agents?.advisor?.temperature).toBe(0.5);
       expect(result.agents?.explore?.model).toBe("anthropic/claude-haiku-4-5");
     });
 

@@ -1,7 +1,7 @@
 import type { PluginInput } from "@opencode-ai/plugin"
 import { existsSync, readdirSync } from "node:fs"
 import { join, resolve, relative, isAbsolute } from "node:path"
-import { HOOK_NAME, PROMETHEUS_AGENT, ALLOWED_EXTENSIONS, ALLOWED_PATH_PREFIX, BLOCKED_TOOLS, PLANNING_CONSULT_WARNING, PROMETHEUS_WORKFLOW_REMINDER } from "./constants"
+import { HOOK_NAME, PLANNER_AGENT, ALLOWED_EXTENSIONS, ALLOWED_PATH_PREFIX, BLOCKED_TOOLS, PLANNING_CONSULT_WARNING, PLANNER_WORKFLOW_REMINDER } from "./constants"
 import { findNearestMessageWithFields, findFirstMessageWithAgent, MESSAGE_STORAGE } from "../../features/hook-message-injector"
 import { getSessionAgent } from "../../features/claude-code-session-state"
 import { readBoulderState } from "../../features/boulder-state"
@@ -12,7 +12,7 @@ import { getAgentDisplayName } from "../../shared/agent-display-names"
 export * from "./constants"
 
 /**
- * Cross-platform path validator for Prometheus file writes.
+ * Cross-platform path validator for Planner file writes.
  * Uses path.resolve/relative instead of string matching to handle:
  * - Windows backslashes (e.g., .sisyphus\\plans\\x.md)
  * - Mixed separators (e.g., .sisyphus\\plans/x.md)
@@ -80,7 +80,7 @@ function getAgentFromMessageFiles(sessionID: string): string | undefined {
  *
  * This fixes issue #927 where after interruption:
  * - In-memory map is cleared (process restart)
- * - Message files return "prometheus" (oldest message from /plan)
+ * - Message files return "planner" (oldest message from /plan)
  * - But boulder.json has agent: "atlas" (set by /start-work)
  */
 function getAgentFromSession(sessionID: string, directory: string): string | undefined {
@@ -98,7 +98,7 @@ function getAgentFromSession(sessionID: string, directory: string): string | und
   return getAgentFromMessageFiles(sessionID)
 }
 
-export function createPrometheusMdOnlyHook(ctx: PluginInput) {
+export function createPlannerMdOnlyHook(ctx: PluginInput) {
   return {
     "tool.execute.before": async (
       input: { tool: string; sessionID: string; callID: string },
@@ -106,13 +106,13 @@ export function createPrometheusMdOnlyHook(ctx: PluginInput) {
     ): Promise<void> => {
       const agentName = getAgentFromSession(input.sessionID, ctx.directory)
 
-      if (agentName !== PROMETHEUS_AGENT) {
+      if (agentName !== PLANNER_AGENT) {
         return
       }
 
       const toolName = input.tool
 
-      // Inject read-only warning for task tools called by Prometheus
+      // Inject read-only warning for task tools called by Planner
        if (TASK_TOOLS.includes(toolName)) {
          const prompt = output.args.prompt as string | undefined
          if (prompt && !prompt.includes(SYSTEM_DIRECTIVE_PREFIX)) {
@@ -130,16 +130,16 @@ export function createPrometheusMdOnlyHook(ctx: PluginInput) {
         return
       }
 
-      // Block bash commands completely - Prometheus is read-only
+      // Block bash commands completely - Planner is read-only
       if (toolName === "bash") {
-        log(`[${HOOK_NAME}] Blocked: Prometheus cannot execute bash commands`, {
+        log(`[${HOOK_NAME}] Blocked: Planner cannot execute bash commands`, {
           sessionID: input.sessionID,
           tool: toolName,
           agent: agentName,
         })
         throw new Error(
-          `[${HOOK_NAME}] ${getAgentDisplayName("prometheus")} cannot execute bash commands. ` +
-          `${getAgentDisplayName("prometheus")} is a READ-ONLY planner. Use /start-work to execute the plan. ` +
+          `[${HOOK_NAME}] ${getAgentDisplayName("planner")} cannot execute bash commands. ` +
+          `${getAgentDisplayName("planner")} is a READ-ONLY planner. Use /start-work to execute the plan. ` +
           `APOLOGIZE TO THE USER, REMIND OF YOUR PLAN WRITING PROCESSES, TELL USER WHAT YOU WILL GOING TO DO AS THE PROCESS, WRITE THE PLAN`
         )
       }
@@ -150,16 +150,16 @@ export function createPrometheusMdOnlyHook(ctx: PluginInput) {
       }
 
        if (!isAllowedFile(filePath, ctx.directory)) {
-         log(`[${HOOK_NAME}] Blocked: Prometheus can only write to .sisyphus/*.md`, {
+         log(`[${HOOK_NAME}] Blocked: Planner can only write to .sisyphus/*.md`, {
            sessionID: input.sessionID,
            tool: toolName,
            filePath,
            agent: agentName,
          })
          throw new Error(
-           `[${HOOK_NAME}] ${getAgentDisplayName("prometheus")} can only write/edit .md files inside .sisyphus/ directory. ` +
+           `[${HOOK_NAME}] ${getAgentDisplayName("planner")} can only write/edit .md files inside .sisyphus/ directory. ` +
            `Attempted to modify: ${filePath}. ` +
-           `${getAgentDisplayName("prometheus")} is a READ-ONLY planner. Use /start-work to execute the plan. ` +
+           `${getAgentDisplayName("planner")} is a READ-ONLY planner. Use /start-work to execute the plan. ` +
            `APOLOGIZE TO THE USER, REMIND OF YOUR PLAN WRITING PROCESSES, TELL USER WHAT YOU WILL GOING TO DO AS THE PROCESS, WRITE THE PLAN`
          )
        }
@@ -172,7 +172,7 @@ export function createPrometheusMdOnlyHook(ctx: PluginInput) {
           filePath,
           agent: agentName,
         })
-        output.message = (output.message || "") + PROMETHEUS_WORKFLOW_REMINDER
+        output.message = (output.message || "") + PLANNER_WORKFLOW_REMINDER
       }
 
       log(`[${HOOK_NAME}] Allowed: .sisyphus/*.md write permitted`, {

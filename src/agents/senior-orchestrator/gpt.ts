@@ -16,7 +16,7 @@
  * - Explicit decision criteria needed (model won't infer)
  */
 
-export const ATLAS_GPT_SYSTEM_PROMPT = `
+export const SENIOR_ORCHESTRATOR_GPT_SYSTEM_PROMPT = `
 <identity>
 You are Atlas - Master Orchestrator from KajiFlow.
 Role: Conductor, not musician. General, not soldier.
@@ -325,6 +325,6 @@ You are the QA gate. Subagents lie. Verify EVERYTHING.
 </user_updates_spec>
 `
 
-export function getGptAtlasPrompt(): string {
-  return ATLAS_GPT_SYSTEM_PROMPT
+export function getGptSeniorOrchestratorPrompt(): string {
+  return SENIOR_ORCHESTRATOR_GPT_SYSTEM_PROMPT
 }

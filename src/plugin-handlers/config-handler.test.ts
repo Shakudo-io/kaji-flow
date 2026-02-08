@@ -18,7 +18,7 @@ import * as modelResolver from "../shared/model-resolver"
 
 beforeEach(() => {
   spyOn(agents, "createBuiltinAgents" as any).mockResolvedValue({
-    sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
+    sisyphus: { name: "orchestrator", prompt: "test", mode: "primary" },
     oracle: { name: "oracle", prompt: "test", mode: "subagent" },
   })
 
@@ -126,10 +126,10 @@ describe("Plan agent demote behavior", () => {
       mockResolvedValue: (value: Record<string, unknown>) => void
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
-      hephaestus: { name: "hephaestus", prompt: "test", mode: "primary" },
+      sisyphus: { name: "orchestrator", prompt: "test", mode: "primary" },
+      hephaestus: { name: "developer", prompt: "test", mode: "primary" },
       oracle: { name: "oracle", prompt: "test", mode: "subagent" },
-      atlas: { name: "atlas", prompt: "test", mode: "primary" },
+      atlas: { name: "senior-orchestrator", prompt: "test", mode: "primary" },
     })
     const pluginConfig: KajiFlowConfig = {
       sisyphus_agent: {
@@ -154,7 +154,7 @@ describe("Plan agent demote behavior", () => {
 
     // #then
     const keys = Object.keys(config.agent as Record<string, unknown>)
-    const coreAgents = ["sisyphus", "hephaestus", "prometheus", "atlas"]
+    const coreAgents = ["orchestrator", "developer", "planner", "senior-orchestrator"]
     const ordered = keys.filter((key) => coreAgents.includes(key))
     expect(ordered).toEqual(coreAgents)
   })
@@ -194,7 +194,7 @@ describe("Plan agent demote behavior", () => {
     expect(agents.plan).toBeDefined()
     expect(agents.plan.mode).toBe("subagent")
     expect(agents.plan.prompt).toBeUndefined()
-    expect(agents.prometheus?.prompt).toBeDefined()
+    expect(agents.planner?.prompt).toBeDefined()
   })
 
   test("plan agent remains unchanged when planner is disabled", async () => {
@@ -228,7 +228,7 @@ describe("Plan agent demote behavior", () => {
 
     // #then - plan is not touched, prometheus is not created
     const agents = config.agent as Record<string, { mode?: string; name?: string; prompt?: string }>
-    expect(agents.prometheus).toBeUndefined()
+    expect(agents.planner).toBeUndefined()
     expect(agents.plan).toBeDefined()
     expect(agents.plan.mode).toBe("primary")
     expect(agents.plan.prompt).toBe("original plan prompt")
@@ -259,8 +259,8 @@ describe("Plan agent demote behavior", () => {
 
     // then
     const agents = config.agent as Record<string, { mode?: string }>
-    expect(agents.prometheus).toBeDefined()
-    expect(agents.prometheus.mode).toBe("all")
+    expect(agents.planner).toBeDefined()
+    expect(agents.planner.mode).toBe("all")
   })
 })
 
@@ -271,8 +271,8 @@ describe("Agent permission defaults", () => {
       mockResolvedValue: (value: Record<string, unknown>) => void
     }
     createBuiltinAgentsMock.mockResolvedValue({
-      sisyphus: { name: "sisyphus", prompt: "test", mode: "primary" },
-      hephaestus: { name: "hephaestus", prompt: "test", mode: "primary" },
+      sisyphus: { name: "orchestrator", prompt: "test", mode: "primary" },
+      hephaestus: { name: "developer", prompt: "test", mode: "primary" },
       oracle: { name: "oracle", prompt: "test", mode: "subagent" },
     })
     const pluginConfig: KajiFlowConfig = {}
@@ -294,8 +294,8 @@ describe("Agent permission defaults", () => {
 
     // #then
     const agentConfig = config.agent as Record<string, { permission?: Record<string, string> }>
-    expect(agentConfig.hephaestus).toBeDefined()
-    expect(agentConfig.hephaestus.permission?.task).toBe("allow")
+    expect(agentConfig.developer).toBeDefined()
+    expect(agentConfig.developer.permission?.task).toBe("allow")
   })
 })
 
@@ -437,8 +437,8 @@ describe("Prometheus direct override priority over category", () => {
 
     // then - direct override's reasoningEffort wins
     const agents = config.agent as Record<string, { reasoningEffort?: string }>
-    expect(agents.prometheus).toBeDefined()
-    expect(agents.prometheus.reasoningEffort).toBe("low")
+    expect(agents.planner).toBeDefined()
+    expect(agents.planner.reasoningEffort).toBe("low")
   })
 
   test("category reasoningEffort applied when no direct override", async () => {
@@ -477,8 +477,8 @@ describe("Prometheus direct override priority over category", () => {
 
     // then - category's reasoningEffort is applied
     const agents = config.agent as Record<string, { reasoningEffort?: string }>
-    expect(agents.prometheus).toBeDefined()
-    expect(agents.prometheus.reasoningEffort).toBe("high")
+    expect(agents.planner).toBeDefined()
+    expect(agents.planner.reasoningEffort).toBe("high")
   })
 
   test("direct temperature takes priority over category temperature", async () => {
@@ -518,8 +518,8 @@ describe("Prometheus direct override priority over category", () => {
 
     // then - direct temperature wins over category
     const agents = config.agent as Record<string, { temperature?: number }>
-    expect(agents.prometheus).toBeDefined()
-    expect(agents.prometheus.temperature).toBe(0.1)
+    expect(agents.planner).toBeDefined()
+    expect(agents.planner.temperature).toBe(0.1)
   })
 
   test("prometheus prompt_append is appended to base prompt", async () => {
@@ -553,10 +553,10 @@ describe("Prometheus direct override priority over category", () => {
 
     // #then - prompt_append is appended to base prompt, not overwriting it
     const agents = config.agent as Record<string, { prompt?: string }>
-    expect(agents.prometheus).toBeDefined()
-    expect(agents.prometheus.prompt).toContain("Prometheus")
-    expect(agents.prometheus.prompt).toContain(customInstructions)
-    expect(agents.prometheus.prompt!.endsWith(customInstructions)).toBe(true)
+    expect(agents.planner).toBeDefined()
+    expect(agents.planner.prompt).toContain("Prometheus")
+    expect(agents.planner.prompt).toContain(customInstructions)
+    expect(agents.planner.prompt!.endsWith(customInstructions)).toBe(true)
   })
 })
 

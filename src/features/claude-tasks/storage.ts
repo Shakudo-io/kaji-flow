@@ -6,7 +6,7 @@ import type { z } from "zod"
 import type { KajiFlowConfig } from "../../config/schema"
 
 export function getTaskDir(config: Partial<KajiFlowConfig> = {}): string {
-  const tasksConfig = config.sisyphus?.tasks
+  const tasksConfig = config.orchestrator_config?.tasks
   const storagePath = tasksConfig?.storage_path
 
   if (storagePath) {
@@ -26,7 +26,7 @@ export function resolveTaskListId(config: Partial<KajiFlowConfig> = {}): string 
   const envId = process.env.ULTRAWORK_TASK_LIST_ID?.trim()
   if (envId) return sanitizePathSegment(envId)
 
-  const configId = config.sisyphus?.tasks?.task_list_id?.trim()
+  const configId = config.orchestrator_config?.tasks?.task_list_id?.trim()
   if (configId) return sanitizePathSegment(configId)
 
   return sanitizePathSegment(basename(process.cwd()))

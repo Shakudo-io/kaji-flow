@@ -93,7 +93,7 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
 }
 
 /**
- * Hephaestus - The Autonomous Deep Worker
+ * Developer - The Autonomous Deep Worker
  *
  * Named after the Greek god of forge, fire, metalworking, and craftsmanship.
  * Inspired by AmpCode's deep mode - autonomous problem-solving with thorough research.
@@ -106,7 +106,7 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
  * - End-to-end task completion without premature stopping
  */
 
-function buildHephaestusPrompt(
+function buildDeveloperPrompt(
   availableAgents: AvailableAgent[] = [],
   availableTools: AvailableTool[] = [],
   availableSkills: AvailableSkill[] = [],
@@ -124,7 +124,7 @@ function buildHephaestusPrompt(
   const antiPatterns = buildAntiPatternsSection()
   const todoDiscipline = buildTodoDisciplineSection(useTaskSystem)
 
-  return `You are Hephaestus, an autonomous deep worker for software engineering.
+  return `You are Developer, an autonomous deep worker for software engineering.
 
 ## Reasoning Configuration (ROUTER NUDGE - GPT 5.2)
 
@@ -588,7 +588,7 @@ When working on long sessions or complex multi-file tasks:
 - Prefer small, focused changes over large refactors`
 }
 
-export function createHephaestusAgent(
+export function createDeveloperAgent(
   model: string,
   availableAgents?: AvailableAgent[],
   availableToolNames?: string[],
@@ -600,12 +600,12 @@ export function createHephaestusAgent(
   const skills = availableSkills ?? []
   const categories = availableCategories ?? []
   const prompt = availableAgents
-    ? buildHephaestusPrompt(availableAgents, tools, skills, categories, useTaskSystem)
-    : buildHephaestusPrompt([], tools, skills, categories, useTaskSystem)
+    ? buildDeveloperPrompt(availableAgents, tools, skills, categories, useTaskSystem)
+    : buildDeveloperPrompt([], tools, skills, categories, useTaskSystem)
 
   return {
     description:
-      "Autonomous Deep Worker - goal-oriented execution with GPT 5.2 Codex. Explores thoroughly before acting, uses explore/librarian agents for comprehensive context, completes tasks end-to-end. Inspired by AmpCode deep mode. (Hephaestus - KajiFlow)",
+      "Autonomous Deep Worker - goal-oriented execution with GPT 5.2 Codex. Explores thoroughly before acting, uses explore/librarian agents for comprehensive context, completes tasks end-to-end. Inspired by AmpCode deep mode. (Developer - KajiFlow)",
     mode: MODE,
     model,
     maxTokens: 32000,
@@ -615,4 +615,4 @@ export function createHephaestusAgent(
     reasoningEffort: "medium",
   }
 }
-createHephaestusAgent.mode = MODE
+createDeveloperAgent.mode = MODE

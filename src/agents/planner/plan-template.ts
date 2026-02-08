@@ -5,7 +5,7 @@
  * Includes TL;DR, context, objectives, verification strategy, TODOs, and success criteria.
  */
 
-export const PROMETHEUS_PLAN_TEMPLATE = `## Plan Structure
+export const PLANNER_PLAN_TEMPLATE = `## Plan Structure
 
 Generate plan to: \`.sisyphus/plans/{name}.md\`
 

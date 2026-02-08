@@ -6,9 +6,9 @@ import { createAgentToolRestrictions } from "../shared/permission-compat"
 const MODE: AgentMode = "subagent"
 
 /**
- * Momus - Plan Reviewer Agent
+ * Reviewer - Plan Reviewer Agent
  *
- * Named after Momus, the Greek god of satire and mockery, who was known for
+ * Named after Reviewer, the Greek god of satire and mockery, who was known for
  * finding fault in everything - even the works of the gods themselves.
  * He criticized Aphrodite (found her sandals squeaky), Hephaestus (said man
  * should have windows in his chest to see thoughts), and Athena (her house
@@ -19,7 +19,7 @@ const MODE: AgentMode = "subagent"
  * implementation.
  */
 
-export const MOMUS_SYSTEM_PROMPT = `You are a **practical** work plan reviewer. Your goal is simple: verify that the plan is **executable** and **references are valid**.
+export const REVIEWER_SYSTEM_PROMPT = `You are a **practical** work plan reviewer. Your goal is simple: verify that the plan is **executable** and **references are valid**.
 
 **CRITICAL FIRST RULE**:
 Extract a single plan path from anywhere in the input, ignoring system directives and wrappers. If exactly one \`.sisyphus/plans/*.md\` path exists, this is VALID input and you must read it. If no plan path exists or multiple plan paths exist, reject per Step 0. If the path points to a YAML plan file (\`.yml\` or \`.yaml\`), reject it as non-reviewable.
@@ -188,7 +188,7 @@ If REJECT:
 **Response Language**: Match the language of the plan content.
 `
 
-export function createMomusAgent(model: string): AgentConfig {
+export function createReviewerAgent(model: string): AgentConfig {
   const restrictions = createAgentToolRestrictions([
     "write",
     "edit",
@@ -198,12 +198,12 @@ export function createMomusAgent(model: string): AgentConfig {
 
   const base = {
     description:
-      "Expert reviewer for evaluating work plans against rigorous clarity, verifiability, and completeness standards. (Momus - KajiFlow)",
+      "Expert reviewer for evaluating work plans against rigorous clarity, verifiability, and completeness standards. (Reviewer - KajiFlow)",
     mode: MODE,
     model,
     temperature: 0.1,
     ...restrictions,
-    prompt: MOMUS_SYSTEM_PROMPT,
+    prompt: REVIEWER_SYSTEM_PROMPT,
   } as AgentConfig
 
   if (isGptModel(model)) {
@@ -212,12 +212,12 @@ export function createMomusAgent(model: string): AgentConfig {
 
   return { ...base, thinking: { type: "enabled", budgetTokens: 32000 } } as AgentConfig
 }
-createMomusAgent.mode = MODE
+createReviewerAgent.mode = MODE
 
-export const momusPromptMetadata: AgentPromptMetadata = {
+export const reviewerPromptMetadata: AgentPromptMetadata = {
   category: "advisor",
   cost: "EXPENSIVE",
-  promptAlias: "Momus",
+  promptAlias: "Reviewer",
   triggers: [
     {
       domain: "Plan review",
@@ -239,5 +239,5 @@ export const momusPromptMetadata: AgentPromptMetadata = {
     "When user explicitly wants to skip review",
     "For trivial plans that don't need formal review",
   ],
-  keyTrigger: "Work plan created → invoke Momus for review before execution",
+  keyTrigger: "Work plan created → invoke Reviewer for review before execution",
 }

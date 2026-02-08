@@ -1,23 +1,14 @@
 export * from "./types"
 export { createBuiltinAgents } from "./utils"
 export type { AvailableAgent, AvailableCategory, AvailableSkill } from "./dynamic-agent-prompt-builder"
-export { createSisyphusAgent } from "./sisyphus"
-export { createOracleAgent, ORACLE_PROMPT_METADATA } from "./oracle"
-export { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
-export { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
 
-
-export { createMultimodalLookerAgent, MULTIMODAL_LOOKER_PROMPT_METADATA } from "./multimodal-looker"
-export { createMetisAgent, METIS_SYSTEM_PROMPT, metisPromptMetadata } from "./metis"
-export { createMomusAgent, MOMUS_SYSTEM_PROMPT, momusPromptMetadata } from "./momus"
-export { createAtlasAgent, atlasPromptMetadata } from "./atlas"
-export {
-  PROMETHEUS_SYSTEM_PROMPT,
-  PROMETHEUS_PERMISSION,
-  PROMETHEUS_IDENTITY_CONSTRAINTS,
-  PROMETHEUS_INTERVIEW_MODE,
-  PROMETHEUS_PLAN_GENERATION,
-  PROMETHEUS_HIGH_ACCURACY_MODE,
-  PROMETHEUS_PLAN_TEMPLATE,
-  PROMETHEUS_BEHAVIORAL_SUMMARY,
-} from "./prometheus"
+export { createOrchestratorAgent } from "./orchestrator"
+export { createSeniorOrchestratorAgent, seniorOrchestratorPromptMetadata } from "./senior-orchestrator"
+export { createPlannerAgent, PLANNER_SYSTEM_PROMPT, PLANNER_PERMISSION, PLANNER_IDENTITY_CONSTRAINTS, PLANNER_INTERVIEW_MODE, PLANNER_PLAN_GENERATION, PLANNER_HIGH_ACCURACY_MODE, PLANNER_PLAN_TEMPLATE, PLANNER_BEHAVIORAL_SUMMARY } from "./planner"
+export { createDeveloperAgent } from "./developer"
+export { createRequirementsAnalystAgent, REQUIREMENTS_ANALYST_SYSTEM_PROMPT, requirementsAnalystPromptMetadata } from "./requirements-analyst"
+export { createReviewerAgent, REVIEWER_SYSTEM_PROMPT, reviewerPromptMetadata } from "./reviewer"
+export { createResearcherAgent, researcherPromptMetadata } from "./researcher"
+export { createContextFinderAgent, contextFinderPromptMetadata } from "./context-finder"
+export { createAdvisorAgent, advisorPromptMetadata } from "./advisor"
+export { createVisionAnalystAgent, visionAnalystPromptMetadata } from "./vision-analyst"

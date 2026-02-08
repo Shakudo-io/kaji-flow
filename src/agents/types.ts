@@ -2,8 +2,8 @@ import type { AgentConfig } from "@opencode-ai/sdk"
 
 /**
  * Agent mode determines UI model selection behavior:
- * - "primary": Respects user's UI-selected model (sisyphus, atlas)
- * - "subagent": Uses own fallback chain, ignores UI selection (oracle, explore, etc.)
+ * - "primary": Respects user's UI-selected model (orchestrator, senior-orchestrator)
+ * - "subagent": Uses own fallback chain, ignores UI selection (advisor, context-finder, etc.)
  * - "all": Available in both contexts (OpenCode compatibility)
  */
 export type AgentMode = "primary" | "subagent" | "all"
@@ -17,7 +17,7 @@ export type AgentFactory = ((model: string) => AgentConfig) & {
 }
 
 /**
- * Agent category for grouping in Sisyphus prompt sections
+ * Agent category for grouping in Orchestrator prompt sections
  */
 export type AgentCategory = "exploration" | "specialist" | "advisor" | "utility"
 
@@ -27,7 +27,7 @@ export type AgentCategory = "exploration" | "specialist" | "advisor" | "utility"
 export type AgentCost = "FREE" | "CHEAP" | "EXPENSIVE"
 
 /**
- * Delegation trigger for Sisyphus prompt's Delegation Table
+ * Delegation trigger for Orchestrator prompt's Delegation Table
  */
 export interface DelegationTrigger {
   /** Domain of work (e.g., "Frontend UI/UX") */
@@ -37,8 +37,8 @@ export interface DelegationTrigger {
 }
 
 /**
- * Metadata for generating Sisyphus prompt sections dynamically
- * This allows adding/removing agents without manually updating the Sisyphus prompt
+ * Metadata for generating Orchestrator prompt sections dynamically
+ * This allows adding/removing agents without manually updating the Orchestrator prompt
  */
 export interface AgentPromptMetadata {
   /** Category for grouping in prompt sections */
@@ -56,13 +56,13 @@ export interface AgentPromptMetadata {
   /** When NOT to use this agent */
   avoidWhen?: string[]
 
-  /** Optional dedicated prompt section (markdown) - for agents like Oracle that have special sections */
+  /** Optional dedicated prompt section (markdown) - for agents like Advisor that have special sections */
   dedicatedSection?: string
 
-  /** Nickname/alias used in prompt (e.g., "Oracle" instead of "oracle") */
+  /** Nickname/alias used in prompt (e.g., "Advisor" instead of "advisor") */
   promptAlias?: string
 
-  /** Key triggers that should appear in Phase 0 (e.g., "External library mentioned → fire librarian") */
+  /** Key triggers that should appear in Phase 0 (e.g., "External library mentioned → fire researcher") */
   keyTrigger?: string
 }
 
@@ -71,15 +71,16 @@ export function isGptModel(model: string): boolean {
 }
 
 export type BuiltinAgentName =
-  | "sisyphus"
-  | "hephaestus"
-  | "oracle"
-  | "librarian"
-  | "explore"
-  | "multimodal-looker"
-  | "metis"
-  | "momus"
-  | "atlas"
+  | "orchestrator"
+  | "developer"
+  | "advisor"
+  | "researcher"
+  | "context-finder"
+  | "vision-analyst"
+  | "requirements-analyst"
+  | "reviewer"
+  | "senior-orchestrator"
+  | "planner"
 
 export type OverridableAgentName =
   | "build"

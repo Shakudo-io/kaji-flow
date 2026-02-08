@@ -5,10 +5,10 @@ import { createAgentToolRestrictions } from "../shared/permission-compat"
 
 const MODE: AgentMode = "subagent"
 
-export const ORACLE_PROMPT_METADATA: AgentPromptMetadata = {
+export const advisorPromptMetadata: AgentPromptMetadata = {
   category: "advisor",
   cost: "EXPENSIVE",
-  promptAlias: "Oracle",
+  promptAlias: "Advisor",
   triggers: [
     { domain: "Architecture decisions", trigger: "Multi-system tradeoffs, unfamiliar patterns" },
     { domain: "Self-review", trigger: "After completing significant implementation" },
@@ -142,7 +142,7 @@ Before finalizing answers on architecture, security, or performance:
 Your response goes directly to the user with no intermediate processing. Make your final message self-contained: a clear recommendation they can act on immediately, covering both what to do and why.
 </delivery>`
 
-export function createOracleAgent(model: string): AgentConfig {
+export function createAdvisorAgent(model: string): AgentConfig {
   const restrictions = createAgentToolRestrictions([
     "write",
     "edit",
@@ -152,7 +152,7 @@ export function createOracleAgent(model: string): AgentConfig {
 
   const base = {
     description:
-      "Read-only consultation agent. High-IQ reasoning specialist for debugging hard problems and high-difficulty architecture design. (Oracle - KajiFlow)",
+      "Read-only consultation agent. High-IQ reasoning specialist for debugging hard problems and high-difficulty architecture design. (Advisor - KajiFlow)",
     mode: MODE,
     model,
     temperature: 0.1,
@@ -166,5 +166,5 @@ export function createOracleAgent(model: string): AgentConfig {
 
   return { ...base, thinking: { type: "enabled", budgetTokens: 32000 } } as AgentConfig
 }
-createOracleAgent.mode = MODE
+createAdvisorAgent.mode = MODE
 

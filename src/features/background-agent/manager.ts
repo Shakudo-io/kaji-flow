@@ -1342,7 +1342,7 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
   }
 
   private async checkAndInterruptStaleTasks(): Promise<void> {
-    const staleTimeoutMs = this.config?.staleTimeoutMs ?? DEFAULT_STALE_TIMEOUT_MS
+    const stale_timeout_ms = this.config?.stale_timeout_ms ?? DEFAULT_STALE_TIMEOUT_MS
     const now = Date.now()
 
     for (const task of this.tasks.values()) {
@@ -1357,7 +1357,7 @@ Use \`background_output(task_id="${task.id}")\` to retrieve this result when rea
       if (runtime < MIN_RUNTIME_BEFORE_STALE_MS) continue
 
       const timeSinceLastUpdate = now - task.progress.lastUpdate.getTime()
-      if (timeSinceLastUpdate <= staleTimeoutMs) continue
+      if (timeSinceLastUpdate <= stale_timeout_ms) continue
 
       if (task.status !== "running") continue
 

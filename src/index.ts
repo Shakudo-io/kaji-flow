@@ -29,7 +29,7 @@ import {
   createTaskResumeInfoHook,
   createStartWorkHook,
   createAtlasHook,
-  createPrometheusMdOnlyHook,
+  createPlannerMdOnlyHook,
   createQuestionLabelTruncatorHook,
   createSubagentQuestionBlockerHook,
   createStopContinuationGuardHook,
@@ -273,8 +273,8 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
     ? safeCreateHook("start-work", () => createStartWorkHook(ctx), { enabled: safeHookEnabled })
     : null;
 
-  const prometheusMdOnly = isHookEnabled("prometheus-md-only")
-    ? safeCreateHook("prometheus-md-only", () => createPrometheusMdOnlyHook(ctx), { enabled: safeHookEnabled })
+  const plannerMdOnly = isHookEnabled("planner-md-only")
+    ? safeCreateHook("planner-md-only", () => createPlannerMdOnlyHook(ctx), { enabled: safeHookEnabled })
     : null;
 
 
@@ -329,8 +329,8 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
     },
   );
 
-  const atlasHook = isHookEnabled("atlas")
-    ? safeCreateHook("atlas", () => createAtlasHook(ctx, { 
+  const atlasHook = isHookEnabled("senior-orchestrator")
+    ? safeCreateHook("senior-orchestrator", () => createAtlasHook(ctx, { 
         directory: ctx.directory, 
         backgroundManager,
         isContinuationStopped: (sessionID: string) => stopContinuationGuard?.isStopped(sessionID) ?? false,
@@ -351,8 +351,8 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
     ? safeCreateHook("compaction-todo-preserver", () => createCompactionTodoPreserverHook(ctx), { enabled: safeHookEnabled })
     : null;
 
-  const todoContinuationEnforcer = isHookEnabled("todo-continuation-enforcer")
-    ? safeCreateHook("todo-continuation-enforcer", () => createTodoContinuationEnforcer(ctx, {
+  const todoContinuationEnforcer = isHookEnabled("todo-continuation-enforcer" as HookName)
+    ? safeCreateHook("todo-continuation-enforcer" as HookName, () => createTodoContinuationEnforcer(ctx, {
         backgroundManager,
         isContinuationStopped: stopContinuationGuard?.isStopped,
       }), { enabled: safeHookEnabled })
@@ -400,8 +400,8 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
     );
   }
 
-  const backgroundNotificationHook = isHookEnabled("background-notification")
-    ? safeCreateHook("background-notification", () => createBackgroundNotificationHook(backgroundManager), { enabled: safeHookEnabled })
+  const backgroundNotificationHook = isHookEnabled("background-notification" as HookName)
+    ? safeCreateHook("background-notification" as HookName, () => createBackgroundNotificationHook(backgroundManager), { enabled: safeHookEnabled })
     : null;
   const backgroundTools = createBackgroundTools(backgroundManager, ctx.client);
 
@@ -821,7 +821,7 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
       await directoryReadmeInjector?.["tool.execute.before"]?.(input, output);
       await rulesInjector?.["tool.execute.before"]?.(input, output);
       await tasksTodowriteDisabler?.["tool.execute.before"]?.(input, output);
-      await prometheusMdOnly?.["tool.execute.before"]?.(input, output);
+      await plannerMdOnly?.["tool.execute.before"]?.(input, output);
       await atlasHook?.["tool.execute.before"]?.(input, output);
 
       if (input.tool === "task") {

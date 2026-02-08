@@ -2,9 +2,6 @@ import type { BackgroundTaskConfig } from "../../config/schema"
 
 /**
  * Queue entry with settled-flag pattern to prevent double-resolution.
- *
- * The settled flag ensures that cancelWaiters() doesn't reject
- * an entry that was already resolved by release().
  */
 interface QueueEntry {
   resolve: () => void
@@ -22,16 +19,12 @@ export class ConcurrencyManager {
   }
 
   getConcurrencyLimit(model: string): number {
-    const modelLimit = this.config?.modelConcurrency?.[model]
+    const modelLimit = this.config?.max_tasks_per_model?.[model]
     if (modelLimit !== undefined) {
       return modelLimit === 0 ? Infinity : modelLimit
     }
-    const provider = model.split('/')[0]
-    const providerLimit = this.config?.providerConcurrency?.[provider]
-    if (providerLimit !== undefined) {
-      return providerLimit === 0 ? Infinity : providerLimit
-    }
-    const defaultLimit = this.config?.defaultConcurrency
+    // Provider concurrency not supported in current schema, skipping
+    const defaultLimit = this.config?.max_concurrent_tasks
     if (defaultLimit !== undefined) {
       return defaultLimit === 0 ? Infinity : defaultLimit
     }
@@ -76,26 +69,20 @@ export class ConcurrencyManager {
 
     const queue = this.queues.get(model)
 
-    // Try to hand off to a waiting entry (skip any settled entries from cancelWaiters)
     while (queue && queue.length > 0) {
       const next = queue.shift()!
       if (!next.settled) {
-        // Hand off the slot to this waiter (count stays the same)
         next.resolve()
         return
       }
     }
 
-    // No handoff occurred - decrement the count to free the slot
     const current = this.counts.get(model) ?? 0
     if (current > 0) {
       this.counts.set(model, current - 1)
     }
   }
 
-  /**
-   * Cancel all waiting acquires for a model. Used during cleanup.
-   */
   cancelWaiters(model: string): void {
     const queue = this.queues.get(model)
     if (queue) {
@@ -109,10 +96,6 @@ export class ConcurrencyManager {
     }
   }
 
-  /**
-   * Clear all state. Used during manager cleanup/shutdown.
-   * Cancels all pending waiters.
-   */
   clear(): void {
     for (const [model] of this.queues) {
       this.cancelWaiters(model)
@@ -121,16 +104,10 @@ export class ConcurrencyManager {
     this.queues.clear()
   }
 
-  /**
-   * Get current count for a model (for testing/debugging)
-   */
   getCount(model: string): number {
     return this.counts.get(model) ?? 0
   }
 
-  /**
-   * Get queue length for a model (for testing/debugging)
-   */
   getQueueLength(model: string): number {
     return this.queues.get(model)?.length ?? 0
   }

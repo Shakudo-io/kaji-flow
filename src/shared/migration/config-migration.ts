@@ -1,6 +1,6 @@
 import * as fs from "fs"
 import { log } from "../logger"
-import { AGENT_NAME_MAP, migrateAgentNames } from "./agent-names"
+import { LEGACY_AGENT_MAPPING, migrateConfigKeys, migrateAgentName } from "./agent-names"
 import { migrateHookNames } from "./hook-names"
 import { migrateModelVersions } from "./model-versions"
 
@@ -17,7 +17,9 @@ export function migrateConfigFile(
   const allNewMigrations: string[] = []
 
   if (rawConfig.agents && typeof rawConfig.agents === "object") {
-    const { migrated, changed } = migrateAgentNames(rawConfig.agents as Record<string, unknown>)
+    const migratedAgents = migrateConfigKeys(rawConfig.agents as Record<string, unknown>)
+    const changed = JSON.stringify(migratedAgents) !== JSON.stringify(rawConfig.agents)
+    const migrated = migratedAgents
     if (changed) {
       rawConfig.agents = migrated
       needsWrite = true
@@ -70,7 +72,7 @@ export function migrateConfigFile(
     const migrated: string[] = []
     let changed = false
     for (const agent of rawConfig.disabled_agents as string[]) {
-      const newAgent = AGENT_NAME_MAP[agent.toLowerCase()] ?? AGENT_NAME_MAP[agent] ?? agent
+      const newAgent = migrateAgentName(agent)
       if (newAgent !== agent) {
         changed = true
       }

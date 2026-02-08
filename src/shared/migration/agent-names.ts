@@ -1,70 +1,45 @@
-export const AGENT_NAME_MAP: Record<string, string> = {
-  // Sisyphus variants → "sisyphus"
-  kaji: "sisyphus",
-  OmO: "sisyphus",
-  Sisyphus: "sisyphus",
-  sisyphus: "sisyphus",
-
-  // Prometheus variants → "prometheus"
-  "OmO-Plan": "prometheus",
-  "kaji-plan": "prometheus",
-  "Planner-Sisyphus": "prometheus",
-  "planner-sisyphus": "prometheus",
-  "Prometheus (Planner)": "prometheus",
-  prometheus: "prometheus",
-
-  // Atlas variants → "atlas"
-  "orchestrator-sisyphus": "atlas",
-  Atlas: "atlas",
-  atlas: "atlas",
-
-  // Metis variants → "metis"
-  "plan-consultant": "metis",
-  "Metis (Plan Consultant)": "metis",
-  metis: "metis",
-
-  // Momus variants → "momus"
-  "Momus (Plan Reviewer)": "momus",
-  momus: "momus",
-
-  // Sisyphus-Junior → "sisyphus-junior"
-  "Sisyphus-Junior": "sisyphus-junior",
-  "sisyphus-junior": "sisyphus-junior",
-
-  // Already lowercase - passthrough
-  build: "build",
-  oracle: "oracle",
-  librarian: "librarian",
-  explore: "explore",
-  "multimodal-looker": "multimodal-looker",
+/**
+ * Maps legacy agent names to new enterprise-friendly names.
+ * Used for config migration and backward compatibility.
+ */
+export const LEGACY_AGENT_MAPPING: Record<string, string> = {
+  // Core Agents
+  sisyphus: "orchestrator",
+  atlas: "senior-orchestrator",
+  prometheus: "planner",
+  hephaestus: "developer",
+  
+  // Specialists
+  metis: "requirements-analyst",
+  momus: "reviewer",
+  librarian: "researcher",
+  explore: "context-finder",
+  oracle: "advisor",
+  "multimodal-looker": "vision-analyst",
+  
+  // Legacy/Removed (map to closest equivalent or ignore)
+  "sisyphus-junior": "developer", 
 }
 
-export const BUILTIN_AGENT_NAMES = new Set([
-  "sisyphus", // was "Sisyphus"
-  "oracle",
-  "librarian",
-  "explore",
-  "multimodal-looker",
-  "metis", // was "Metis (Plan Consultant)"
-  "momus", // was "Momus (Plan Reviewer)"
-  "prometheus", // was "Prometheus (Planner)"
-  "atlas", // was "Atlas"
-  "build",
-])
+/**
+ * Migrates a legacy agent name to its new name.
+ * If the name is already current or unknown, returns it as-is.
+ */
+export function migrateAgentName(name: string): string {
+  const lowerName = name.toLowerCase()
+  return LEGACY_AGENT_MAPPING[lowerName] ?? name
+}
 
-export function migrateAgentNames(
-  agents: Record<string, unknown>
-): { migrated: Record<string, unknown>; changed: boolean } {
-  const migrated: Record<string, unknown> = {}
-  let changed = false
-
-  for (const [key, value] of Object.entries(agents)) {
-    const newKey = AGENT_NAME_MAP[key.toLowerCase()] ?? AGENT_NAME_MAP[key] ?? key
-    if (newKey !== key) {
-      changed = true
-    }
-    migrated[newKey] = value
+/**
+ * Migrates a configuration object keys from legacy to new names.
+ */
+export function migrateConfigKeys(config: Record<string, any>): Record<string, any> {
+  const newConfig: Record<string, any> = {}
+  for (const [key, value] of Object.entries(config)) {
+    const newKey = migrateAgentName(key)
+    newConfig[newKey] = value
   }
-
-  return { migrated, changed }
+  return newConfig
 }
+
+export const BUILTIN_AGENT_NAMES = Object.values(LEGACY_AGENT_MAPPING)

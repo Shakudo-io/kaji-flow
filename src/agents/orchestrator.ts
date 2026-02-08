@@ -6,7 +6,7 @@ const MODE: AgentMode = "primary"
 export const SISYPHUS_PROMPT_METADATA: AgentPromptMetadata = {
   category: "utility",
   cost: "EXPENSIVE",
-  promptAlias: "Sisyphus",
+  promptAlias: "Orchestrator",
   triggers: [],
 }
 import type { AvailableAgent, AvailableTool, AvailableSkill, AvailableCategory } from "./dynamic-agent-prompt-builder"
@@ -141,7 +141,7 @@ Should I proceed with [recommendation], or would you prefer differently?
 </Task_Management>`
 }
 
-function buildDynamicSisyphusPrompt(
+function buildDynamicOrchestratorPrompt(
   availableAgents: AvailableAgent[],
   availableTools: AvailableTool[] = [],
   availableSkills: AvailableSkill[] = [],
@@ -163,9 +163,9 @@ function buildDynamicSisyphusPrompt(
     : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])"
 
   return `<Role>
-You are "Sisyphus" - Powerful AI Agent with orchestration capabilities from KajiFlow.
+You are "Orchestrator" - Powerful AI Agent with orchestration capabilities from KajiFlow.
 
-**Why Sisyphus?**: Humans roll their boulder every day. So do you. We're not so different—your code should be indistinguishable from a senior engineer's.
+**Why Orchestrator?**: Humans roll their boulder every day. So do you. We're not so different—your code should be indistinguishable from a senior engineer's.
 
 **Identity**: SF Bay Area engineer. Work, delegate, verify, ship. No AI slop.
 
@@ -494,7 +494,7 @@ ${antiPatterns}
 `
 }
 
-export function createSisyphusAgent(
+export function createOrchestratorAgent(
   model: string,
   availableAgents?: AvailableAgent[],
   availableToolNames?: string[],
@@ -506,13 +506,13 @@ export function createSisyphusAgent(
   const skills = availableSkills ?? []
   const categories = availableCategories ?? []
   const prompt = availableAgents
-    ? buildDynamicSisyphusPrompt(availableAgents, tools, skills, categories, useTaskSystem)
-    : buildDynamicSisyphusPrompt([], tools, skills, categories, useTaskSystem)
+    ? buildDynamicOrchestratorPrompt(availableAgents, tools, skills, categories, useTaskSystem)
+    : buildDynamicOrchestratorPrompt([], tools, skills, categories, useTaskSystem)
 
   const permission = { question: "allow", call_kaji_agent: "deny" } as AgentConfig["permission"]
   const base = {
     description:
-      "Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Sisyphus - KajiFlow)",
+      "Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Orchestrator - KajiFlow)",
     mode: MODE,
     model,
     maxTokens: 64000,
@@ -527,4 +527,4 @@ export function createSisyphusAgent(
 
   return { ...base, thinking: { type: "enabled", budgetTokens: 32000 } }
 }
-createSisyphusAgent.mode = MODE
+createOrchestratorAgent.mode = MODE

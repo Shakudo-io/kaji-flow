@@ -1,32 +1,89 @@
-export {
+import { 
   KajiFlowConfigSchema,
   AgentOverrideConfigSchema,
-  AgentOverridesSchema,
-  McpNameSchema,
-  AgentNameSchema,
   HookNameSchema,
-  BuiltinCommandNameSchema,
-  SisyphusAgentConfigSchema,
   ExperimentalConfigSchema,
   RalphLoopConfigSchema,
   TmuxConfigSchema,
-  TmuxLayoutSchema,
+  CategoryConfigSchema,
+  GitMasterConfigSchema,
+  BrowserAutomationEngineSchema,
+  CommentCheckerConfigSchema,
+  ClaudeCodeConfigSchema,
+  BackgroundTaskConfigSchema,
+  BabysittingConfigSchema,
+  NotificationConfigSchema,
+  OrchestratorConfigSchema,
+  WebsearchConfigSchema,
 } from "./schema"
+
+import type {
+  KajiFlowConfig,
+  AgentOverrideConfig,
+  HookName,
+  ExperimentalConfig,
+  RalphLoopConfig,
+  TmuxConfig,
+  CategoryConfig,
+  CategoriesConfig,
+  GitMasterConfig,
+  BrowserAutomationEngineConfig,
+  CommentCheckerConfig,
+  ClaudeCodeConfig,
+  BackgroundTaskConfig,
+  BabysittingConfig,
+  NotificationConfig,
+  OrchestratorConfig,
+  WebsearchConfig,
+  TmuxLayout,
+} from "./schema"
+
+export {
+  KajiFlowConfigSchema,
+  AgentOverrideConfigSchema,
+  HookNameSchema,
+  ExperimentalConfigSchema,
+  RalphLoopConfigSchema,
+  TmuxConfigSchema,
+  CategoryConfigSchema,
+  GitMasterConfigSchema,
+  BrowserAutomationEngineSchema,
+  CommentCheckerConfigSchema,
+  ClaudeCodeConfigSchema,
+  BackgroundTaskConfigSchema,
+  BabysittingConfigSchema,
+  NotificationConfigSchema,
+  OrchestratorConfigSchema,
+  WebsearchConfigSchema,
+}
 
 export type {
   KajiFlowConfig,
   AgentOverrideConfig,
-  AgentOverrides,
-  McpName,
-  AgentName,
   HookName,
-  BuiltinCommandName,
-  SisyphusAgentConfig,
   ExperimentalConfig,
-  DynamicContextPruningConfig,
   RalphLoopConfig,
   TmuxConfig,
+  CategoryConfig,
+  CategoriesConfig,
+  GitMasterConfig,
+  BrowserAutomationEngineConfig,
+  CommentCheckerConfig,
+  ClaudeCodeConfig,
+  BackgroundTaskConfig,
+  BabysittingConfig,
+  NotificationConfig,
+  OrchestratorConfig,
+  WebsearchConfig,
   TmuxLayout,
-  SisyphusConfig,
-  SisyphusTasksConfig,
-} from "./schema"
+}
+
+// Legacy/Compatibility types
+export type AgentName = string // Fallback
+export type McpName = string
+export type AgentOverrides = Record<string, any>
+export type BuiltinCommandName = string
+export type SisyphusAgentConfig = OrchestratorConfig // Alias
+export type SisyphusConfig = OrchestratorConfig // Alias
+export type SisyphusTasksConfig = any
+export type DynamicContextPruningConfig = any

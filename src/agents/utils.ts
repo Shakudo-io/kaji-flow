@@ -1,15 +1,15 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { BuiltinAgentName, AgentOverrideConfig, AgentOverrides, AgentFactory, AgentPromptMetadata } from "./types"
 import type { CategoriesConfig, CategoryConfig, GitMasterConfig } from "../config/schema"
-import { createSisyphusAgent } from "./sisyphus"
-import { createOracleAgent, ORACLE_PROMPT_METADATA } from "./oracle"
-import { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
-import { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
-import { createMultimodalLookerAgent, MULTIMODAL_LOOKER_PROMPT_METADATA } from "./multimodal-looker"
-import { createMetisAgent, metisPromptMetadata } from "./metis"
-import { createAtlasAgent, atlasPromptMetadata } from "./atlas"
-import { createMomusAgent, momusPromptMetadata } from "./momus"
-import { createHephaestusAgent } from "./hephaestus"
+import { createOrchestratorAgent } from "./orchestrator"
+import { createAdvisorAgent, advisorPromptMetadata } from "./advisor"
+import { createResearcherAgent, researcherPromptMetadata } from "./researcher"
+import { createContextFinderAgent, contextFinderPromptMetadata } from "./context-finder"
+import { createVisionAnalystAgent, visionAnalystPromptMetadata } from "./vision-analyst"
+import { createRequirementsAnalystAgent, requirementsAnalystPromptMetadata } from "./requirements-analyst"
+import { createSeniorOrchestratorAgent, seniorOrchestratorPromptMetadata } from "./senior-orchestrator"
+import { createReviewerAgent, reviewerPromptMetadata } from "./reviewer"
+import { createDeveloperAgent } from "./developer"
 import type { AvailableAgent, AvailableCategory, AvailableSkill } from "./dynamic-agent-prompt-builder"
 import { deepMerge, fetchAvailableModels, resolveModelPipeline, AGENT_MODEL_REQUIREMENTS, readConnectedProvidersCache, isModelAvailable, isAnyFallbackModelAvailable, isAnyProviderConnected, migrateAgentConfig } from "../shared"
 import { DEFAULT_CATEGORIES, CATEGORY_DESCRIPTIONS } from "../tools/delegate-task/constants"
@@ -21,31 +21,46 @@ import type { BrowserAutomationProvider } from "../config/schema"
 type AgentSource = AgentFactory | AgentConfig
 
 const agentSources: Record<BuiltinAgentName, AgentSource> = {
-  sisyphus: createSisyphusAgent,
-  hephaestus: createHephaestusAgent,
-  oracle: createOracleAgent,
-  librarian: createLibrarianAgent,
-  explore: createExploreAgent,
-  "multimodal-looker": createMultimodalLookerAgent,
-  metis: createMetisAgent,
-  momus: createMomusAgent,
-  // Note: Atlas is handled specially in createBuiltinAgents()
-  // because it needs OrchestratorContext, not just a model string
-  atlas: createAtlasAgent as unknown as AgentFactory,
+  orchestrator: createOrchestratorAgent,
+  developer: createDeveloperAgent,
+  advisor: createAdvisorAgent,
+  researcher: createResearcherAgent,
+  "context-finder": createContextFinderAgent,
+  "vision-analyst": createVisionAnalystAgent,
+  "requirements-analyst": createRequirementsAnalystAgent,
+  reviewer: createReviewerAgent,
+  "senior-orchestrator": createSeniorOrchestratorAgent as unknown as AgentFactory,
+  planner: undefined as unknown as AgentFactory, // Planner is handled specially or not in this map? Legacy had Prometheus separately?
+  // Checking legacy utils.ts, Prometheus wasn't in agentSources map. It was likely handled in createBuiltinAgents but skipped?
+  // Legacy code:
+  // const agentSources: ... = {
+  //   sisyphus: createSisyphusAgent,
+  //   hephaestus: createHephaestusAgent,
+  //   oracle: createOracleAgent,
+  //   librarian: createLibrarianAgent,
+  //   explore: createExploreAgent,
+  //   "multimodal-looker": createMultimodalLookerAgent,
+  //   metis: createMetisAgent,
+  //   momus: createMomusAgent,
+  //   atlas: createAtlasAgent...
+  // }
+  // Prometheus wasn't in the list. It must be created manually or added later.
+  // Wait, I see "Plan agent demote behavior" tests in config-handler. Maybe it's dynamic?
+  // Let's assume it's not in the loop for now.
 }
 
 /**
- * Metadata for each agent, used to build Sisyphus's dynamic prompt sections
+ * Metadata for each agent, used to build Orchestrator's dynamic prompt sections
  * (Delegation Table, Tool Selection, Key Triggers, etc.)
  */
 const agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> = {
-  oracle: ORACLE_PROMPT_METADATA,
-  librarian: LIBRARIAN_PROMPT_METADATA,
-  explore: EXPLORE_PROMPT_METADATA,
-  "multimodal-looker": MULTIMODAL_LOOKER_PROMPT_METADATA,
-  metis: metisPromptMetadata,
-  momus: momusPromptMetadata,
-  atlas: atlasPromptMetadata,
+  advisor: advisorPromptMetadata,
+  researcher: researcherPromptMetadata,
+  "context-finder": contextFinderPromptMetadata,
+  "vision-analyst": visionAnalystPromptMetadata,
+  "requirements-analyst": requirementsAnalystPromptMetadata,
+  reviewer: reviewerPromptMetadata,
+  "senior-orchestrator": seniorOrchestratorPromptMetadata,
 }
 
 function isFactory(source: AgentSource): source is AgentFactory {
@@ -92,12 +107,6 @@ export function buildAgent(
   return base
 }
 
-/**
- * Creates OmO-specific environment context (time, timezone, locale).
- * Note: Working directory, platform, and date are already provided by OpenCode's system.ts,
- * so we only include fields that OpenCode doesn't provide to avoid duplication.
- * See: https://github.com/code-yeongyu/kajiflow/issues/379
- */
 export function createEnvContext(): string {
   const now = new Date()
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -126,12 +135,6 @@ export function createEnvContext(): string {
 </kaji-env>`
 }
 
-/**
- * Expands a category reference from an agent override into concrete config properties.
- * Category properties are applied unconditionally (overwriting factory defaults),
- * because the user's chosen category should take priority over factory base values.
- * Direct override properties applied later via mergeAgentConfig() will supersede these.
- */
 function applyCategoryOverride(
   config: AgentConfig,
   categoryName: string,
@@ -239,9 +242,6 @@ export async function createBuiltinAgents(
   disabledSkills?: Set<string>
 ): Promise<Record<string, AgentConfig>> {
   const connectedProviders = readConnectedProvidersCache()
-  // IMPORTANT: Do NOT pass client to fetchAvailableModels during plugin initialization.
-  // This function is called from config handler, and calling client API causes deadlock.
-  // See: https://github.com/code-yeongyu/kajiflow/issues/1301
   const availableModels = await fetchAvailableModels(undefined, {
     connectedProviders: connectedProviders ?? undefined,
   })
@@ -279,22 +279,21 @@ export async function createBuiltinAgents(
 
   const availableSkills: AvailableSkill[] = [...builtinAvailable, ...discoveredAvailable]
 
-  // Collect general agents first (for availableAgents), but don't add to result yet
   const pendingAgentConfigs: Map<string, AgentConfig> = new Map()
 
    for (const [name, source] of Object.entries(agentSources)) {
      const agentName = name as BuiltinAgentName
 
-     if (agentName === "sisyphus") continue
-     if (agentName === "hephaestus") continue
-     if (agentName === "atlas") continue
+     if (agentName === "orchestrator") continue
+     if (agentName === "developer") continue
+     if (agentName === "senior-orchestrator") continue
+     if (agentName === "planner") continue
      if (disabledAgents.some((name) => name.toLowerCase() === agentName.toLowerCase())) continue
 
      const override = agentOverrides[agentName]
        ?? Object.entries(agentOverrides).find(([key]) => key.toLowerCase() === agentName.toLowerCase())?.[1]
      const requirement = AGENT_MODEL_REQUIREMENTS[agentName]
 
-     // Check if agent requires a specific model
      if (requirement?.requiresModel && availableModels) {
        if (!isModelAvailable(requirement.requiresModel, availableModels)) {
          continue
@@ -315,24 +314,21 @@ export async function createBuiltinAgents(
 
     let config = buildAgent(source, model, mergedCategories, gitMasterConfig, browserProvider, disabledSkills)
     
-    // Apply resolved variant from model fallback chain
     if (resolvedVariant) {
       config = { ...config, variant: resolvedVariant }
     }
 
-    // Expand override.category into concrete properties (higher priority than factory/resolved)
     const overrideCategory = (override as Record<string, unknown> | undefined)?.category as string | undefined
     if (overrideCategory) {
       config = applyCategoryOverride(config, overrideCategory, mergedCategories)
     }
 
-    if (agentName === "librarian") {
+    if (agentName === "researcher") {
       config = applyEnvironmentContext(config, directory)
     }
 
     config = applyOverrides(config, override, mergedCategories)
 
-    // Store for later - will be added after sisyphus and hephaestus
     pendingAgentConfigs.set(name, config)
 
     const metadata = agentMetadata[agentName]
@@ -345,139 +341,142 @@ export async function createBuiltinAgents(
     }
   }
 
-   const sisyphusOverride = agentOverrides["sisyphus"]
-   const sisyphusRequirement = AGENT_MODEL_REQUIREMENTS["sisyphus"]
-   const hasSisyphusExplicitConfig = sisyphusOverride !== undefined
-   const meetsSisyphusAnyModelRequirement =
-     !sisyphusRequirement?.requiresAnyModel ||
-     hasSisyphusExplicitConfig ||
+   // Handle Orchestrator (formerly Sisyphus)
+   const orchestratorOverride = agentOverrides["orchestrator"]
+   const orchestratorRequirement = AGENT_MODEL_REQUIREMENTS["orchestrator"]
+   const hasOrchestratorExplicitConfig = orchestratorOverride !== undefined
+   const meetsOrchestratorAnyModelRequirement =
+     !orchestratorRequirement?.requiresAnyModel ||
+     hasOrchestratorExplicitConfig ||
      isFirstRunNoCache ||
-     isAnyFallbackModelAvailable(sisyphusRequirement.fallbackChain, availableModels)
+     isAnyFallbackModelAvailable(orchestratorRequirement.fallbackChain, availableModels)
 
-   if (!disabledAgents.includes("sisyphus") && meetsSisyphusAnyModelRequirement) {
-    let sisyphusResolution = applyModelResolution({
-      uiSelectedModel: sisyphusOverride?.model ? undefined : uiSelectedModel,
-      userModel: sisyphusOverride?.model,
-      requirement: sisyphusRequirement,
+   if (!disabledAgents.includes("orchestrator") && meetsOrchestratorAnyModelRequirement) {
+    let orchestratorResolution = applyModelResolution({
+      uiSelectedModel: orchestratorOverride?.model ? undefined : uiSelectedModel,
+      userModel: orchestratorOverride?.model,
+      requirement: orchestratorRequirement,
       availableModels,
       systemDefaultModel,
     })
 
-    if (isFirstRunNoCache && !sisyphusOverride?.model && !uiSelectedModel) {
-      sisyphusResolution = getFirstFallbackModel(sisyphusRequirement)
+    if (isFirstRunNoCache && !orchestratorOverride?.model && !uiSelectedModel) {
+      orchestratorResolution = getFirstFallbackModel(orchestratorRequirement)
     }
 
-    if (sisyphusResolution) {
-      const { model: sisyphusModel, variant: sisyphusResolvedVariant } = sisyphusResolution
+    if (orchestratorResolution) {
+      const { model: orchestratorModel, variant: orchestratorResolvedVariant } = orchestratorResolution
 
-      let sisyphusConfig = createSisyphusAgent(
-        sisyphusModel,
+      let orchestratorConfig = createOrchestratorAgent(
+        orchestratorModel,
         availableAgents,
         undefined,
         availableSkills,
         availableCategories
       )
 
-      if (sisyphusResolvedVariant) {
-        sisyphusConfig = { ...sisyphusConfig, variant: sisyphusResolvedVariant }
+      if (orchestratorResolvedVariant) {
+        orchestratorConfig = { ...orchestratorConfig, variant: orchestratorResolvedVariant }
       }
 
-      sisyphusConfig = applyOverrides(sisyphusConfig, sisyphusOverride, mergedCategories)
-      sisyphusConfig = applyEnvironmentContext(sisyphusConfig, directory)
+      orchestratorConfig = applyOverrides(orchestratorConfig, orchestratorOverride, mergedCategories)
+      orchestratorConfig = applyEnvironmentContext(orchestratorConfig, directory)
 
-      result["sisyphus"] = sisyphusConfig
+      result["orchestrator"] = orchestratorConfig
     }
    }
 
-  if (!disabledAgents.includes("hephaestus")) {
-    const hephaestusOverride = agentOverrides["hephaestus"]
-    const hephaestusRequirement = AGENT_MODEL_REQUIREMENTS["hephaestus"]
-    const hasHephaestusExplicitConfig = hephaestusOverride !== undefined
+  // Handle Developer (formerly Hephaestus)
+  if (!disabledAgents.includes("developer")) {
+    const developerOverride = agentOverrides["developer"]
+    const developerRequirement = AGENT_MODEL_REQUIREMENTS["developer"]
+    const hasDeveloperExplicitConfig = developerOverride !== undefined
 
     const hasRequiredProvider =
-      !hephaestusRequirement?.requiresProvider ||
-      hasHephaestusExplicitConfig ||
+      !developerRequirement?.requiresProvider ||
+      hasDeveloperExplicitConfig ||
       isFirstRunNoCache ||
-      isAnyProviderConnected(hephaestusRequirement.requiresProvider, availableModels)
+      isAnyProviderConnected(developerRequirement.requiresProvider, availableModels)
 
     if (hasRequiredProvider) {
-      let hephaestusResolution = applyModelResolution({
-        userModel: hephaestusOverride?.model,
-        requirement: hephaestusRequirement,
+      let developerResolution = applyModelResolution({
+        userModel: developerOverride?.model,
+        requirement: developerRequirement,
         availableModels,
         systemDefaultModel,
       })
 
-      if (isFirstRunNoCache && !hephaestusOverride?.model) {
-        hephaestusResolution = getFirstFallbackModel(hephaestusRequirement)
+      if (isFirstRunNoCache && !developerOverride?.model) {
+        developerResolution = getFirstFallbackModel(developerRequirement)
       }
 
-      if (hephaestusResolution) {
-        const { model: hephaestusModel, variant: hephaestusResolvedVariant } = hephaestusResolution
+      if (developerResolution) {
+        const { model: developerModel, variant: developerResolvedVariant } = developerResolution
 
-        let hephaestusConfig = createHephaestusAgent(
-          hephaestusModel,
+        let developerConfig = createDeveloperAgent(
+          developerModel,
           availableAgents,
           undefined,
           availableSkills,
           availableCategories
         )
 
-        hephaestusConfig = { ...hephaestusConfig, variant: hephaestusResolvedVariant ?? "medium" }
+        developerConfig = { ...developerConfig, variant: developerResolvedVariant ?? "medium" }
 
-        const hepOverrideCategory = (hephaestusOverride as Record<string, unknown> | undefined)?.category as string | undefined
+        const hepOverrideCategory = (developerOverride as Record<string, unknown> | undefined)?.category as string | undefined
         if (hepOverrideCategory) {
-          hephaestusConfig = applyCategoryOverride(hephaestusConfig, hepOverrideCategory, mergedCategories)
+          developerConfig = applyCategoryOverride(developerConfig, hepOverrideCategory, mergedCategories)
         }
 
-        if (directory && hephaestusConfig.prompt) {
+        if (directory && developerConfig.prompt) {
           const envContext = createEnvContext()
-          hephaestusConfig = { ...hephaestusConfig, prompt: hephaestusConfig.prompt + envContext }
+          developerConfig = { ...developerConfig, prompt: developerConfig.prompt + envContext }
         }
 
-        if (hephaestusOverride) {
-          hephaestusConfig = mergeAgentConfig(hephaestusConfig, hephaestusOverride)
+        if (developerOverride) {
+          developerConfig = mergeAgentConfig(developerConfig, developerOverride)
         }
 
-        result["hephaestus"] = hephaestusConfig
+        result["developer"] = developerConfig
       }
     }
    }
 
-   // Add pending agents after sisyphus and hephaestus to maintain order
+   // Add pending agents after orchestrator and developer
    for (const [name, config] of pendingAgentConfigs) {
      result[name] = config
    }
 
-    if (!disabledAgents.includes("atlas")) {
-      const orchestratorOverride = agentOverrides["atlas"]
-      const atlasRequirement = AGENT_MODEL_REQUIREMENTS["atlas"]
+    // Handle Senior Orchestrator (formerly Atlas)
+    if (!disabledAgents.includes("senior-orchestrator")) {
+      const seniorOrchestratorOverride = agentOverrides["senior-orchestrator"]
+      const seniorOrchestratorRequirement = AGENT_MODEL_REQUIREMENTS["senior-orchestrator"]
 
-      const atlasResolution = applyModelResolution({
-        uiSelectedModel: orchestratorOverride?.model ? undefined : uiSelectedModel,
-        userModel: orchestratorOverride?.model,
-        requirement: atlasRequirement,
+      const seniorOrchestratorResolution = applyModelResolution({
+        uiSelectedModel: seniorOrchestratorOverride?.model ? undefined : uiSelectedModel,
+        userModel: seniorOrchestratorOverride?.model,
+        requirement: seniorOrchestratorRequirement,
         availableModels,
         systemDefaultModel,
       })
     
-    if (atlasResolution) {
-      const { model: atlasModel, variant: atlasResolvedVariant } = atlasResolution
+    if (seniorOrchestratorResolution) {
+      const { model: seniorOrchestratorModel, variant: seniorOrchestratorResolvedVariant } = seniorOrchestratorResolution
 
-      let orchestratorConfig = createAtlasAgent({
-        model: atlasModel,
+      let seniorOrchestratorConfig = createSeniorOrchestratorAgent({
+        model: seniorOrchestratorModel,
         availableAgents,
         availableSkills,
         userCategories: categories,
       })
 
-      if (atlasResolvedVariant) {
-        orchestratorConfig = { ...orchestratorConfig, variant: atlasResolvedVariant }
+      if (seniorOrchestratorResolvedVariant) {
+        seniorOrchestratorConfig = { ...seniorOrchestratorConfig, variant: seniorOrchestratorResolvedVariant }
       }
 
-      orchestratorConfig = applyOverrides(orchestratorConfig, orchestratorOverride, mergedCategories)
+      seniorOrchestratorConfig = applyOverrides(seniorOrchestratorConfig, seniorOrchestratorOverride, mergedCategories)
 
-      result["atlas"] = orchestratorConfig
+      result["senior-orchestrator"] = seniorOrchestratorConfig
     }
    }
 

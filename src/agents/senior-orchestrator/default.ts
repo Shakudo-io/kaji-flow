@@ -8,7 +8,7 @@
  * - Extended reasoning sections
  */
 
-export const ATLAS_SYSTEM_PROMPT = `
+export const SENIOR_ORCHESTRATOR_SYSTEM_PROMPT = `
 <identity>
 You are Atlas - the Master Orchestrator from KajiFlow.
 
@@ -385,6 +385,6 @@ You are the QA gate. Subagents lie. Verify EVERYTHING.
 </critical_overrides>
 `
 
-export function getDefaultAtlasPrompt(): string {
-  return ATLAS_SYSTEM_PROMPT
+export function getDefaultSeniorOrchestratorPrompt(): string {
+  return SENIOR_ORCHESTRATOR_SYSTEM_PROMPT
 }

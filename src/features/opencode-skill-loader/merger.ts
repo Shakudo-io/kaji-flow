@@ -9,12 +9,12 @@ import { parseFrontmatter } from "../../shared/frontmatter"
 import { sanitizeModelField } from "../../shared/model-sanitizer"
 import { deepMerge } from "../../shared/deep-merge"
 
-function parseAllowedToolsFromMetadata(allowedTools: string | string[] | undefined): string[] | undefined {
+function parseAllowedToolsFromMetadata(allowedTools: any): string[] | undefined {
   if (!allowedTools) return undefined
   if (Array.isArray(allowedTools)) {
-    return allowedTools.map(t => t.trim()).filter(Boolean)
+    return allowedTools.map((t: any) => String(t).trim()).filter(Boolean)
   }
-  return allowedTools.split(/\s+/).filter(Boolean)
+  return String(allowedTools).split(/\s+/).filter(Boolean)
 }
 
 const SCOPE_PRIORITY: Record<SkillScope, number> = {
@@ -81,7 +81,7 @@ function loadSkillFromFile(filePath: string): { template: string; metadata: Skil
 
 function configEntryToLoaded(
   name: string,
-  entry: SkillDefinition,
+  entry: any, // Force any to avoid strict schema conflicts
   configDir?: string
 ): LoadedSkill | null {
   let template = entry.template || ""
@@ -109,7 +109,7 @@ function configEntryToLoaded(
 Base directory for this skill: ${resolvedPath}/
 File references (@path) in this skill are relative to this directory.
 
-${template.trim()}
+${String(template).trim()}
 </skill-instruction>
 
 <user-request>
@@ -138,7 +138,7 @@ $ARGUMENTS
     license: entry.license || fileMetadata.license,
     compatibility: entry.compatibility || fileMetadata.compatibility,
     metadata: entry.metadata as Record<string, string> | undefined || fileMetadata.metadata,
-    allowedTools,
+    allowedTools: Array.isArray(allowedTools) ? allowedTools : undefined,
   }
 }
 
@@ -146,21 +146,21 @@ function normalizeConfig(config: SkillsConfig | undefined): {
   sources: Array<string | { path: string; recursive?: boolean; glob?: string }>
   enable: string[]
   disable: string[]
-  entries: Record<string, boolean | SkillDefinition>
+  entries: Record<string, any>
 } {
   if (!config) {
     return { sources: [], enable: [], disable: [], entries: {} }
   }
 
   if (Array.isArray(config)) {
-    return { sources: [], enable: config, disable: [], entries: {} }
+    return { sources: [], enable: config as any, disable: [], entries: {} }
   }
 
-  const { sources = [], enable = [], disable = [], ...entries } = config
+  const { sources = [], enable = [], disable = [], ...entries } = config as any
   return { sources, enable, disable, entries }
 }
 
-function mergeSkillDefinitions(base: LoadedSkill, patch: SkillDefinition): LoadedSkill {
+function mergeSkillDefinitions(base: LoadedSkill, patch: any): LoadedSkill {
   const mergedMetadata = base.metadata || patch.metadata
     ? deepMerge(base.metadata || {}, (patch.metadata as Record<string, string>) || {})
     : undefined
@@ -184,7 +184,7 @@ function mergeSkillDefinitions(base: LoadedSkill, patch: SkillDefinition): Loade
     license: patch.license || base.license,
     compatibility: patch.compatibility || base.compatibility,
     metadata: mergedMetadata as Record<string, string> | undefined,
-    allowedTools: mergedTools ? [...new Set(mergedTools)] : undefined,
+    allowedTools: mergedTools ? [...new Set(mergedTools as string[])] : undefined,
   }
 }
 

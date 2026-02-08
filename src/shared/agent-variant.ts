@@ -9,7 +9,7 @@ export function resolveAgentVariant(
     return undefined
   }
 
-  const agentOverrides = config.agents as
+  const agentOverrides = config.agent as
     | Record<string, { variant?: string; category?: string }>
     | undefined
   const agentOverride = agentOverrides
@@ -37,7 +37,7 @@ export function resolveVariantForModel(
   agentName: string,
   currentModel: { providerID: string; modelID: string },
 ): string | undefined {
-  const agentOverrides = config.agents as
+  const agentOverrides = config.agent as
     | Record<string, { variant?: string; category?: string }>
     | undefined
   const agentOverride = agentOverrides

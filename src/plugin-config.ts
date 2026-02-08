@@ -36,7 +36,7 @@ export function loadConfigFromPath(
         return null;
       }
 
-      log(`Config loaded from ${configPath}`, { agents: result.data.agents });
+      log(`Config loaded from ${configPath}`, { agents: result.data.agent });
       return result.data;
     }
   } catch (err) {
@@ -54,7 +54,7 @@ export function mergeConfigs(
   return {
     ...base,
     ...override,
-    agents: deepMerge(base.agents, override.agents),
+    agent: deepMerge(base.agent, override.agent),
     categories: deepMerge(base.categories, override.categories),
     disabled_agents: [
       ...new Set([
@@ -126,7 +126,7 @@ export function loadPluginConfig(
   };
 
   log("Final merged config", {
-    agents: config.agents,
+    agent: config.agent,
     disabled_agents: config.disabled_agents,
     disabled_mcps: config.disabled_mcps,
     disabled_hooks: config.disabled_hooks,
