@@ -25,8 +25,7 @@ export interface ExecutorContext {
   directory: string
   userCategories?: CategoriesConfig
   gitMasterConfig?: GitMasterConfig
-  sisyphusJuniorModel?: string
-  browserProvider?: BrowserAutomationProvider
+    browserProvider?: BrowserAutomationProvider
   onSyncSessionCreated?: (event: { sessionID: string; parentID: string; title: string }) => Promise<void>
 }
 
@@ -796,7 +795,7 @@ export async function resolveCategoryExecution(
   inheritedModel: string | undefined,
   systemDefaultModel: string | undefined
 ): Promise<CategoryResolutionResult> {
-  const { client, userCategories, sisyphusJuniorModel } = executorCtx
+  const { client, userCategories } = executorCtx
 
   const connectedProviders = readConnectedProvidersCache()
   const availableModels = await fetchAvailableModels(client, {
@@ -827,12 +826,12 @@ export async function resolveCategoryExecution(
   let modelInfo: ModelFallbackInfo | undefined
   let categoryModel: { providerID: string; modelID: string; variant?: string } | undefined
 
-  const overrideModel = sisyphusJuniorModel
+  const overrideModel = undefined
   const explicitCategoryModel = userCategories?.[args.category!]?.model
 
   if (!requirement) {
-    // Precedence: explicit category model > sisyphus-junior default > category resolved model
-    // This keeps `sisyphus-junior.model` useful as a global default while allowing
+    // Precedence: explicit category model > developer default > category resolved model
+    // This keeps `developer.model` useful as a global default while allowing
     // per-category overrides via `categories[category].model`.
     actualModel = explicitCategoryModel ?? overrideModel ?? resolved.model
     if (actualModel) {

@@ -10,20 +10,20 @@ import {
   getPlanProgress,
   getPlanName,
   createBoulderState,
-  findPrometheusPlans,
+  findPlannerPlans,
 } from "./storage"
 import type { BoulderState } from "./types"
 
 describe("boulder-state", () => {
   const TEST_DIR = join(tmpdir(), "boulder-state-test-" + Date.now())
-  const SISYPHUS_DIR = join(TEST_DIR, ".sisyphus")
+  const WORK_DIR = join(TEST_DIR, ".kajiflow/work")
 
   beforeEach(() => {
     if (!existsSync(TEST_DIR)) {
       mkdirSync(TEST_DIR, { recursive: true })
     }
-    if (!existsSync(SISYPHUS_DIR)) {
-      mkdirSync(SISYPHUS_DIR, { recursive: true })
+    if (!existsSync(WORK_DIR)) {
+      mkdirSync(WORK_DIR, { recursive: true })
     }
     clearBoulderState(TEST_DIR)
   })
@@ -223,7 +223,7 @@ describe("boulder-state", () => {
   describe("getPlanName", () => {
     test("should extract plan name from path", () => {
       // given
-      const path = "/home/user/.sisyphus/plans/project/my-feature.md"
+      const path = "/home/user/.kajiflow/work/plans/project/my-feature.md"
       // when
       const name = getPlanName(path)
       // then
@@ -251,13 +251,13 @@ describe("boulder-state", () => {
       //#given - plan path, session id, and agent type
       const planPath = "/path/to/feature.md"
       const sessionId = "ses-xyz789"
-      const agent = "atlas"
+      const agent = "senior-orchestrator"
 
       //#when - createBoulderState is called with agent
       const state = createBoulderState(planPath, sessionId, agent)
 
       //#then - state should include the agent field
-      expect(state.agent).toBe("atlas")
+      expect(state.agent).toBe("senior-orchestrator")
       expect(state.active_plan).toBe(planPath)
       expect(state.session_ids).toEqual([sessionId])
       expect(state.plan_name).toBe("feature")

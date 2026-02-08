@@ -28,7 +28,7 @@ import {
   createDelegateTaskRetryHook,
   createTaskResumeInfoHook,
   createStartWorkHook,
-  createAtlasHook,
+  createSeniorOrchestratorHook,
   createPlannerMdOnlyHook,
   createQuestionLabelTruncatorHook,
   createSubagentQuestionBlockerHook,
@@ -330,7 +330,7 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
   );
 
   const atlasHook = isHookEnabled("senior-orchestrator")
-    ? safeCreateHook("senior-orchestrator", () => createAtlasHook(ctx, { 
+    ? safeCreateHook("senior-orchestrator", () => createSeniorOrchestratorHook(ctx, { 
         directory: ctx.directory, 
         backgroundManager,
         isContinuationStopped: (sessionID: string) => stopContinuationGuard?.isStopped(sessionID) ?? false,

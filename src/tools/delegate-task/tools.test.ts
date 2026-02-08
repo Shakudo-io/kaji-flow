@@ -217,7 +217,7 @@ describe("sisyphus-task", () => {
           id: "task-123",
           status: "pending",
           description: "Test task",
-          agent: "hephaestus",
+          agent: "developer",
           sessionID: "test-session",
         }),
       }
@@ -243,7 +243,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-         agent: "sisyphus",
+         agent: "orchestrator",
          abort: new AbortController().signal,
        }
 
@@ -266,14 +266,14 @@ describe("sisyphus-task", () => {
        await tool.execute(args, toolContext)
 
       // then
-      expect(args.subagent_type).toBe("hephaestus")
+      expect(args.subagent_type).toBe("developer")
     }, { timeout: 10000 })
 
     test("proceeds without error when systemDefaultModel is undefined", async () => {
       // given a mock client with no model in config
       const { createDelegateTask } = require("./tools")
       
-       const mockManager = { launch: async () => ({ id: "task-123", status: "pending", description: "Test task", agent: "hephaestus", sessionID: "test-session" }) }
+       const mockManager = { launch: async () => ({ id: "task-123", status: "pending", description: "Test task", agent: "developer", sessionID: "test-session" }) }
        const mockClient = {
          app: { agents: async () => ({ data: [] }) },
          config: { get: async () => ({}) }, // No model configured
@@ -296,7 +296,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-         agent: "sisyphus",
+         agent: "orchestrator",
          abort: new AbortController().signal,
        }
        
@@ -345,7 +345,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -409,7 +409,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
         metadata: (input: { title?: string; metadata?: Record<string, unknown> }) => {
           metadataCalls.push(input)
@@ -671,7 +671,7 @@ describe("sisyphus-task", () => {
             id: "task-variant",
             sessionID: "session-variant",
             description: "Variant task",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -699,7 +699,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -735,7 +735,7 @@ describe("sisyphus-task", () => {
             id: "task-default-variant",
             sessionID: "session-default-variant",
             description: "Default variant task",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -762,7 +762,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -823,7 +823,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -873,7 +873,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-         agent: "sisyphus",
+         agent: "orchestrator",
          abort: new AbortController().signal,
        }
        
@@ -914,7 +914,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-         agent: "sisyphus",
+         agent: "orchestrator",
          abort: new AbortController().signal,
        }
        
@@ -967,7 +967,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1034,7 +1034,7 @@ describe("sisyphus-task", () => {
      const toolContext = {
        sessionID: "parent-session",
        messageID: "parent-message",
-       agent: "sisyphus",
+       agent: "orchestrator",
        abort: new AbortController().signal,
      }
      
@@ -1090,7 +1090,7 @@ describe("sisyphus-task", () => {
      const toolContext = {
        sessionID: "parent-session",
        messageID: "parent-message",
-       agent: "sisyphus",
+       agent: "orchestrator",
        abort: new AbortController().signal,
      }
      
@@ -1148,7 +1148,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1209,7 +1209,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1265,7 +1265,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1324,7 +1324,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent",
         messageID: "msg",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal
       }
 
@@ -1358,7 +1358,7 @@ describe("sisyphus-task", () => {
             id: "task-unstable",
             sessionID: "ses_unstable_gemini",
             description: "Unstable gemini task",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -1390,7 +1390,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1424,7 +1424,7 @@ describe("sisyphus-task", () => {
             id: "task-normal-bg",
             sessionID: "ses_normal_bg",
             description: "Normal background task",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -1449,7 +1449,7 @@ describe("sisyphus-task", () => {
        const toolContext = {
          sessionID: "parent-session",
          messageID: "parent-message",
-         agent: "sisyphus",
+         agent: "orchestrator",
          abort: new AbortController().signal,
        }
        
@@ -1483,7 +1483,7 @@ describe("sisyphus-task", () => {
             id: "task-unstable-minimax",
             sessionID: "ses_unstable_minimax",
             description: "Unstable minimax task",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -1519,7 +1519,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -1583,7 +1583,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1617,7 +1617,7 @@ describe("sisyphus-task", () => {
             id: "task-artistry",
             sessionID: "ses_artistry_gemini",
             description: "Artistry gemini task",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -1649,7 +1649,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1683,7 +1683,7 @@ describe("sisyphus-task", () => {
             id: "task-writing",
             sessionID: "ses_writing_gemini",
             description: "Writing gemini task",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -1715,7 +1715,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1749,7 +1749,7 @@ describe("sisyphus-task", () => {
             id: "task-custom-unstable",
             sessionID: "ses_custom_unstable",
             description: "Custom unstable task",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -1786,7 +1786,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -1825,7 +1825,7 @@ describe("sisyphus-task", () => {
             id: "task-fallback",
             sessionID: "ses_fallback_test",
             description: "Fallback test task",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -1842,18 +1842,18 @@ describe("sisyphus-task", () => {
         },
       }
 
-      // NO userCategories override, NO sisyphusJuniorModel
+      // NO userCategories override, NO developerModel
       const tool = createDelegateTask({
         manager: mockManager,
         client: mockClient,
         // userCategories: undefined - use DEFAULT_CATEGORIES only
-        // sisyphusJuniorModel: undefined
+        // developerModel: undefined
       })
 
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -1887,7 +1887,7 @@ describe("sisyphus-task", () => {
             id: "task-ui-model",
             sessionID: "ses_ui_model_test",
             description: "UI model inheritance test",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -1916,7 +1916,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -1949,7 +1949,7 @@ describe("sisyphus-task", () => {
             id: "task-override",
             sessionID: "ses_override_test",
             description: "Override precedence test",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -1969,13 +1969,13 @@ describe("sisyphus-task", () => {
       const tool = createDelegateTask({
         manager: mockManager,
         client: mockClient,
-        sisyphusJuniorModel: "anthropic/claude-sonnet-4-5",
+        developerModel: "anthropic/claude-sonnet-4-5",
       })
 
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2008,7 +2008,7 @@ describe("sisyphus-task", () => {
             id: "task-category-precedence",
             sessionID: "ses_category_precedence_test",
             description: "Category precedence test",
-            agent: "hephaestus",
+            agent: "developer",
             status: "running",
           }
         },
@@ -2029,7 +2029,7 @@ describe("sisyphus-task", () => {
        const tool = createDelegateTask({
          manager: mockManager,
          client: mockClient,
-         sisyphusJuniorModel: "anthropic/claude-sonnet-4-5",
+         developerModel: "anthropic/claude-sonnet-4-5",
          userCategories: {
            ultrabrain: { model: "openai/gpt-5.3-codex" },
          },
@@ -2038,7 +2038,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2098,7 +2098,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2149,7 +2149,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2641,7 +2641,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -2754,7 +2754,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2818,7 +2818,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2882,7 +2882,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -2939,7 +2939,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -2994,7 +2994,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
       
@@ -3049,7 +3049,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3098,7 +3098,7 @@ describe("sisyphus-task", () => {
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 
@@ -3129,7 +3129,7 @@ describe("sisyphus-task", () => {
           id: "bg_meta_test",
           sessionID: "ses_bg_metadata",
           description: "Background metadata test",
-          agent: "hephaestus",
+          agent: "developer",
           status: "running",
         }),
       }
@@ -3149,14 +3149,14 @@ describe("sisyphus-task", () => {
          manager: mockManager,
          client: mockClient,
          userCategories: {
-           "hephaestus": { model: "anthropic/claude-sonnet-4-5" },
+           "developer": { model: "anthropic/claude-sonnet-4-5" },
          },
        })
 
       const toolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         abort: new AbortController().signal,
       }
 

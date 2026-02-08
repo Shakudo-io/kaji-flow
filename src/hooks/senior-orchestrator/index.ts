@@ -17,11 +17,11 @@ import type { BackgroundManager } from "../../features/background-agent"
 export const HOOK_NAME = "atlas"
 
 /**
- * Cross-platform check if a path is inside .sisyphus/ directory.
+ * Cross-platform check if a path is inside .kajiflow/work/ directory.
  * Handles both forward slashes (Unix) and backslashes (Windows).
  */
-function isSisyphusPath(filePath: string): boolean {
-  return /\.sisyphus[/\\]/.test(filePath)
+function isWorkPath(filePath: string): boolean {
+  return /\.kajiflow[/\\]work[/\\]/.test(filePath)
 }
 
 const WRITE_EDIT_TOOLS = ["Write", "Edit", "write", "edit"]
@@ -39,7 +39,7 @@ const DIRECT_WORK_REMINDER = `
 
 ${createSystemDirective(SystemDirectiveTypes.DELEGATION_REQUIRED)}
 
-You just performed direct file modifications outside \`.sisyphus/\`.
+You just performed direct file modifications outside \`.kajiflow/work/\`.
 
 **You are an ORCHESTRATOR, not an IMPLEMENTER.**
 
@@ -49,8 +49,8 @@ As an orchestrator, you should:
 - **COORDINATE** multiple tasks and ensure completion
 
 You should NOT:
-- Write code directly (except for \`.sisyphus/\` files like plans and notepads)
-- Make direct file edits outside \`.sisyphus/\`
+- Write code directly (except for \`.kajiflow/work/\` files like plans and notepads)
+- Make direct file edits outside \`.kajiflow/work/\`
 - Implement features yourself
 
 **If you need to make changes:**
@@ -68,7 +68,7 @@ You have an active work plan with incomplete tasks. Continue working.
 RULES:
 - Proceed without asking for permission
 - Change \`- [ ]\` to \`- [x]\` in the plan file when done
-- Use the notepad at .sisyphus/notepads/{PLAN_NAME}/ to record learnings
+- Use the notepad at .kajiflow/work/notepads/{PLAN_NAME}/ to record learnings
 - Do not stop until all tasks are complete
 - If blocked, document the blocker and move to the next task`
 
@@ -119,7 +119,7 @@ ${createSystemDirective(SystemDirectiveTypes.DELEGATION_REQUIRED)}
 
 **STOP. YOU ARE VIOLATING ORCHESTRATOR PROTOCOL.**
 
-You (Atlas) are attempting to directly modify a file outside \`.sisyphus/\`.
+You (Senior Orchestrator) are attempting to directly modify a file outside \`.kajiflow/work/\`.
 
 **Path attempted:** $FILE_PATH
 
@@ -133,13 +133,13 @@ As an ORCHESTRATOR, you MUST:
 3. **COORDINATE** - you orchestrate, you don't implement
 
 **ALLOWED direct file operations:**
-- Files inside \`.sisyphus/\` (plans, notepads, drafts)
+- Files inside \`.kajiflow/work/\` (plans, notepads, drafts)
 - Reading files for verification
 - Running diagnostics/tests
 
 **FORBIDDEN direct file operations:**
 - Writing/editing source code
-- Creating new files outside \`.sisyphus/\`
+- Creating new files outside \`.kajiflow/work/\`
 - Any implementation work
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -212,7 +212,7 @@ ${buildVerificationReminder(sessionId)}
 
 RIGHT NOW - Do not delay. Verification passed → Mark IMMEDIATELY.
 
-Update the plan file \`.sisyphus/tasks/${planName}.yaml\`:
+Update the plan file \`.kajiflow/work/tasks/${planName}.yaml\`:
 - Change \`- [ ]\` to \`- [x]\` for the completed task
 - Use \`Edit\` tool to modify the checkbox
 
@@ -487,7 +487,7 @@ export function createAtlasHook(
         await ctx.client.session.promptAsync({
           path: { id: sessionID },
           body: {
-             agent: agent ?? "atlas",
+             agent: agent ?? "senior-orchestrator",
             ...(model !== undefined ? { model } : {}),
             parts: [{ type: "text", text: prompt }],
           },
@@ -579,7 +579,7 @@ export function createAtlasHook(
           return
         }
 
-        const requiredAgent = (boulderState.agent ?? "atlas").toLowerCase()
+        const requiredAgent = (boulderState.agent ?? "senior-orchestrator").toLowerCase()
         const lastAgent = getLastAgentFromSession(sessionID)
         if (!lastAgent || lastAgent !== requiredAgent) {
           log(`[${HOOK_NAME}] Skipped: last agent does not match boulder agent`, {
@@ -678,7 +678,7 @@ export function createAtlasHook(
       // Check Write/Edit tools for orchestrator - inject strong warning
       if (WRITE_EDIT_TOOLS.includes(input.tool)) {
         const filePath = (output.args.filePath ?? output.args.path ?? output.args.file) as string | undefined
-        if (filePath && !isSisyphusPath(filePath)) {
+        if (filePath && !isWorkPath(filePath)) {
           // Store filePath for use in tool.execute.after
           if (input.callID) {
             pendingFilePaths.set(input.callID, filePath)
@@ -727,7 +727,7 @@ export function createAtlasHook(
         if (!filePath) {
           filePath = output.metadata?.filePath as string | undefined
         }
-        if (filePath && !isSisyphusPath(filePath)) {
+        if (filePath && !isWorkPath(filePath)) {
           output.output = (output.output || "") + DIRECT_WORK_REMINDER
           log(`[${HOOK_NAME}] Direct work reminder appended`, {
             sessionID: input.sessionID,

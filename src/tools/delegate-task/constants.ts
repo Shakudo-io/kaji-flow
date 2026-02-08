@@ -26,7 +26,7 @@ You are working on DEEP LOGICAL REASONING / COMPLEX ARCHITECTURE tasks.
 1. BEFORE writing ANY code, SEARCH the existing codebase to find similar patterns/styles
 2. Your code MUST match the project's existing conventions - blend in seamlessly
 3. Write READABLE code that humans can easily understand - no clever tricks
-4. If unsure about style, explore more files until you find the pattern
+4. If unsure about style, context-finder more files until you find the pattern
 
 Strategic advisor mindset:
 - Bias toward simplicity: least complex solution that fulfills requirements
@@ -171,7 +171,7 @@ You are working on GOAL-ORIENTED AUTONOMOUS tasks.
 You are NOT an interactive assistant. You are an autonomous problem-solver.
 
 **BEFORE making ANY changes**:
-1. SILENTLY explore the codebase extensively (5-15 minutes of reading is normal)
+1. SILENTLY context-finder the codebase extensively (5-15 minutes of reading is normal)
 2. Read related files, trace dependencies, understand the full context
 3. Build a complete mental model of the problem space
 4. DO NOT ask clarifying questions - the goal is already defined
@@ -232,7 +232,7 @@ export const CATEGORY_DESCRIPTIONS: Record<string, string> = {
 
 /**
  * System prompt prepended to plan agent invocations.
- * Instructs the plan agent to first gather context via explore/librarian agents,
+ * Instructs the plan agent to first gather context via context-finder/researcher agents,
  * then summarize user requirements and clarify uncertainties before proceeding.
  * Also MANDATES dependency graphs, parallel execution analysis, and category+skill recommendations.
  */
@@ -241,8 +241,8 @@ BEFORE you begin planning, you MUST first understand the user's request deeply.
 
 MANDATORY CONTEXT GATHERING PROTOCOL:
 1. Launch background agents to gather context:
-   - call_kaji_agent(description="Explore codebase patterns", subagent_type="explore", run_in_background=true, prompt="<search for relevant patterns, files, and implementations in the codebase related to user's request>")
-   - call_kaji_agent(description="Research documentation", subagent_type="librarian", run_in_background=true, prompt="<search for external documentation, examples, and best practices related to user's request>")
+   - call_kaji_agent(description="Explore codebase patterns", subagent_type="context-finder", run_in_background=true, prompt="<search for relevant patterns, files, and implementations in the codebase related to user's request>")
+   - call_kaji_agent(description="Research documentation", subagent_type="researcher", run_in_background=true, prompt="<search for external documentation, examples, and best practices related to user's request>")
 
 2. After gathering context, ALWAYS present:
    - **User Request Summary**: Concise restatement of what the user is asking for
@@ -538,7 +538,7 @@ export function buildPlanAgentSystemPrepend(
  * List of agent names that should be treated as plan agents.
  * Case-insensitive matching is used.
  */
-export const PLAN_AGENT_NAMES = ["plan", "prometheus", "planner"]
+export const PLAN_AGENT_NAMES = ["plan", "planner"]
 
 /**
  * Check if the given agent name is a plan agent.

@@ -23,7 +23,7 @@ describe("resolveAgentVariant", () => {
     } as KajiFlowConfig
 
     // when
-    const variant = resolveAgentVariant(config, "sisyphus")
+    const variant = resolveAgentVariant(config, "orchestrator")
 
     // then
     expect(variant).toBe("low")
@@ -41,7 +41,7 @@ describe("resolveAgentVariant", () => {
     } as KajiFlowConfig
 
     // when
-    const variant = resolveAgentVariant(config, "sisyphus")
+    const variant = resolveAgentVariant(config, "orchestrator")
 
     // then
     expect(variant).toBe("xhigh")
@@ -59,7 +59,7 @@ describe("applyAgentVariant", () => {
     const message: { variant?: string } = {}
 
     // when
-    applyAgentVariant(config, "sisyphus", message)
+    applyAgentVariant(config, "orchestrator", message)
 
     // then
     expect(message.variant).toBe("low")
@@ -75,7 +75,7 @@ describe("applyAgentVariant", () => {
     const message = { variant: "max" }
 
     // when
-    applyAgentVariant(config, "sisyphus", message)
+    applyAgentVariant(config, "orchestrator", message)
 
     // then
     expect(message.variant).toBe("max")
@@ -94,7 +94,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "anthropic", modelID: "claude-opus-4-6" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBe("high")
@@ -106,7 +106,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "anthropic", modelID: "claude-opus-4-6" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBe("max")
@@ -118,7 +118,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "openai", modelID: "gpt-5.3-codex" }
 
     // #when
-    const variant = resolveVariantForModel(config, "hephaestus", model)
+    const variant = resolveVariantForModel(config, "developer", model)
 
     // then
     expect(variant).toBe("medium")
@@ -130,7 +130,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "openai", modelID: "gpt-5.2" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBeUndefined()
@@ -142,7 +142,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "unknown-provider", modelID: "some-model" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBeUndefined()
@@ -166,7 +166,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "zai-coding-plan", modelID: "glm-4.7" }
 
     // when
-    const variant = resolveVariantForModel(config, "sisyphus", model)
+    const variant = resolveVariantForModel(config, "orchestrator", model)
 
     // then
     expect(variant).toBeUndefined()
@@ -194,7 +194,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "openai", modelID: "gpt-5.2" }
 
     // when
-    const variant = resolveVariantForModel(config, "oracle", model)
+    const variant = resolveVariantForModel(config, "advisor", model)
 
     // then
     expect(variant).toBe("high")
@@ -206,7 +206,7 @@ describe("resolveVariantForModel", () => {
     const model = { providerID: "anthropic", modelID: "claude-opus-4-6" }
 
     // when
-    const variant = resolveVariantForModel(config, "oracle", model)
+    const variant = resolveVariantForModel(config, "advisor", model)
 
     // then
     expect(variant).toBe("max")

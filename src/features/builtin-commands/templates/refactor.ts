@@ -465,7 +465,7 @@ If ANY verification fails:
 4. **OPTIONS**:
    - Fix the issue and retry
    - Skip this step (if optional)
-   - Consult oracle agent for help
+   - Consult advisor agent for help
    - Ask user for guidance
 
 **NEVER proceed to next step with broken tests.**
@@ -600,14 +600,14 @@ Use \`ast_grep_search\` and \`ast_grep_replace\` for structural transformations.
 ## Agents
 - \`explore\`: Parallel codebase pattern discovery
 - \`plan\`: Detailed refactoring plan generation
-- \`oracle\`: Read-only consultation for complex architectural decisions and debugging
-- \`librarian\`: **Use proactively** when encountering deprecated methods or library migration tasks. Query official docs and OSS examples for modern replacements.
+- \`advisor\`: Read-only consultation for complex architectural decisions and debugging
+- \`researcher\`: **Use proactively** when encountering deprecated methods or library migration tasks. Query official docs and OSS examples for modern replacements.
 
 ## Deprecated Code & Library Migration
 When you encounter deprecated methods/APIs during refactoring:
-1. Fire \`librarian\` to find the recommended modern alternative
+1. Fire \`researcher\` to find the recommended modern alternative
 2. **DO NOT auto-upgrade to latest version** unless user explicitly requests migration
-3. If user requests library migration, use \`librarian\` to fetch latest API docs before making changes
+3. If user requests library migration, use \`researcher\` to fetch latest API docs before making changes
 
 ---
 

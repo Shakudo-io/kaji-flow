@@ -1,15 +1,18 @@
-export const ALLOWED_AGENTS = [
-  "explore",
-  "librarian",
-  "oracle",
-  "hephaestus",
-  "metis",
-  "momus",
-  "multimodal-looker",
-] as const
+export const ALLOWED_SUBAGENTS = [
+  "researcher",
+  "advisor",
+  "developer",
+  "requirements-analyst",
+  "reviewer",
+  "context-finder",
+  "vision-analyst",
+  "planner",
+]
 
-export const CALL_OMO_AGENT_DESCRIPTION = `Spawn explore/librarian agent. run_in_background REQUIRED (true=async with task_id, false=sync).
-
-Available: {agents}
-
-Pass \`session_id=<id>\` to continue previous agent with full context. Prompts MUST be in English. Use \`background_output\` for async results.`
+export const CALL_KAJI_AGENT_DESCRIPTION = `Spawn context-finder/researcher agent. run_in_background REQUIRED (true=async with task_id, false=sync).
+Use this tool to gather context or documentation BEFORE starting work.
+- context-finder: Fast grep/glob/ast-grep in codebase.
+- researcher: External documentation/GitHub search.
+- advisor: High-level architectural consultation.
+- vision-analyst: Analyze images/PDFs in the repository.
+`
