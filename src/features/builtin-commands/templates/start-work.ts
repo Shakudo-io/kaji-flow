@@ -2,7 +2,6 @@ import type { PluginInput } from "@opencode-ai/plugin"
 import {
   readBoulderState,
   writeBoulderState,
-  appendSessionId,
   findPlannerPlans,
   getPlanProgress,
   createBoulderState,
@@ -106,7 +105,8 @@ export function createStartWorkHook(ctx: PluginInput) {
 
       updateSessionAgent(input.sessionID, "senior-orchestrator")
 
-      const existingState = readBoulderState(ctx.directory)
+      // Check for SESSION-SCOPED state
+      const existingState = readBoulderState(ctx.directory, input.sessionID)
       const sessionId = input.sessionID
       const timestamp = new Date().toISOString()
 
@@ -138,10 +138,10 @@ All ${progress.total} tasks are done.
 Create a new feature spec with: /speckit.specify {project}:{feature}`
           } else {
             if (existingState) {
-              clearBoulderState(ctx.directory)
+              clearBoulderState(ctx.directory, sessionId)
             }
             const newState = createBoulderState(matchedPlan, sessionId, "senior-orchestrator")
-            writeBoulderState(ctx.directory, newState)
+            writeBoulderState(ctx.directory, sessionId, newState)
             
             contextInfo = `
 ## Auto-Selected Plan (Speckit)
@@ -152,7 +152,7 @@ Create a new feature spec with: /speckit.specify {project}:{feature}`
 **Session ID**: ${sessionId}
 **Started**: ${timestamp}
 
-boulder.json has been created. Read the tasks.md and begin execution.`
+Session-scoped boulder state created. Read the tasks.md and begin execution.`
           }
         } else {
           const incompletePlans = allPlans.filter(p => !getPlanProgress(p).isComplete)
@@ -185,18 +185,15 @@ Create a new feature spec with: /speckit.specify {project}:{feature}`
         const progress = getPlanProgress(existingState.active_plan)
         
         if (!progress.isComplete) {
-          appendSessionId(ctx.directory, sessionId)
           contextInfo = `
 ## Active Work Session Found
 
-**Status**: RESUMING existing work
+**Status**: RESUMING existing work (Session Isolated)
 **Plan**: ${existingState.plan_name}
 **Path**: ${existingState.active_plan}
 **Progress**: ${progress.completed}/${progress.total} tasks completed
-**Sessions**: ${existingState.session_ids.length + 1} (current session appended)
 **Started**: ${existingState.started_at}
 
-The current session (${sessionId}) has been added to session_ids.
 Read the plan file and continue from the first unchecked task.`
         } else {
           contextInfo = `
@@ -237,7 +234,7 @@ Create a new feature spec with: /speckit.specify {project}:{feature}`
           const planPath = incompletePlans[0]
           const progress = getPlanProgress(planPath)
           const newState = createBoulderState(planPath, sessionId, "senior-orchestrator")
-          writeBoulderState(ctx.directory, newState)
+          writeBoulderState(ctx.directory, sessionId, newState)
 
           contextInfo = `
 ## Auto-Selected Plan (Speckit)
@@ -272,8 +269,8 @@ Ask the user which plan to work on. Present the options above and wait for their
       const idx = output.parts.findIndex((p) => p.type === "text" && p.text)
       if (idx >= 0 && output.parts[idx].text) {
         output.parts[idx].text = output.parts[idx].text
-          .replace(/$SESSION_ID/g, sessionId)
-          .replace(/$TIMESTAMP/g, timestamp)
+          .replace(/\$SESSION_ID/g, sessionId)
+          .replace(/\$TIMESTAMP/g, timestamp)
         
         output.parts[idx].text += `\n\n---\n${contextInfo}`
       }
@@ -288,36 +285,52 @@ Ask the user which plan to work on. Present the options above and wait for their
 
 export const START_WORK_TEMPLATE = `You are starting an Orchestrator work session.
 
-## WHAT TO DO
+## PRE-FLIGHT CHECK (MANDATORY)
+
+Before starting work, you MUST verify the project state:
+
+1. **Checklist Verification**:
+   - Check \`specs/**/checklists/*.md\`
+   - Are all checklist items marked complete?
+   - If NOT, **STOP** and ask the user to confirm proceeding.
+
+2. **Context Loading**:
+   - Read \`tasks.md\` (Execution Plan)
+   - Read \`plan.md\` (Architecture)
+   - Read \`data-model.md\` (if exists)
+   - Read \`contracts/\` (if exists)
+   - **Do NOT** read other files yet unless necessary.
+
+## EXECUTION LOOP
 
 1. **Find available plans**:
    - Check \`specs/**/tasks.md\` (Speckit workflow)
    - Check \`.kajiflow/work/plans/\` (Legacy)
 
-2. **Check for active boulder state**: Read \`.kajiflow/work/boulder.json\` if it exists
+2. **Check for active boulder state**: Read \`.kajiflow/work/sessions/$SESSION_ID.json\`
 
 3. **Decision logic**:
-   - If \`.kajiflow/work/boulder.json\` exists AND plan is NOT complete:
+   - If state exists AND plan is NOT complete:
      - **RESUME** work on existing plan
    - If no active plan OR plan is complete:
      - List available incomplete plans
      - If ONE plan: auto-select it
      - If MULTIPLE plans: show list and ask user to select
 
-4. **Create/Update boulder.json**:
+4. **Create/Update state**:
    \`\`\`json
    {
      "active_plan": "/absolute/path/to/tasks.md",
      "started_at": "ISO_TIMESTAMP",
-     "session_ids": ["session_id_1"],
+     "session_ids": ["$SESSION_ID"],
      "plan_name": "feature-name"
    }
    \`\`\`
 
 5. **Read the plan file** and start executing tasks using the senior-orchestrator loop.
 
-## CRITICAL
-- The session_id is injected by the hook.
-- Always update boulder.json BEFORE starting work.
-- If no plans exist, guide the user to creating one via \`/speckit.specify\`.
-`
+## CRITICAL RULES
+- **Update Session State**: Always update session state BEFORE starting work.
+- **Mark Progress**: Update \`tasks.md\` with \`[x]\` as you complete items.
+- **Verify Completion**: Run \`/speckit.analyze\` after all tasks are done to verify spec compliance.
+`;
