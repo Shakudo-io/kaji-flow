@@ -10,7 +10,7 @@ import {
 } from "../../features/boulder-state"
 import type { BoulderState } from "../../features/boulder-state"
 
-const TEST_STORAGE_ROOT = join(tmpdir(), `atlas-message-storage-${randomUUID()}`)
+const TEST_STORAGE_ROOT = join(tmpdir(), `senior-orchestrator-message-storage-${randomUUID()}`)
 const TEST_MESSAGE_STORAGE = join(TEST_STORAGE_ROOT, "message")
 const TEST_PART_STORAGE = join(TEST_STORAGE_ROOT, "part")
 
@@ -20,10 +20,10 @@ mock.module("../../features/hook-message-injector/constants", () => ({
   PART_STORAGE: TEST_PART_STORAGE,
 }))
 
-const { createAtlasHook } = await import("./index")
+const { createSeniorOrchestratorHook } = await import("./index")
 const { MESSAGE_STORAGE } = await import("../../features/hook-message-injector")
 
-describe("atlas hook", () => {
+describe("senior-orchestrator hook", () => {
   let TEST_DIR: string
   let SISYPHUS_DIR: string
 
@@ -38,7 +38,7 @@ describe("atlas hook", () => {
         },
       },
       _promptMock: promptMock,
-    } as unknown as Parameters<typeof createAtlasHook>[0] & { _promptMock: ReturnType<typeof mock> }
+    } as unknown as Parameters<typeof createSeniorOrchestratorHook>[0] & { _promptMock: ReturnType<typeof mock> }
   }
 
   function setupMessageStorage(sessionID: string, agent: string): void {
@@ -61,8 +61,8 @@ describe("atlas hook", () => {
   }
 
   beforeEach(() => {
-    TEST_DIR = join(tmpdir(), `atlas-test-${randomUUID()}`)
-    SISYPHUS_DIR = join(TEST_DIR, ".sisyphus")
+    TEST_DIR = join(tmpdir(), `senior-orchestrator-test-${randomUUID()}`)
+    SISYPHUS_DIR = join(TEST_DIR, ".kajiflow/work")
     if (!existsSync(TEST_DIR)) {
       mkdirSync(TEST_DIR, { recursive: true })
     }
@@ -83,7 +83,7 @@ describe("atlas hook", () => {
   describe("tool.execute.after handler", () => {
     test("should handle undefined output gracefully (issue #1035)", async () => {
       // given - hook and undefined output (e.g., from /review command)
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
 
       // when - calling with undefined output
       const result = await hook["tool.execute.after"](
@@ -97,7 +97,7 @@ describe("atlas hook", () => {
 
     test("should ignore non-task tools", async () => {
       // given - hook and non-task tool
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
       const output = {
         title: "Test Tool",
         output: "Original output",
@@ -114,8 +114,8 @@ describe("atlas hook", () => {
       expect(output.output).toBe("Original output")
     })
 
-     test("should not transform when caller is not Atlas", async () => {
-       // given - boulder state exists but caller agent in message storage is not Atlas
+     test("should not transform when caller is not SeniorOrchestrator", async () => {
+       // given - boulder state exists but caller agent in message storage is not SeniorOrchestrator
        const sessionID = "session-non-orchestrator-test"
        setupMessageStorage(sessionID, "other-agent")
       
@@ -130,9 +130,9 @@ describe("atlas hook", () => {
       }
       writeBoulderState(TEST_DIR, state)
 
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
       const output = {
-        title: "Sisyphus Task",
+        title: "Orchestrator Task",
         output: "Task completed successfully",
         metadata: {},
       }
@@ -149,14 +149,14 @@ describe("atlas hook", () => {
       cleanupMessageStorage(sessionID)
     })
 
-     test("should append standalone verification when no boulder state but caller is Atlas", async () => {
-       // given - no boulder state, but caller is Atlas
+     test("should append standalone verification when no boulder state but caller is SeniorOrchestrator", async () => {
+       // given - no boulder state, but caller is SeniorOrchestrator
        const sessionID = "session-no-boulder-test"
-       setupMessageStorage(sessionID, "atlas")
+       setupMessageStorage(sessionID, "senior-orchestrator")
       
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
       const output = {
-        title: "Sisyphus Task",
+        title: "Orchestrator Task",
         output: "Task completed successfully",
         metadata: {},
       }
@@ -175,10 +175,10 @@ describe("atlas hook", () => {
       cleanupMessageStorage(sessionID)
     })
 
-     test("should transform output when caller is Atlas with boulder state", async () => {
-       // given - Atlas caller with boulder state
+     test("should transform output when caller is SeniorOrchestrator with boulder state", async () => {
+       // given - SeniorOrchestrator caller with boulder state
        const sessionID = "session-transform-test"
-       setupMessageStorage(sessionID, "atlas")
+       setupMessageStorage(sessionID, "senior-orchestrator")
       
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [x] Task 2")
@@ -191,9 +191,9 @@ describe("atlas hook", () => {
       }
       writeBoulderState(TEST_DIR, state)
 
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
       const output = {
-        title: "Sisyphus Task",
+        title: "Orchestrator Task",
         output: "Task completed successfully",
         metadata: {},
       }
@@ -215,9 +215,9 @@ describe("atlas hook", () => {
     })
 
      test("should still transform when plan is complete (shows progress)", async () => {
-       // given - boulder state with complete plan, Atlas caller
+       // given - boulder state with complete plan, SeniorOrchestrator caller
        const sessionID = "session-complete-plan-test"
-       setupMessageStorage(sessionID, "atlas")
+       setupMessageStorage(sessionID, "senior-orchestrator")
       
       const planPath = join(TEST_DIR, "complete-plan.md")
       writeFileSync(planPath, "# Plan\n- [x] Task 1\n- [x] Task 2")
@@ -230,9 +230,9 @@ describe("atlas hook", () => {
       }
       writeBoulderState(TEST_DIR, state)
 
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
       const output = {
-        title: "Sisyphus Task",
+        title: "Orchestrator Task",
         output: "Original output",
         metadata: {},
       }
@@ -252,9 +252,9 @@ describe("atlas hook", () => {
     })
 
      test("should append session ID to boulder state if not present", async () => {
-       // given - boulder state without session-append-test, Atlas caller
+       // given - boulder state without session-append-test, SeniorOrchestrator caller
        const sessionID = "session-append-test"
-       setupMessageStorage(sessionID, "atlas")
+       setupMessageStorage(sessionID, "senior-orchestrator")
       
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1")
@@ -267,9 +267,9 @@ describe("atlas hook", () => {
       }
       writeBoulderState(TEST_DIR, state)
 
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
       const output = {
-        title: "Sisyphus Task",
+        title: "Orchestrator Task",
         output: "Task output",
         metadata: {},
       }
@@ -288,9 +288,9 @@ describe("atlas hook", () => {
     })
 
      test("should not duplicate existing session ID", async () => {
-       // given - boulder state already has session-dup-test, Atlas caller
+       // given - boulder state already has session-dup-test, SeniorOrchestrator caller
        const sessionID = "session-dup-test"
-       setupMessageStorage(sessionID, "atlas")
+       setupMessageStorage(sessionID, "senior-orchestrator")
       
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1")
@@ -303,9 +303,9 @@ describe("atlas hook", () => {
       }
       writeBoulderState(TEST_DIR, state)
 
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
       const output = {
-        title: "Sisyphus Task",
+        title: "Orchestrator Task",
         output: "Task output",
         metadata: {},
       }
@@ -325,9 +325,9 @@ describe("atlas hook", () => {
     })
 
      test("should include boulder.json path and notepad path in transformed output", async () => {
-       // given - boulder state, Atlas caller
+       // given - boulder state, SeniorOrchestrator caller
        const sessionID = "session-path-test"
-       setupMessageStorage(sessionID, "atlas")
+       setupMessageStorage(sessionID, "senior-orchestrator")
       
       const planPath = join(TEST_DIR, "my-feature.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2\n- [x] Task 3")
@@ -340,9 +340,9 @@ describe("atlas hook", () => {
       }
       writeBoulderState(TEST_DIR, state)
 
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
       const output = {
-        title: "Sisyphus Task",
+        title: "Orchestrator Task",
         output: "Task completed",
         metadata: {},
       }
@@ -362,9 +362,9 @@ describe("atlas hook", () => {
     })
 
      test("should include session_id and checkbox instructions in reminder", async () => {
-       // given - boulder state, Atlas caller
+       // given - boulder state, SeniorOrchestrator caller
        const sessionID = "session-resume-test"
-       setupMessageStorage(sessionID, "atlas")
+       setupMessageStorage(sessionID, "senior-orchestrator")
       
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1")
@@ -377,9 +377,9 @@ describe("atlas hook", () => {
       }
       writeBoulderState(TEST_DIR, state)
 
-      const hook = createAtlasHook(createMockPluginInput())
+      const hook = createSeniorOrchestratorHook(createMockPluginInput())
       const output = {
-        title: "Sisyphus Task",
+        title: "Orchestrator Task",
         output: "Task completed",
         metadata: {},
       }
@@ -402,16 +402,16 @@ describe("atlas hook", () => {
       const ORCHESTRATOR_SESSION = "orchestrator-write-test"
 
        beforeEach(() => {
-         setupMessageStorage(ORCHESTRATOR_SESSION, "atlas")
+         setupMessageStorage(ORCHESTRATOR_SESSION, "senior-orchestrator")
        })
 
       afterEach(() => {
         cleanupMessageStorage(ORCHESTRATOR_SESSION)
       })
 
-      test("should append delegation reminder when orchestrator writes outside .sisyphus/", async () => {
+      test("should append delegation reminder when orchestrator writes outside .kajiflow/work/", async () => {
         // given
-        const hook = createAtlasHook(createMockPluginInput())
+        const hook = createSeniorOrchestratorHook(createMockPluginInput())
         const output = {
           title: "Write",
           output: "File written successfully",
@@ -430,9 +430,9 @@ describe("atlas hook", () => {
         expect(output.output).toContain("task")
       })
 
-      test("should append delegation reminder when orchestrator edits outside .sisyphus/", async () => {
+      test("should append delegation reminder when orchestrator edits outside .kajiflow/work/", async () => {
         // given
-        const hook = createAtlasHook(createMockPluginInput())
+        const hook = createSeniorOrchestratorHook(createMockPluginInput())
         const output = {
           title: "Edit",
           output: "File edited successfully",
@@ -449,14 +449,14 @@ describe("atlas hook", () => {
         expect(output.output).toContain("ORCHESTRATOR, not an IMPLEMENTER")
       })
 
-      test("should NOT append reminder when orchestrator writes inside .sisyphus/", async () => {
+      test("should NOT append reminder when orchestrator writes inside .kajiflow/work/", async () => {
         // given
-        const hook = createAtlasHook(createMockPluginInput())
+        const hook = createSeniorOrchestratorHook(createMockPluginInput())
         const originalOutput = "File written successfully"
         const output = {
           title: "Write",
           output: originalOutput,
-          metadata: { filePath: "/project/.sisyphus/plans/work-plan.md" },
+          metadata: { filePath: "/project/.kajiflow/work/plans/work-plan.md" },
         }
 
         // when
@@ -470,12 +470,12 @@ describe("atlas hook", () => {
         expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
       })
 
-      test("should NOT append reminder when non-orchestrator writes outside .sisyphus/", async () => {
+      test("should NOT append reminder when non-orchestrator writes outside .kajiflow/work/", async () => {
         // given
         const nonOrchestratorSession = "non-orchestrator-session"
-        setupMessageStorage(nonOrchestratorSession, "sisyphus-junior")
+        setupMessageStorage(nonOrchestratorSession, "orchestrator-junior")
         
-        const hook = createAtlasHook(createMockPluginInput())
+        const hook = createSeniorOrchestratorHook(createMockPluginInput())
         const originalOutput = "File written successfully"
         const output = {
           title: "Write",
@@ -498,7 +498,7 @@ describe("atlas hook", () => {
 
       test("should NOT append reminder for read-only tools", async () => {
         // given
-        const hook = createAtlasHook(createMockPluginInput())
+        const hook = createSeniorOrchestratorHook(createMockPluginInput())
         const originalOutput = "File content"
         const output = {
           title: "Read",
@@ -518,7 +518,7 @@ describe("atlas hook", () => {
 
       test("should handle missing filePath gracefully", async () => {
         // given
-        const hook = createAtlasHook(createMockPluginInput())
+        const hook = createSeniorOrchestratorHook(createMockPluginInput())
         const originalOutput = "File written successfully"
         const output = {
           title: "Write",
@@ -537,14 +537,14 @@ describe("atlas hook", () => {
       })
 
       describe("cross-platform path validation (Windows support)", () => {
-        test("should NOT append reminder when orchestrator writes inside .sisyphus\\ (Windows backslash)", async () => {
+        test("should NOT append reminder when orchestrator writes inside .kajiflow/work\\ (Windows backslash)", async () => {
           // given
-          const hook = createAtlasHook(createMockPluginInput())
+          const hook = createSeniorOrchestratorHook(createMockPluginInput())
           const originalOutput = "File written successfully"
           const output = {
             title: "Write",
             output: originalOutput,
-            metadata: { filePath: ".sisyphus\\plans\\work-plan.md" },
+            metadata: { filePath: ".kajiflow/work\\plans\\work-plan.md" },
           }
 
           // when
@@ -558,14 +558,14 @@ describe("atlas hook", () => {
           expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
         })
 
-        test("should NOT append reminder when orchestrator writes inside .sisyphus with mixed separators", async () => {
+        test("should NOT append reminder when orchestrator writes inside .kajiflow/work with mixed separators", async () => {
           // given
-          const hook = createAtlasHook(createMockPluginInput())
+          const hook = createSeniorOrchestratorHook(createMockPluginInput())
           const originalOutput = "File written successfully"
           const output = {
             title: "Write",
             output: originalOutput,
-            metadata: { filePath: ".sisyphus\\plans/work-plan.md" },
+            metadata: { filePath: ".kajiflow/work\\plans/work-plan.md" },
           }
 
           // when
@@ -579,14 +579,14 @@ describe("atlas hook", () => {
           expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
         })
 
-        test("should NOT append reminder for absolute Windows path inside .sisyphus\\", async () => {
+        test("should NOT append reminder for absolute Windows path inside .kajiflow/work\\", async () => {
           // given
-          const hook = createAtlasHook(createMockPluginInput())
+          const hook = createSeniorOrchestratorHook(createMockPluginInput())
           const originalOutput = "File written successfully"
           const output = {
             title: "Write",
             output: originalOutput,
-            metadata: { filePath: "C:\\Users\\test\\project\\.sisyphus\\plans\\x.md" },
+            metadata: { filePath: "C:\\Users\\test\\project\\.kajiflow/work\\plans\\x.md" },
           }
 
           // when
@@ -600,9 +600,9 @@ describe("atlas hook", () => {
           expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
         })
 
-        test("should append reminder for Windows path outside .sisyphus\\", async () => {
+        test("should append reminder for Windows path outside .kajiflow/work\\", async () => {
           // given
-          const hook = createAtlasHook(createMockPluginInput())
+          const hook = createSeniorOrchestratorHook(createMockPluginInput())
           const output = {
             title: "Write",
             output: "File written successfully",
@@ -635,7 +635,7 @@ describe("atlas hook", () => {
          getMainSessionID: () => MAIN_SESSION_ID,
          subagentSessions: new Set<string>(),
        }))
-       setupMessageStorage(MAIN_SESSION_ID, "atlas")
+       setupMessageStorage(MAIN_SESSION_ID, "senior-orchestrator")
      })
 
     afterEach(() => {
@@ -656,7 +656,7 @@ describe("atlas hook", () => {
       writeBoulderState(TEST_DIR, state)
 
       const mockInput = createMockPluginInput()
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       // when
       await hook.handler({
@@ -677,7 +677,7 @@ describe("atlas hook", () => {
     test("should not inject when no boulder state exists", async () => {
       // given - no boulder state
       const mockInput = createMockPluginInput()
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       // when
       await hook.handler({
@@ -705,7 +705,7 @@ describe("atlas hook", () => {
       writeBoulderState(TEST_DIR, state)
 
       const mockInput = createMockPluginInput()
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       // when
       await hook.handler({
@@ -733,7 +733,7 @@ describe("atlas hook", () => {
       writeBoulderState(TEST_DIR, state)
 
       const mockInput = createMockPluginInput()
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       // when - send abort error then idle
       await hook.handler({
@@ -774,7 +774,7 @@ describe("atlas hook", () => {
        }
 
        const mockInput = createMockPluginInput()
-       const hook = createAtlasHook(mockInput, {
+       const hook = createSeniorOrchestratorHook(mockInput, {
          directory: TEST_DIR,
          backgroundManager: mockBackgroundManager as any,
        })
@@ -805,7 +805,7 @@ describe("atlas hook", () => {
        writeBoulderState(TEST_DIR, state)
 
        const mockInput = createMockPluginInput()
-       const hook = createAtlasHook(mockInput, {
+       const hook = createSeniorOrchestratorHook(mockInput, {
          directory: TEST_DIR,
          isContinuationStopped: (sessionID: string) => sessionID === MAIN_SESSION_ID,
        })
@@ -836,7 +836,7 @@ describe("atlas hook", () => {
       writeBoulderState(TEST_DIR, state)
 
       const mockInput = createMockPluginInput()
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       // when - abort error, then message update, then idle
       await hook.handler({
@@ -879,7 +879,7 @@ describe("atlas hook", () => {
       writeBoulderState(TEST_DIR, state)
 
       const mockInput = createMockPluginInput()
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       // when
       await hook.handler({
@@ -905,16 +905,16 @@ describe("atlas hook", () => {
          started_at: "2026-01-02T10:00:00Z",
          session_ids: [MAIN_SESSION_ID],
          plan_name: "test-plan",
-         agent: "atlas",
+         agent: "senior-orchestrator",
        }
        writeBoulderState(TEST_DIR, state)
 
        // given - last agent is NOT the boulder agent
        cleanupMessageStorage(MAIN_SESSION_ID)
-       setupMessageStorage(MAIN_SESSION_ID, "sisyphus")
+       setupMessageStorage(MAIN_SESSION_ID, "orchestrator")
 
        const mockInput = createMockPluginInput()
-       const hook = createAtlasHook(mockInput)
+       const hook = createSeniorOrchestratorHook(mockInput)
 
        // when
        await hook.handler({
@@ -928,8 +928,8 @@ describe("atlas hook", () => {
        expect(mockInput._promptMock).not.toHaveBeenCalled()
      })
 
-     test("should inject when last agent matches boulder agent even if non-Atlas", async () => {
-       // given - boulder state expects sisyphus and last agent is sisyphus
+     test("should inject when last agent matches boulder agent even if non-SeniorOrchestrator", async () => {
+       // given - boulder state expects orchestrator and last agent is orchestrator
        const planPath = join(TEST_DIR, "test-plan.md")
        writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
 
@@ -938,15 +938,15 @@ describe("atlas hook", () => {
          started_at: "2026-01-02T10:00:00Z",
          session_ids: [MAIN_SESSION_ID],
          plan_name: "test-plan",
-         agent: "sisyphus",
+         agent: "orchestrator",
        }
        writeBoulderState(TEST_DIR, state)
 
        cleanupMessageStorage(MAIN_SESSION_ID)
-       setupMessageStorage(MAIN_SESSION_ID, "sisyphus")
+       setupMessageStorage(MAIN_SESSION_ID, "orchestrator")
 
        const mockInput = createMockPluginInput()
-       const hook = createAtlasHook(mockInput)
+       const hook = createSeniorOrchestratorHook(mockInput)
 
        // when
        await hook.handler({
@@ -956,10 +956,10 @@ describe("atlas hook", () => {
          },
        })
 
-       // then - should call prompt for sisyphus
+       // then - should call prompt for orchestrator
        expect(mockInput._promptMock).toHaveBeenCalled()
        const callArgs = mockInput._promptMock.mock.calls[0][0]
-       expect(callArgs.body.agent).toBe("sisyphus")
+       expect(callArgs.body.agent).toBe("orchestrator")
      })
 
     test("should debounce rapid continuation injections (prevent infinite loop)", async () => {
@@ -976,7 +976,7 @@ describe("atlas hook", () => {
       writeBoulderState(TEST_DIR, state)
 
       const mockInput = createMockPluginInput()
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       // when - fire multiple idle events in rapid succession (simulating infinite loop bug)
       await hook.handler({
@@ -1017,7 +1017,7 @@ describe("atlas hook", () => {
 
       const promptMock = mock(() => Promise.reject(new Error("Bad Request")))
       const mockInput = createMockPluginInput({ promptMock })
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       const originalDateNow = Date.now
       let now = 0
@@ -1063,7 +1063,7 @@ describe("atlas hook", () => {
       promptMock.mockImplementationOnce(() => Promise.reject(new Error("Bad Request")))
 
       const mockInput = createMockPluginInput({ promptMock })
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       const originalDateNow = Date.now
       let now = 0
@@ -1099,7 +1099,7 @@ describe("atlas hook", () => {
 
       const promptMock = mock(() => Promise.reject(new Error("Bad Request")))
       const mockInput = createMockPluginInput({ promptMock })
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       const originalDateNow = Date.now
       let now = 0
@@ -1145,7 +1145,7 @@ describe("atlas hook", () => {
       writeBoulderState(TEST_DIR, state)
 
       const mockInput = createMockPluginInput()
-      const hook = createAtlasHook(mockInput)
+      const hook = createSeniorOrchestratorHook(mockInput)
 
       // when - create abort state then delete
       await hook.handler({

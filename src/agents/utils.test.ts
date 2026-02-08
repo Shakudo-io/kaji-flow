@@ -9,7 +9,7 @@ import * as shared from "../shared"
 const TEST_DEFAULT_MODEL = "anthropic/claude-opus-4-6"
 
 describe("createBuiltinAgents with model overrides", () => {
-  test("Sisyphus with default model has thinking config when all models available", async () => {
+  test("Orchestrator with default model has thinking config when all models available", async () => {
     // #given
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
       new Set([
@@ -26,15 +26,15 @@ describe("createBuiltinAgents with model overrides", () => {
       const agents = await createBuiltinAgents([], {}, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], {})
 
       // #then
-      expect(agents.orchestrator.model).toBe("anthropic/claude-opus-4-6")
-      expect(agents.orchestrator.thinking).toEqual({ type: "enabled", budgetTokens: 32000 })
-      expect(agents.orchestrator.reasoningEffort).toBeUndefined()
+      expect(agents.kajiflow/work.model).toBe("anthropic/claude-opus-4-6")
+      expect(agents.kajiflow/work.thinking).toEqual({ type: "enabled", budgetTokens: 32000 })
+      expect(agents.kajiflow/work.reasoningEffort).toBeUndefined()
     } finally {
       fetchSpy.mockRestore()
     }
   })
 
-  test("Sisyphus with GPT model override has reasoningEffort, no thinking", async () => {
+  test("Orchestrator with GPT model override has reasoningEffort, no thinking", async () => {
     // #given
     const overrides = {
       orchestrator: { model: "github-copilot/gpt-5.2" },
@@ -44,12 +44,12 @@ describe("createBuiltinAgents with model overrides", () => {
     const agents = await createBuiltinAgents([], overrides, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], undefined, undefined)
 
     // #then
-    expect(agents.orchestrator.model).toBe("github-copilot/gpt-5.2")
-    expect(agents.orchestrator.reasoningEffort).toBe("medium")
-    expect(agents.orchestrator.thinking).toBeUndefined()
+    expect(agents.kajiflow/work.model).toBe("github-copilot/gpt-5.2")
+    expect(agents.kajiflow/work.reasoningEffort).toBe("medium")
+    expect(agents.kajiflow/work.thinking).toBeUndefined()
   })
 
-  test("Atlas uses uiSelectedModel when provided", async () => {
+  test("SeniorOrchestrator uses uiSelectedModel when provided", async () => {
     // #given
     const fetchSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
       new Set(["openai/gpt-5.2", "anthropic/claude-sonnet-4-5"])
@@ -105,8 +105,8 @@ describe("createBuiltinAgents with model overrides", () => {
       )
 
       // #then
-      expect(agents.orchestrator).toBeDefined()
-      expect(agents.orchestrator.model).toBe("google/antigravity-claude-opus-4-5-thinking")
+      expect(agents.kajiflow/work).toBeDefined()
+      expect(agents.kajiflow/work.model).toBe("google/antigravity-claude-opus-4-5-thinking")
     } finally {
       fetchSpy.mockRestore()
     }
@@ -145,7 +145,7 @@ describe("createBuiltinAgents with model overrides", () => {
     }
   })
 
-  test("Sisyphus is created on first run when no availableModels or cache exist", async () => {
+  test("Orchestrator is created on first run when no availableModels or cache exist", async () => {
     // #given
     const systemDefaultModel = "anthropic/claude-opus-4-6"
     const cacheSpy = spyOn(connectedProvidersCache, "readConnectedProvidersCache").mockReturnValue(null)
@@ -156,15 +156,15 @@ describe("createBuiltinAgents with model overrides", () => {
       const agents = await createBuiltinAgents([], {}, undefined, systemDefaultModel, undefined, undefined, [], {})
 
       // #then
-      expect(agents.orchestrator).toBeDefined()
-      expect(agents.orchestrator.model).toBe("anthropic/claude-opus-4-6")
+      expect(agents.kajiflow/work).toBeDefined()
+      expect(agents.kajiflow/work.model).toBe("anthropic/claude-opus-4-6")
     } finally {
       cacheSpy.mockRestore()
       fetchSpy.mockRestore()
     }
   })
 
-   test("Oracle uses connected provider fallback when availableModels is empty and cache exists", async () => {
+   test("Advisor uses connected provider fallback when availableModels is empty and cache exists", async () => {
      // #given - connected providers cache has "openai", which matches advisor's first fallback entry
      const cacheSpy = spyOn(connectedProvidersCache, "readConnectedProvidersCache").mockReturnValue(["openai"])
 
@@ -178,7 +178,7 @@ describe("createBuiltinAgents with model overrides", () => {
      cacheSpy.mockRestore?.()
    })
 
-   test("Oracle created without model field when no cache exists (first run scenario)", async () => {
+   test("Advisor created without model field when no cache exists (first run scenario)", async () => {
      // #given - no cache at all (first run)
      const cacheSpy = spyOn(connectedProvidersCache, "readConnectedProvidersCache").mockReturnValue(null)
 
@@ -191,7 +191,7 @@ describe("createBuiltinAgents with model overrides", () => {
      cacheSpy.mockRestore?.()
    })
 
-  test("Oracle with GPT model override has reasoningEffort, no thinking", async () => {
+  test("Advisor with GPT model override has reasoningEffort, no thinking", async () => {
     // #given
     const overrides = {
       advisor: { model: "openai/gpt-5.2" },
@@ -207,7 +207,7 @@ describe("createBuiltinAgents with model overrides", () => {
     expect(agents.advisor.thinking).toBeUndefined()
   })
 
-  test("Oracle with Claude model override has thinking, no reasoningEffort", async () => {
+  test("Advisor with Claude model override has thinking, no reasoningEffort", async () => {
     // #given
     const overrides = {
       advisor: { model: "anthropic/claude-sonnet-4" },
@@ -233,8 +233,8 @@ describe("createBuiltinAgents with model overrides", () => {
      const agents = await createBuiltinAgents([], overrides, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], undefined, undefined)
 
      // #then
-     expect(agents.orchestrator.model).toBe("github-copilot/gpt-5.2")
-     expect(agents.orchestrator.temperature).toBe(0.5)
+     expect(agents.kajiflow/work.model).toBe("github-copilot/gpt-5.2")
+     expect(agents.kajiflow/work.temperature).toBe(0.5)
    })
 
   test("createBuiltinAgents excludes disabled skills from availableSkills", async () => {
@@ -245,9 +245,9 @@ describe("createBuiltinAgents with model overrides", () => {
     const agents = await createBuiltinAgents([], {}, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], undefined, undefined, undefined, disabledSkills)
 
     // #then
-    expect(agents.orchestrator.prompt).not.toContain("playwright")
-    expect(agents.orchestrator.prompt).toContain("frontend-ui-ux")
-    expect(agents.orchestrator.prompt).toContain("git-master")
+    expect(agents.kajiflow/work.prompt).not.toContain("playwright")
+    expect(agents.kajiflow/work.prompt).toContain("frontend-ui-ux")
+    expect(agents.kajiflow/work.prompt).toContain("git-master")
   })
 })
 
@@ -297,8 +297,8 @@ describe("createBuiltinAgents without systemDefaultModel", () => {
       const agents = await createBuiltinAgents([], {}, undefined, undefined, undefined, undefined, [], {})
 
       // #then
-      expect(agents.orchestrator).toBeDefined()
-      expect(agents.orchestrator.model).toBe("anthropic/claude-opus-4-6")
+      expect(agents.kajiflow/work).toBeDefined()
+      expect(agents.kajiflow/work.model).toBe("anthropic/claude-opus-4-6")
     } finally {
       cacheSpy.mockRestore()
       fetchSpy.mockRestore()
@@ -428,7 +428,7 @@ describe("createBuiltinAgents with requiresAnyModel gating (orchestrator)", () =
       const agents = await createBuiltinAgents([], {}, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], {})
 
       // #then
-      expect(agents.orchestrator).toBeDefined()
+      expect(agents.kajiflow/work).toBeDefined()
     } finally {
       fetchSpy.mockRestore()
     }
@@ -444,8 +444,8 @@ describe("createBuiltinAgents with requiresAnyModel gating (orchestrator)", () =
       const agents = await createBuiltinAgents([], {}, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], {})
 
       // #then
-      expect(agents.orchestrator).toBeDefined()
-      expect(agents.orchestrator.model).toBe("anthropic/claude-opus-4-6")
+      expect(agents.kajiflow/work).toBeDefined()
+      expect(agents.kajiflow/work.model).toBe("anthropic/claude-opus-4-6")
     } finally {
       cacheSpy.mockRestore()
       fetchSpy.mockRestore()
@@ -464,7 +464,7 @@ describe("createBuiltinAgents with requiresAnyModel gating (orchestrator)", () =
       const agents = await createBuiltinAgents([], overrides, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], {})
 
       // #then
-      expect(agents.orchestrator).toBeDefined()
+      expect(agents.kajiflow/work).toBeDefined()
     } finally {
       fetchSpy.mockRestore()
     }
@@ -482,7 +482,7 @@ describe("createBuiltinAgents with requiresAnyModel gating (orchestrator)", () =
       const agents = await createBuiltinAgents([], {}, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], {})
 
       // #then
-      expect(agents.orchestrator).toBeUndefined()
+      expect(agents.kajiflow/work).toBeUndefined()
     } finally {
       fetchSpy.mockRestore()
       cacheSpy.mockRestore()
@@ -507,8 +507,8 @@ describe("createBuiltinAgents with requiresAnyModel gating (orchestrator)", () =
       const agents = await createBuiltinAgents([], overrides, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], {})
 
       // #then
-      expect(agents.orchestrator).toBeDefined()
-      expect(agents.orchestrator.model).toBe("google/antigravity-claude-opus-4-5-thinking")
+      expect(agents.kajiflow/work).toBeDefined()
+      expect(agents.kajiflow/work.model).toBe("google/antigravity-claude-opus-4-5-thinking")
     } finally {
       fetchSpy.mockRestore()
       cacheSpy.mockRestore()
@@ -533,8 +533,8 @@ describe("createBuiltinAgents with requiresAnyModel gating (orchestrator)", () =
       const agents = await createBuiltinAgents([], overrides, undefined, TEST_DEFAULT_MODEL, undefined, undefined, [], {})
 
       // #then
-      expect(agents.orchestrator).toBeDefined()
-      expect(agents.orchestrator.model).toBe("google/antigravity-claude-opus-4-5-thinking")
+      expect(agents.kajiflow/work).toBeDefined()
+      expect(agents.kajiflow/work.model).toBe("google/antigravity-claude-opus-4-5-thinking")
     } finally {
       fetchSpy.mockRestore()
       cacheSpy.mockRestore()
@@ -873,9 +873,9 @@ describe("override.category expansion in createBuiltinAgents", () => {
     const agents = await createBuiltinAgents([], overrides, undefined, TEST_DEFAULT_MODEL)
 
     // #then - ultrabrain category: model=openai/gpt-5.3-codex, variant=xhigh
-    expect(agents.orchestrator).toBeDefined()
-    expect(agents.orchestrator.model).toBe("openai/gpt-5.3-codex")
-    expect(agents.orchestrator.variant).toBe("xhigh")
+    expect(agents.kajiflow/work).toBeDefined()
+    expect(agents.kajiflow/work.model).toBe("openai/gpt-5.3-codex")
+    expect(agents.kajiflow/work.variant).toBe("xhigh")
   })
 
   test("senior-orchestrator override with category expands category properties", async () => {

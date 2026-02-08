@@ -97,7 +97,7 @@ afterEach(() => {
   ;(modelResolver.resolveModelWithFallback as any)?.mockRestore?.()
 })
 
-describe("Sisyphus-Junior model inheritance", () => {
+describe("Orchestrator-Junior model inheritance", () => {
   test("does not inherit UI-selected model as system default", async () => {
     // #given
     const pluginConfig: KajiFlowConfig = {}
@@ -120,7 +120,7 @@ describe("Sisyphus-Junior model inheritance", () => {
 })
 
 describe("Plan agent demote behavior", () => {
-  test("orders core agents as sisyphus -> hephaestus -> prometheus -> atlas", async () => {
+  test("orders core agents as orchestrator -> developer -> planner -> senior-orchestrator", async () => {
     // #given
     const createBuiltinAgentsMock = agents.createBuiltinAgents as unknown as {
       mockResolvedValue: (value: Record<string, unknown>) => void
@@ -159,7 +159,7 @@ describe("Plan agent demote behavior", () => {
     expect(ordered).toEqual(coreAgents)
   })
 
-  test("plan agent should be demoted to subagent without inheriting prometheus prompt", async () => {
+  test("plan agent should be demoted to subagent without inheriting planner prompt", async () => {
     // #given
     const pluginConfig: KajiFlowConfig = {
       orchestrator_config: {
@@ -189,7 +189,7 @@ describe("Plan agent demote behavior", () => {
     // #when
     await handler(config)
 
-    // #then - plan is demoted to subagent but does NOT inherit prometheus prompt
+    // #then - plan is demoted to subagent but does NOT inherit planner prompt
     const agents = config.agent as Record<string, { mode?: string; name?: string; prompt?: string }>
     expect(agents.plan).toBeDefined()
     expect(agents.plan.mode).toBe("subagent")
@@ -226,7 +226,7 @@ describe("Plan agent demote behavior", () => {
     // #when
     await handler(config)
 
-    // #then - plan is not touched, prometheus is not created
+    // #then - plan is not touched, planner is not created
     const agents = config.agent as Record<string, { mode?: string; name?: string; prompt?: string }>
     expect(agents.planner).toBeUndefined()
     expect(agents.plan).toBeDefined()
@@ -234,7 +234,7 @@ describe("Plan agent demote behavior", () => {
     expect(agents.plan.prompt).toBe("original plan prompt")
   })
 
-  test("prometheus should have mode 'all' to be callable via task", async () => {
+  test("planner should have mode 'all' to be callable via task", async () => {
     // given
     const pluginConfig: KajiFlowConfig = {
       orchestrator_config: {
@@ -265,7 +265,7 @@ describe("Plan agent demote behavior", () => {
 })
 
 describe("Agent permission defaults", () => {
-  test("hephaestus should allow task", async () => {
+  test("developer should allow task", async () => {
     // #given
     const createBuiltinAgentsMock = agents.createBuiltinAgents as unknown as {
       mockResolvedValue: (value: Record<string, unknown>) => void
@@ -299,7 +299,7 @@ describe("Agent permission defaults", () => {
   })
 })
 
-describe("Prometheus category config resolution", () => {
+describe("Planner category config resolution", () => {
   test("resolves ultrabrain category config", () => {
     // given
     const categoryName = "ultrabrain"
@@ -399,7 +399,7 @@ describe("Prometheus category config resolution", () => {
   })
 })
 
-describe("Prometheus direct override priority over category", () => {
+describe("Planner direct override priority over category", () => {
   test("direct reasoningEffort takes priority over category reasoningEffort", async () => {
     // given - category has reasoningEffort=xhigh, direct override says "low"
     const pluginConfig: KajiFlowConfig = {
@@ -522,8 +522,8 @@ describe("Prometheus direct override priority over category", () => {
     expect(agents.planner.temperature).toBe(0.1)
   })
 
-  test("prometheus prompt_append is appended to base prompt", async () => {
-    // #given - prometheus override with prompt_append
+  test("planner prompt_append is appended to base prompt", async () => {
+    // #given - planner override with prompt_append
     const customInstructions = "## Custom Project Rules\nUse max 2 commits."
     const pluginConfig: KajiFlowConfig = {
       orchestrator_config: {
@@ -554,7 +554,7 @@ describe("Prometheus direct override priority over category", () => {
     // #then - prompt_append is appended to base prompt, not overwriting it
     const agents = config.agent as Record<string, { prompt?: string }>
     expect(agents.planner).toBeDefined()
-    expect(agents.planner.prompt).toContain("Prometheus")
+    expect(agents.planner.prompt).toContain("Planner")
     expect(agents.planner.prompt).toContain(customInstructions)
     expect(agents.planner.prompt!.endsWith(customInstructions)).toBe(true)
   })

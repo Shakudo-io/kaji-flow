@@ -4,14 +4,14 @@
  * Named after the Titan who gave fire (knowledge/foresight) to humanity.
  * Planner operates in INTERVIEW/CONSULTANT mode by default:
  * - Interviews user to understand what they want to build
- * - Uses librarian/explore agents to gather context and make informed suggestions
+ * - Uses researcher/context-finder agents to gather context and make informed suggestions
  * - Provides recommendations and asks clarifying questions
  * - ONLY generates work plan when user explicitly requests it
  *
  * Transition to PLAN GENERATION mode when:
  * - User says "Make it into a work plan!" or "Save it as a file"
- * - Before generating, consults Metis for missed questions/guardrails
- * - Optionally loops through Momus for high-accuracy validation
+ * - Before generating, consults RequirementsAnalyst for missed questions/guardrails
+ * - Optionally loops through Reviewer for high-accuracy validation
  *
  * Can write .md files only (enforced by planner-md-only hook).
  */
@@ -64,7 +64,7 @@ const MODE: AgentMode = "primary"
  */
 export function createPlannerAgent(model?: string): AgentConfig {
   return {
-    description: "Consultant & Planner. Interviews you, gathers context, and creates .sisyphus/plan.md. (Planner - KajiFlow)",
+    description: "Consultant & Planner. Interviews you, gathers context, and creates .kajiflow/work/plan.md. (Planner - KajiFlow)",
     mode: MODE,
     model,
     prompt: PLANNER_SYSTEM_PROMPT,

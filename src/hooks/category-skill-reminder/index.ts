@@ -8,9 +8,9 @@ import { log } from "../../shared"
  * These are orchestrator agents that delegate work to specialized agents.
  */
 const TARGET_AGENTS = new Set([
-  "sisyphus",
-  "sisyphus-junior",
-  "atlas",
+  "orchestrator",
+  "orchestrator-junior",
+  "senior-orchestrator",
 ])
 
 /**
@@ -112,8 +112,8 @@ export function createCategorySkillReminderHook(
     if (!agent) return false
     const agentLower = agent.toLowerCase()
     return TARGET_AGENTS.has(agentLower) || 
-           agentLower.includes("sisyphus") || 
-           agentLower.includes("atlas")
+           agentLower.includes("orchestrator") || 
+           agentLower.includes("senior-orchestrator")
   }
 
   const toolExecuteAfter = async (

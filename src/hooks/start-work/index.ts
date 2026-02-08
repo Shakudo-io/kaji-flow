@@ -60,7 +60,7 @@ export function createStartWorkHook(ctx: PluginInput) {
         .trim() || ""
 
       // Only trigger on actual command execution (contains <session-context> tag)
-      // NOT on description text like "Start Sisyphus work session from Prometheus plan"
+      // NOT on description text like "Start Orchestrator work session from Planner plan"
       const isStartWorkCommand = promptText.includes("<session-context>")
 
       if (!isStartWorkCommand) {
@@ -71,7 +71,7 @@ export function createStartWorkHook(ctx: PluginInput) {
         sessionID: input.sessionID,
       })
 
-      updateSessionAgent(input.sessionID, "atlas") // Always switch: fixes #1298
+      updateSessionAgent(input.sessionID, "senior-orchestrator") // Always switch: fixes #1298
 
       const existingState = readBoulderState(ctx.directory)
       const sessionId = input.sessionID
@@ -102,7 +102,7 @@ All ${progress.total} tasks are done. Create a new plan with: /plan "your task"`
             if (existingState) {
               clearBoulderState(ctx.directory)
             }
-            const newState = createBoulderState(matchedPlan, sessionId, "atlas")
+            const newState = createBoulderState(matchedPlan, sessionId, "senior-orchestrator")
             writeBoulderState(ctx.directory, newState)
             
             contextInfo = `
@@ -176,8 +176,8 @@ Looking for new plans...`
 
 ## No Plans Found
 
-No Prometheus plan files found at .sisyphus/plans/
-Use Prometheus to create a work plan first: /plan "your task"`
+No Planner plan files found at .kajiflow/work/plans/
+Use Planner to create a work plan first: /plan "your task"`
         } else if (incompletePlans.length === 0) {
           contextInfo += `
 
@@ -187,7 +187,7 @@ All ${plans.length} plan(s) are complete. Create a new plan with: /plan "your ta
         } else if (incompletePlans.length === 1) {
           const planPath = incompletePlans[0]
           const progress = getPlanProgress(planPath)
-          const newState = createBoulderState(planPath, sessionId, "atlas")
+          const newState = createBoulderState(planPath, sessionId, "senior-orchestrator")
           writeBoulderState(ctx.directory, newState)
 
           contextInfo += `

@@ -33,7 +33,7 @@ describe("look_at tool conditional registration", () => {
     // when checking if agent is enabled
     // then should return true (enabled)
     it("returns true when multimodal-looker is not disabled", () => {
-      const disabledAgents: string[] = ["oracle", "librarian"]
+      const disabledAgents: string[] = ["advisor", "researcher"]
       const isEnabled = !disabledAgents.some(
         (agent) => agent.toLowerCase() === "multimodal-looker"
       )

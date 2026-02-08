@@ -4,21 +4,21 @@
  */
 export const LEGACY_AGENT_MAPPING: Record<string, string> = {
   // Core Agents
-  sisyphus: "orchestrator",
-  atlas: "senior-orchestrator",
-  prometheus: "planner",
-  hephaestus: "developer",
+  orchestrator: "orchestrator",
+  "senior-orchestrator": "senior-orchestrator",
+  planner: "planner",
+  developer: "developer",
   
   // Specialists
-  metis: "requirements-analyst",
-  momus: "reviewer",
-  librarian: "researcher",
-  explore: "context-finder",
-  oracle: "advisor",
+  "requirements-analyst": "requirements-analyst",
+  reviewer: "reviewer",
+  researcher: "researcher",
+  "context-finder": "context-finder",
+  advisor: "advisor",
   "multimodal-looker": "vision-analyst",
   
   // Legacy/Removed (map to closest equivalent or ignore)
-  "sisyphus-junior": "developer", 
+  "orchestrator-junior": "developer", 
 }
 
 /**

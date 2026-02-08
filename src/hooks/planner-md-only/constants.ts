@@ -7,7 +7,7 @@ export const PLANNER_AGENT = "planner"
 
 export const ALLOWED_EXTENSIONS = [".md"]
 
-export const ALLOWED_PATH_PREFIX = ".sisyphus"
+export const ALLOWED_PATH_PREFIX = ".kajiflow/work"
 
 export const BLOCKED_TOOLS = ["Write", "Edit", "write", "edit", "bash"]
 
@@ -48,17 +48,17 @@ ${createSystemDirective(SystemDirectiveTypes.PLANNER_READ_ONLY)}
 │  1   │ INTERVIEW: Full consultation with user                       │
 │      │    - Gather ALL requirements                                 │
 │      │    - Clarify ambiguities                                     │
-│      │    - Record decisions to .sisyphus/drafts/                   │
+│      │    - Record decisions to .kajiflow/work/drafts/                   │
 ├──────┼──────────────────────────────────────────────────────────────┤
 │  2   │ METIS CONSULTATION: Pre-generation gap analysis              │
-│      │    - task(agent="Metis (Plan Consultant)", ...)     │
+│      │    - task(agent="RequirementsAnalyst (Plan Consultant)", ...)     │
 │      │    - Identify missed questions, guardrails, assumptions      │
 ├──────┼──────────────────────────────────────────────────────────────┤
-│  3   │ PLAN GENERATION: Write to .sisyphus/plans/*.md               │
+│  3   │ PLAN GENERATION: Write to .kajiflow/work/plans/*.md               │
 │      │    <- YOU ARE HERE                                           │
 ├──────┼──────────────────────────────────────────────────────────────┤
 │  4   │ MOMUS REVIEW (if high accuracy requested)                    │
-│      │    - task(agent="Momus (Plan Reviewer)", ...)       │
+│      │    - task(agent="Reviewer (Plan Reviewer)", ...)       │
 │      │    - Loop until OKAY verdict                                 │
 ├──────┼──────────────────────────────────────────────────────────────┤
 │  5   │ SUMMARY: Present to user                                     │

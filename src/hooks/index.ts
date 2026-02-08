@@ -27,7 +27,7 @@ export { createEditErrorRecoveryHook } from "./edit-error-recovery";
 export { createPlannerMdOnlyHook } from "./planner-md-only";
 export { createTaskResumeInfoHook } from "./task-resume-info";
 export { createStartWorkHook } from "./start-work";
-export { createAtlasHook as createSeniorOrchestratorHook } from "./senior-orchestrator";
+export { createSeniorOrchestratorHook as createSeniorOrchestratorHook } from "./senior-orchestrator";
 export { createDelegateTaskRetryHook } from "./delegate-task-retry";
 export { createQuestionLabelTruncatorHook } from "./question-label-truncator";
 export { createSubagentQuestionBlockerHook } from "./subagent-question-blocker";

@@ -20,10 +20,10 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
       const resolvedPath = normalize(isAbsolute(filePath) ? filePath : resolve(ctx.directory, filePath))
 
       if (existsSync(resolvedPath)) {
-        const sisyphusRoot = join(ctx.directory, ".sisyphus") + sep
-        const isSisyphusMarkdown = resolvedPath.startsWith(sisyphusRoot) && resolvedPath.endsWith(".md")
-        if (isSisyphusMarkdown) {
-          log("[write-existing-file-guard] Allowing .sisyphus/*.md overwrite", {
+        const orchestratorRoot = join(ctx.directory, ".kajiflow/work") + sep
+        const isOrchestratorMarkdown = resolvedPath.startsWith(orchestratorRoot) && resolvedPath.endsWith(".md")
+        if (isOrchestratorMarkdown) {
+          log("[write-existing-file-guard] Allowing .kajiflow/work/*.md overwrite", {
             sessionID: input.sessionID,
             filePath,
           })

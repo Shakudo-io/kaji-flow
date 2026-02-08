@@ -3,25 +3,25 @@ import { AGENT_DISPLAY_NAMES, getAgentDisplayName } from "./agent-display-names"
 
 describe("getAgentDisplayName", () => {
   it("returns display name for lowercase config key (new format)", () => {
-    // given config key "sisyphus"
-    const configKey = "sisyphus"
+    // given config key "orchestrator"
+    const configKey = "orchestrator"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Sisyphus (Ultraworker)"
-    expect(result).toBe("Sisyphus (Ultraworker)")
+    // then returns "Orchestrator (Ultraworker)"
+    expect(result).toBe("Orchestrator (Ultraworker)")
   })
 
   it("returns display name for uppercase config key (old format - case-insensitive)", () => {
-    // given config key "Sisyphus" (old format)
-    const configKey = "Sisyphus"
+    // given config key "Orchestrator" (old format)
+    const configKey = "Orchestrator"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Sisyphus (Ultraworker)" (case-insensitive lookup)
-    expect(result).toBe("Sisyphus (Ultraworker)")
+    // then returns "Orchestrator (Ultraworker)" (case-insensitive lookup)
+    expect(result).toBe("Orchestrator (Ultraworker)")
   })
 
   it("returns original key for unknown agents (fallback)", () => {
@@ -35,81 +35,81 @@ describe("getAgentDisplayName", () => {
     expect(result).toBe("custom-agent")
   })
 
-  it("returns display name for atlas", () => {
-    // given config key "atlas"
-    const configKey = "atlas"
+  it("returns display name for senior-orchestrator", () => {
+    // given config key "senior-orchestrator"
+    const configKey = "senior-orchestrator"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Atlas (Plan Execution Orchestrator)"
-    expect(result).toBe("Atlas (Plan Execution Orchestrator)")
+    // then returns "SeniorOrchestrator (Plan Execution Orchestrator)"
+    expect(result).toBe("SeniorOrchestrator (Plan Execution Orchestrator)")
   })
 
-  it("returns display name for prometheus", () => {
-    // given config key "prometheus"
-    const configKey = "prometheus"
+  it("returns display name for planner", () => {
+    // given config key "planner"
+    const configKey = "planner"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Prometheus (Plan Builder)"
-    expect(result).toBe("Prometheus (Plan Builder)")
+    // then returns "Planner (Plan Builder)"
+    expect(result).toBe("Planner (Plan Builder)")
   })
 
-  it("returns display name for metis", () => {
-    // given config key "metis"
-    const configKey = "metis"
+  it("returns display name for requirements-analyst", () => {
+    // given config key "requirements-analyst"
+    const configKey = "requirements-analyst"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Metis (Plan Consultant)"
-    expect(result).toBe("Metis (Plan Consultant)")
+    // then returns "RequirementsAnalyst (Plan Consultant)"
+    expect(result).toBe("RequirementsAnalyst (Plan Consultant)")
   })
 
-  it("returns display name for momus", () => {
-    // given config key "momus"
-    const configKey = "momus"
+  it("returns display name for reviewer", () => {
+    // given config key "reviewer"
+    const configKey = "reviewer"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "Momus (Plan Reviewer)"
-    expect(result).toBe("Momus (Plan Reviewer)")
+    // then returns "Reviewer (Plan Reviewer)"
+    expect(result).toBe("Reviewer (Plan Reviewer)")
   })
 
-  it("returns display name for oracle", () => {
-    // given config key "oracle"
-    const configKey = "oracle"
+  it("returns display name for advisor", () => {
+    // given config key "advisor"
+    const configKey = "advisor"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "oracle"
-    expect(result).toBe("oracle")
+    // then returns "advisor"
+    expect(result).toBe("advisor")
   })
 
-  it("returns display name for librarian", () => {
-    // given config key "librarian"
-    const configKey = "librarian"
+  it("returns display name for researcher", () => {
+    // given config key "researcher"
+    const configKey = "researcher"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "librarian"
-    expect(result).toBe("librarian")
+    // then returns "researcher"
+    expect(result).toBe("researcher")
   })
 
-  it("returns display name for explore", () => {
-    // given config key "explore"
-    const configKey = "explore"
+  it("returns display name for context-finder", () => {
+    // given config key "context-finder"
+    const configKey = "context-finder"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "explore"
-    expect(result).toBe("explore")
+    // then returns "context-finder"
+    expect(result).toBe("context-finder")
   })
 
   it("returns display name for multimodal-looker", () => {
@@ -126,14 +126,14 @@ describe("getAgentDisplayName", () => {
   it("contains all expected agent mappings", () => {
     // given expected mappings
     const expectedMappings = {
-      sisyphus: "Sisyphus (Ultraworker)",
-      atlas: "Atlas (Plan Execution Orchestrator)",
-      prometheus: "Prometheus (Plan Builder)",
-      metis: "Metis (Plan Consultant)",
-      momus: "Momus (Plan Reviewer)",
-      oracle: "oracle",
-      librarian: "librarian",
-      explore: "explore",
+      orchestrator: "Orchestrator (Ultraworker)",
+      senior-orchestrator: "SeniorOrchestrator (Plan Execution Orchestrator)",
+      planner: "Planner (Plan Builder)",
+      requirements-analyst: "RequirementsAnalyst (Plan Consultant)",
+      reviewer: "Reviewer (Plan Reviewer)",
+      advisor: "advisor",
+      researcher: "researcher",
+      context-finder: "context-finder",
       "multimodal-looker": "multimodal-looker",
     }
 

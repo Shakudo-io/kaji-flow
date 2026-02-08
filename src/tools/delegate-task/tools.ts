@@ -56,10 +56,10 @@ export function createDelegateTask(options: DelegateTaskToolOptions): ToolDefini
 MUTUALLY EXCLUSIVE: Provide EITHER category OR subagent_type, not both (unless continuing a session).
 
 - load_skills: ALWAYS REQUIRED. Pass at least one skill name (e.g., ["playwright"], ["git-master", "frontend-ui-ux"]).
-- category: Use predefined category → Spawns Sisyphus-Junior with category config
+- category: Use predefined category → Spawns Orchestrator-Junior with category config
   Available categories:
 ${categoryList}
-- subagent_type: Use specific agent directly (e.g., "oracle", "explore")
+- subagent_type: Use specific agent directly (e.g., "advisor", "context-finder")
 - run_in_background: true=async (returns task_id), false=sync (waits for result). Default: false. Use background=true ONLY for parallel exploration with 5+ independent queries.
 - session_id: Existing Task session to continue (from previous task output). Continues agent with FULL CONTEXT PRESERVED - saves tokens, maintains continuity.
 - command: The command that triggered this task (optional, for slash command tracking).
@@ -79,7 +79,7 @@ Prompts MUST be in English.`
       prompt: tool.schema.string().describe("Full detailed prompt for the agent"),
       run_in_background: tool.schema.boolean().describe("true=async (returns task_id), false=sync (waits). Default: false"),
       category: tool.schema.string().optional().describe(`Category (e.g., ${categoryExamples}). Mutually exclusive with subagent_type.`),
-      subagent_type: tool.schema.string().optional().describe("Agent name (e.g., 'oracle', 'explore'). Mutually exclusive with category."),
+      subagent_type: tool.schema.string().optional().describe("Agent name (e.g., 'advisor', 'context-finder'). Mutually exclusive with category."),
       session_id: tool.schema.string().optional().describe("Existing Task session to continue"),
       command: tool.schema.string().optional().describe("The command that triggered this task"),
     },
@@ -87,7 +87,7 @@ Prompts MUST be in English.`
       const ctx = toolContext as ToolContextWithMetadata
 
       if (args.category && !args.subagent_type) {
-        args.subagent_type = "hephaestus"
+        args.subagent_type = "developer"
       }
       await ctx.metadata?.({
         title: args.description,
@@ -123,7 +123,7 @@ Prompts MUST be in English.`
         return executeSyncContinuation(args, ctx, options)
       }
 
-      if (args.category && args.subagent_type && args.subagent_type !== "hephaestus") {
+      if (args.category && args.subagent_type && args.subagent_type !== "developer") {
         return `Invalid arguments: Provide EITHER category OR subagent_type, not both.`
       }
 

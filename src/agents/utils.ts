@@ -30,21 +30,21 @@ const agentSources: Record<BuiltinAgentName, AgentSource> = {
   "requirements-analyst": createRequirementsAnalystAgent,
   reviewer: createReviewerAgent,
   "senior-orchestrator": createSeniorOrchestratorAgent as unknown as AgentFactory,
-  planner: undefined as unknown as AgentFactory, // Planner is handled specially or not in this map? Legacy had Prometheus separately?
-  // Checking legacy utils.ts, Prometheus wasn't in agentSources map. It was likely handled in createBuiltinAgents but skipped?
+  planner: undefined as unknown as AgentFactory, // Planner is handled specially or not in this map? Legacy had Planner separately?
+  // Checking legacy utils.ts, Planner wasn't in agentSources map. It was likely handled in createBuiltinAgents but skipped?
   // Legacy code:
   // const agentSources: ... = {
-  //   sisyphus: createSisyphusAgent,
-  //   hephaestus: createHephaestusAgent,
-  //   oracle: createOracleAgent,
-  //   librarian: createLibrarianAgent,
-  //   explore: createExploreAgent,
+  //   orchestrator: createOrchestratorAgent,
+  //   developer: createDeveloperAgent,
+  //   advisor: createAdvisorAgent,
+  //   researcher: createResearcherAgent,
+  //   context-finder: createContextFinderAgent,
   //   "multimodal-looker": createMultimodalLookerAgent,
-  //   metis: createMetisAgent,
-  //   momus: createMomusAgent,
-  //   atlas: createAtlasAgent...
+  //   requirements-analyst: createRequirementsAnalystAgent,
+  //   reviewer: createReviewerAgent,
+  //   senior-orchestrator: createSeniorOrchestratorAgent...
   // }
-  // Prometheus wasn't in the list. It must be created manually or added later.
+  // Planner wasn't in the list. It must be created manually or added later.
   // Wait, I see "Plan agent demote behavior" tests in config-handler. Maybe it's dynamic?
   // Let's assume it's not in the loop for now.
 }
@@ -341,7 +341,7 @@ export async function createBuiltinAgents(
     }
   }
 
-   // Handle Orchestrator (formerly Sisyphus)
+   // Handle Orchestrator (formerly Orchestrator)
    const orchestratorOverride = agentOverrides["orchestrator"]
    const orchestratorRequirement = AGENT_MODEL_REQUIREMENTS["orchestrator"]
    const hasOrchestratorExplicitConfig = orchestratorOverride !== undefined
@@ -386,7 +386,7 @@ export async function createBuiltinAgents(
     }
    }
 
-  // Handle Developer (formerly Hephaestus)
+  // Handle Developer (formerly Developer)
   if (!disabledAgents.includes("developer")) {
     const developerOverride = agentOverrides["developer"]
     const developerRequirement = AGENT_MODEL_REQUIREMENTS["developer"]
@@ -447,7 +447,7 @@ export async function createBuiltinAgents(
      result[name] = config
    }
 
-    // Handle Senior Orchestrator (formerly Atlas)
+    // Handle SeniorOrchestrator (formerly SeniorOrchestrator)
     if (!disabledAgents.includes("senior-orchestrator")) {
       const seniorOrchestratorOverride = agentOverrides["senior-orchestrator"]
       const seniorOrchestratorRequirement = AGENT_MODEL_REQUIREMENTS["senior-orchestrator"]

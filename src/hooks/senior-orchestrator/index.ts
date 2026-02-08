@@ -14,7 +14,7 @@ import { createSystemDirective, SYSTEM_DIRECTIVE_PREFIX, SystemDirectiveTypes } 
 import { isCallerOrchestrator, getMessageDir } from "../../shared/session-utils"
 import type { BackgroundManager } from "../../features/background-agent"
 
-export const HOOK_NAME = "atlas"
+export const HOOK_NAME = "senior-orchestrator"
 
 /**
  * Cross-platform check if a path is inside .kajiflow/work/ directory.
@@ -119,7 +119,7 @@ ${createSystemDirective(SystemDirectiveTypes.DELEGATION_REQUIRED)}
 
 **STOP. YOU ARE VIOLATING ORCHESTRATOR PROTOCOL.**
 
-You (Senior Orchestrator) are attempting to directly modify a file outside \`.kajiflow/work/\`.
+You (SeniorOrchestrator) are attempting to directly modify a file outside \`.kajiflow/work/\`.
 
 **Path attempted:** $FILE_PATH
 
@@ -365,7 +365,7 @@ function formatFileChanges(stats: GitFileStat[], notepadPath?: string): string {
   }
 
   if (notepadPath) {
-    const notepadStat = stats.find((s) => s.path.includes("notepad") || s.path.includes(".sisyphus"))
+    const notepadStat = stats.find((s) => s.path.includes("notepad") || s.path.includes(".kajiflow/work"))
     if (notepadStat) {
       lines.push("[NOTEPAD UPDATED]")
       lines.push(`  ${notepadStat.path}  (+${notepadStat.added})`)
@@ -396,7 +396,7 @@ interface SessionState {
 
 const CONTINUATION_COOLDOWN_MS = 5000
 
-export interface AtlasHookOptions {
+export interface SeniorOrchestratorHookOptions {
   directory: string
   backgroundManager?: BackgroundManager
   isContinuationStopped?: (sessionID: string) => boolean
@@ -423,9 +423,9 @@ function isAbortError(error: unknown): boolean {
   return false
 }
 
-export function createAtlasHook(
+export function createSeniorOrchestratorHook(
   ctx: PluginInput,
-  options?: AtlasHookOptions
+  options?: SeniorOrchestratorHookOptions
 ) {
   const backgroundManager = options?.backgroundManager
   const sessions = new Map<string, SessionState>()

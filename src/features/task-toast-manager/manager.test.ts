@@ -50,7 +50,7 @@ describe("TaskToastManager", () => {
       const task = {
         id: "task_2",
         description: "Test task without skills",
-        agent: "explore",
+        agent: "context-finder",
         isBackground: true,
       }
 
@@ -70,13 +70,13 @@ describe("TaskToastManager", () => {
       toastManager.addTask({
         id: "task_1",
         description: "First task",
-        agent: "explore",
+        agent: "context-finder",
         isBackground: true,
       })
       toastManager.addTask({
         id: "task_2",
         description: "Second task",
-        agent: "librarian",
+        agent: "researcher",
         isBackground: true,
       })
 
@@ -84,7 +84,7 @@ describe("TaskToastManager", () => {
       toastManager.addTask({
         id: "task_3",
         description: "Third task",
-        agent: "explore",
+        agent: "context-finder",
         isBackground: true,
       })
 
@@ -110,7 +110,7 @@ describe("TaskToastManager", () => {
       managerWithConcurrency.addTask({
         id: "task_1",
         description: "Test task",
-        agent: "explore",
+        agent: "context-finder",
         isBackground: true,
       })
 
@@ -233,7 +233,7 @@ describe("TaskToastManager", () => {
       const task = {
         id: "task_4",
         description: "Task without model info",
-        agent: "explore",
+        agent: "context-finder",
         isBackground: true,
       }
 

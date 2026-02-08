@@ -13,11 +13,11 @@ import type { AvailableAgent, AvailableTool, AvailableSkill, AvailableCategory }
 import {
   buildKeyTriggersSection,
   buildToolSelectionTable,
-  buildExploreSection,
-  buildLibrarianSection,
+  buildContextFinderSection,
+  buildResearcherSection,
   buildDelegationTable,
   buildCategorySkillsDelegationGuide,
-  buildOracleSection,
+  buildAdvisorSection,
   buildHardBlocksSection,
   buildAntiPatternsSection,
   categorizeTools,
@@ -142,11 +142,11 @@ function buildDynamicOrchestratorPrompt(
 ): string {
   const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills)
   const toolSelection = buildToolSelectionTable(availableAgents, availableTools, availableSkills)
-  const exploreSection = buildExploreSection(availableAgents)
-  const librarianSection = buildLibrarianSection(availableAgents)
+  const contextFinderSection = buildContextFinderSection(availableAgents)
+  const researcherSection = buildResearcherSection(availableAgents)
   const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills)
   const delegationTable = buildDelegationTable(availableAgents)
-  const oracleSection = buildOracleSection(availableAgents)
+  const advisorSection = buildAdvisorSection(availableAgents)
   const hardBlocks = buildHardBlocksSection()
   const antiPatterns = buildAntiPatternsSection()
   const taskManagementSection = buildTaskManagementSection(useTaskSystem)
@@ -187,7 +187,7 @@ ${speckitSection}
 |------|--------|--------|
 | **Trivial** | Single file, known location, direct answer | Direct tools only (UNLESS Key Trigger applies) |
 | **Explicit** | Specific file/line, clear command | Execute directly |
-| **Exploratory** | "How does X work?", "Find Y" | Fire explore (1-3) + tools in parallel |
+| **Exploratory** | "How does X work?", "Find Y" | Fire context-finder (1-3) + tools in parallel |
 | **Open-ended** | "Improve", "Refactor", "Add feature" | Assess codebase first |
 | **Ambiguous** | Unclear scope, multiple interpretations | Ask ONE clarifying question |
 
@@ -260,13 +260,13 @@ IMPORTANT: If codebase appears undisciplined, verify before assuming:
 
 ${toolSelection}
 
-${exploreSection}
+${contextFinderSection}
 
-${librarianSection}
+${researcherSection}
 
 ### Parallel Execution (DEFAULT behavior)
 
-**Explore/Researcher = Grep, not consultants.**
+**ContextFinder/Researcher = Grep, not consultants.**
 
 \`\`\`typescript
 // CORRECT: Always background, always parallel
@@ -280,7 +280,7 @@ task(subagent_type="researcher", run_in_background=true, load_skills=[], descrip
 // Continue working immediately. Collect with background_output when needed.
 
 // WRONG: Sequential or blocking
-result = task(..., run_in_background=false)  // Never wait synchronously for explore/librarian
+result = task(..., run_in_background=false)  // Never wait synchronously for context-finder/researcher
 \`\`\`
 
 ### Background Result Collection:
@@ -297,7 +297,7 @@ STOP searching when:
 - 2 search iterations yielded no new useful data
 - Direct answer found
 
-**DO NOT over-explore. Time is precious.**
+**DO NOT over-context-finder. Time is precious.**
 
 ---
 
@@ -429,7 +429,7 @@ If verification fails:
 - This conserves resources and ensures clean workflow completion
 </Behavior_Instructions>
 
-${oracleSection}
+${advisorSection}
 
 ${taskManagementSection}
 

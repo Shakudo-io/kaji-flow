@@ -14,11 +14,11 @@ export * from "./constants"
 /**
  * Cross-platform path validator for Planner file writes.
  * Uses path.resolve/relative instead of string matching to handle:
- * - Windows backslashes (e.g., .sisyphus\\plans\\x.md)
- * - Mixed separators (e.g., .sisyphus\\plans/x.md)
+ * - Windows backslashes (e.g., .kajiflow/work\\plans\\x.md)
+ * - Mixed separators (e.g., .kajiflow/work\\plans/x.md)
  * - Case-insensitive directory/extension matching
  * - Workspace confinement (blocks paths outside root or via traversal)
- * - Nested project paths (e.g., parent/.sisyphus/... when ctx.directory is parent)
+ * - Nested project paths (e.g., parent/.kajiflow/work/... when ctx.directory is parent)
  */
 function isAllowedFile(filePath: string, workspaceRoot: string): boolean {
   // 1. Resolve to absolute path
@@ -32,9 +32,9 @@ function isAllowedFile(filePath: string, workspaceRoot: string): boolean {
     return false
   }
 
-  // 4. Check if .sisyphus/ or .sisyphus\ exists anywhere in the path (case-insensitive)
-  // This handles both direct paths (.sisyphus/x.md) and nested paths (project/.sisyphus/x.md)
-  if (!/\.sisyphus[/\\]/i.test(rel)) {
+  // 4. Check if .kajiflow/work/ or .kajiflow/work\ exists anywhere in the path (case-insensitive)
+  // This handles both direct paths (.kajiflow/work/x.md) and nested paths (project/.kajiflow/work/x.md)
+  if (!/\.kajiflow\/work[/\\]/i.test(rel)) {
     return false
   }
 
@@ -81,7 +81,7 @@ function getAgentFromMessageFiles(sessionID: string): string | undefined {
  * This fixes issue #927 where after interruption:
  * - In-memory map is cleared (process restart)
  * - Message files return "planner" (oldest message from /plan)
- * - But boulder.json has agent: "atlas" (set by /start-work)
+ * - But boulder.json has agent: "senior-orchestrator" (set by /start-work)
  */
 function getAgentFromSession(sessionID: string, directory: string): string | undefined {
   // Check in-memory first (current session)
@@ -150,14 +150,14 @@ export function createPlannerMdOnlyHook(ctx: PluginInput) {
       }
 
        if (!isAllowedFile(filePath, ctx.directory)) {
-         log(`[${HOOK_NAME}] Blocked: Planner can only write to .sisyphus/*.md`, {
+         log(`[${HOOK_NAME}] Blocked: Planner can only write to .kajiflow/work/*.md`, {
            sessionID: input.sessionID,
            tool: toolName,
            filePath,
            agent: agentName,
          })
          throw new Error(
-           `[${HOOK_NAME}] ${getAgentDisplayName("planner")} can only write/edit .md files inside .sisyphus/ directory. ` +
+           `[${HOOK_NAME}] ${getAgentDisplayName("planner")} can only write/edit .md files inside .kajiflow/work/ directory. ` +
            `Attempted to modify: ${filePath}. ` +
            `${getAgentDisplayName("planner")} is a READ-ONLY planner. Use /start-work to execute the plan. ` +
            `APOLOGIZE TO THE USER, REMIND OF YOUR PLAN WRITING PROCESSES, TELL USER WHAT YOU WILL GOING TO DO AS THE PROCESS, WRITE THE PLAN`
@@ -165,7 +165,7 @@ export function createPlannerMdOnlyHook(ctx: PluginInput) {
        }
 
       const normalizedPath = filePath.toLowerCase().replace(/\\/g, "/")
-      if (normalizedPath.includes(".sisyphus/plans/") || normalizedPath.includes(".sisyphus\\plans\\")) {
+      if (normalizedPath.includes(".kajiflow/work/plans/") || normalizedPath.includes(".kajiflow/work\\plans\\")) {
         log(`[${HOOK_NAME}] Injecting workflow reminder for plan write`, {
           sessionID: input.sessionID,
           tool: toolName,
@@ -175,7 +175,7 @@ export function createPlannerMdOnlyHook(ctx: PluginInput) {
         output.message = (output.message || "") + PLANNER_WORKFLOW_REMINDER
       }
 
-      log(`[${HOOK_NAME}] Allowed: .sisyphus/*.md write permitted`, {
+      log(`[${HOOK_NAME}] Allowed: .kajiflow/work/*.md write permitted`, {
         sessionID: input.sessionID,
         tool: toolName,
         filePath,

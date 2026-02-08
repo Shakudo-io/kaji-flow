@@ -1,8 +1,8 @@
 /**
  * Boulder State Types
  *
- * Manages the active work plan state for Sisyphus orchestrator.
- * Named after Sisyphus's boulder - the eternal task that must be rolled.
+ * Manages the active work plan state for Orchestrator orchestrator.
+ * Named after Orchestrator's boulder - the eternal task that must be rolled.
  */
 
 export interface BoulderState {
@@ -14,7 +14,7 @@ export interface BoulderState {
   session_ids: string[]
   /** Plan name derived from filename */
   plan_name: string
-  /** Agent type to use when resuming (e.g., 'atlas') */
+  /** Agent type to use when resuming (e.g., 'senior-orchestrator') */
   agent?: string
 }
 

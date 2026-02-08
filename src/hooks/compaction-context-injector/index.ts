@@ -36,13 +36,13 @@ When summarizing this session, you MUST include the following sections in your s
 - If no explicit constraints exist, write "None"
 
 ## 7. Agent Verification State (Critical for Reviewers)
-- **Current Agent**: What agent is running (momus, oracle, etc.)
+- **Current Agent**: What agent is running (reviewer, advisor, etc.)
 - **Verification Progress**: Files already verified/validated
 - **Pending Verifications**: Files still needing verification
 - **Previous Rejections**: If reviewer agent, what was rejected and why
 - **Acceptance Status**: Current state of review process
 
-This section is CRITICAL for reviewer agents (momus, oracle) to maintain continuity.
+This section is CRITICAL for reviewer agents (reviewer, advisor) to maintain continuity.
 
 This context is critical for maintaining continuity after compaction.
 `

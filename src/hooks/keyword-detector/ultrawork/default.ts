@@ -2,7 +2,7 @@
  * Default ultrawork message optimized for Claude series models.
  *
  * Key characteristics:
- * - Natural tool-like usage of explore/librarian agents (run_in_background=true)
+ * - Natural tool-like usage of context-finder/researcher agents (run_in_background=true)
  * - Parallel execution emphasized - fire agents and continue working
  * - Simple workflow: EXPLORES → GATHER → PLAN → DELEGATE
  */
@@ -29,9 +29,9 @@ export const ULTRAWORK_DEFAULT_MESSAGE = `<ultrawork-mode>
 **IF YOU ARE NOT 100% CERTAIN:**
 
 1. **THINK DEEPLY** - What is the user's TRUE intent? What problem are they REALLY trying to solve?
-2. **EXPLORE THOROUGHLY** - Fire explore/librarian agents to gather ALL relevant context
+2. **EXPLORE THOROUGHLY** - Fire context-finder/researcher agents to gather ALL relevant context
 3. **CONSULT SPECIALISTS** - For hard/complex tasks, DO NOT struggle alone. Delegate:
-   - **Oracle**: Conventional problems - architecture, debugging, complex logic
+   - **Advisor**: Conventional problems - architecture, debugging, complex logic
    - **Artistry**: Non-conventional problems - different approach needed, unusual constraints
 4. **ASK THE USER** - If ambiguity remains after exploration, ASK. Don't guess.
 
@@ -44,9 +44,9 @@ export const ULTRAWORK_DEFAULT_MESSAGE = `<ultrawork-mode>
 
 **WHEN IN DOUBT:**
 \`\`\`
-task(subagent_type="explore", load_skills=[], prompt="Find [X] patterns in codebase", run_in_background=true)
-task(subagent_type="librarian", load_skills=[], prompt="Find docs/examples for [Y]", run_in_background=true)
-task(subagent_type="oracle", load_skills=[], prompt="Review my approach: [describe plan]", run_in_background=false)
+task(subagent_type="context-finder", load_skills=[], prompt="Find [X] patterns in codebase", run_in_background=true)
+task(subagent_type="researcher", load_skills=[], prompt="Find docs/examples for [Y]", run_in_background=true)
+task(subagent_type="advisor", load_skills=[], prompt="Review my approach: [describe plan]", run_in_background=false)
 \`\`\`
 
 **ONLY AFTER YOU HAVE:**
@@ -81,9 +81,9 @@ task(subagent_type="oracle", load_skills=[], prompt="Review my approach: [descri
 **IF YOU ENCOUNTER A BLOCKER:**
 1. **DO NOT** give up
 2. **DO NOT** deliver a compromised version
-3. **DO** consult specialists (oracle for conventional, artistry for non-conventional)
+3. **DO** consult specialists (advisor for conventional, artistry for non-conventional)
 4. **DO** ask the user for guidance
-5. **DO** explore alternative approaches
+5. **DO** context-finder alternative approaches
 
 **THE USER ASKED FOR X. DELIVER EXACTLY X. PERIOD.**
 
@@ -147,10 +147,10 @@ task(session_id="ses_abc123", prompt="Here's my answer to your question: ...")
 
 | Task Type | Action | Why |
 |-----------|--------|-----|
-| Codebase exploration | task(subagent_type="explore", run_in_background=true) | Parallel, context-efficient |
-| Documentation lookup | task(subagent_type="librarian", run_in_background=true) | Specialized knowledge |
+| Codebase exploration | task(subagent_type="context-finder", run_in_background=true) | Parallel, context-efficient |
+| Documentation lookup | task(subagent_type="researcher", run_in_background=true) | Specialized knowledge |
 | Planning | task(subagent_type="plan") | Parallel task graph + structured TODO list |
-| Hard problem (conventional) | task(subagent_type="oracle") | Architecture, debugging, complex logic |
+| Hard problem (conventional) | task(subagent_type="advisor") | Architecture, debugging, complex logic |
 | Hard problem (non-conventional) | task(category="artistry", load_skills=[...]) | Different approach needed |
 | Implementation | task(category="...", load_skills=[...]) | Domain-optimized models |
 
@@ -184,7 +184,7 @@ task(category="quick", load_skills=["git-master"])
 
 ## WORKFLOW
 1. Analyze the request and identify required capabilities
-2. Spawn exploration/librarian agents via task(run_in_background=true) in PARALLEL (10+ if needed)
+2. Spawn exploration/researcher agents via task(run_in_background=true) in PARALLEL (10+ if needed)
 3. Use Plan agent with gathered context to create detailed work breakdown
 4. Execute with continuous verification against original requirements
 

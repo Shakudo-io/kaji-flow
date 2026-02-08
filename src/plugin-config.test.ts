@@ -88,7 +88,7 @@ describe("mergeConfigs", () => {
       const override: KajiFlowConfig = {
         agents: {
           advisor: { temperature: 0.5 },
-          explore: { model: "anthropic/claude-haiku-4-5" },
+          context-finder: { model: "anthropic/claude-haiku-4-5" },
         },
       };
 
@@ -96,7 +96,7 @@ describe("mergeConfigs", () => {
 
       expect(result.agents?.advisor?.model).toBe("openai/gpt-5.2");
       expect(result.agents?.advisor?.temperature).toBe(0.5);
-      expect(result.agents?.explore?.model).toBe("anthropic/claude-haiku-4-5");
+      expect(result.agents?.context-finder?.model).toBe("anthropic/claude-haiku-4-5");
     });
 
     it("should merge disabled arrays without duplicates", () => {

@@ -48,7 +48,7 @@ export interface DelegateTaskToolOptions {
   directory: string
   userCategories?: CategoriesConfig
   gitMasterConfig?: GitMasterConfig
-  sisyphusJuniorModel?: string
+  orchestratorJuniorModel?: string
   browserProvider?: BrowserAutomationProvider
   disabledSkills?: Set<string>
   availableCategories?: AvailableCategory[]

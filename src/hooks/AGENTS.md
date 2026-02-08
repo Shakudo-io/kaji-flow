@@ -14,7 +14,7 @@
 ## STRUCTURE
 ```
 hooks/
-├── atlas/                      # Main orchestration (770 lines)
+├── senior-orchestrator/                      # Main orchestration (770 lines)
 ├── anthropic-context-window-limit-recovery/ # Auto-summarize
 ├── todo-continuation-enforcer.ts # Force TODO completion (517 lines)
 ├── ralph-loop/                 # Self-referential dev loop (428 lines)
@@ -32,7 +32,7 @@ hooks/
 ├── think-mode/                 # Dynamic thinking budget
 ├── keyword-detector/           # ultrawork/search/analyze modes
 ├── background-notification/    # OS notification
-├── prometheus-md-only/         # Planner read-only mode
+├── planner-md-only/         # Planner read-only mode
 ├── agent-usage-reminder/       # Specialized agent hints
 ├── auto-update-checker/        # Plugin update check (304 lines)
 ├── tool-output-truncator.ts    # Prevents context bloat
@@ -40,12 +40,12 @@ hooks/
 ├── delegate-task-retry/        # Retries failed delegations
 ├── interactive-bash-session/   # Tmux session management
 ├── non-interactive-env/        # Non-TTY environment handling
-├── start-work/                 # Sisyphus work session starter
+├── start-work/                 # Orchestrator work session starter
 ├── task-resume-info/           # Resume info for cancelled tasks
 ├── question-label-truncator/   # Auto-truncates question labels
 ├── category-skill-reminder/    # Reminds of category skills
 ├── empty-task-response-detector.ts # Detects empty responses
-├── sisyphus-junior-notepad/    # Sisyphus Junior notepad
+├── orchestrator-junior-notepad/    # Orchestrator Junior notepad
 ├── stop-continuation-guard/    # Guards stop continuation
 ├── subagent-question-blocker/  # Blocks subagent questions
 ├── task-reminder/              # Task progress reminders
@@ -67,8 +67,8 @@ hooks/
 
 ## EXECUTION ORDER
 - **UserPromptSubmit**: keywordDetector → claudeCodeHooks → autoSlashCommand → startWork
-- **PreToolUse**: subagentQuestionBlocker → questionLabelTruncator → claudeCodeHooks → nonInteractiveEnv → commentChecker → directoryAgentsInjector → directoryReadmeInjector → rulesInjector → prometheusMdOnly → sisyphusJuniorNotepad → writeExistingFileGuard → atlasHook
-- **PostToolUse**: claudeCodeHooks → toolOutputTruncator → contextWindowMonitor → commentChecker → directoryAgentsInjector → directoryReadmeInjector → rulesInjector → emptyTaskResponseDetector → agentUsageReminder → interactiveBashSession → editErrorRecovery → delegateTaskRetry → atlasHook → taskResumeInfo → taskReminder
+- **PreToolUse**: subagentQuestionBlocker → questionLabelTruncator → claudeCodeHooks → nonInteractiveEnv → commentChecker → directoryAgentsInjector → directoryReadmeInjector → rulesInjector → plannerMdOnly → orchestratorJuniorNotepad → writeExistingFileGuard → senior-orchestratorHook
+- **PostToolUse**: claudeCodeHooks → toolOutputTruncator → contextWindowMonitor → commentChecker → directoryAgentsInjector → directoryReadmeInjector → rulesInjector → emptyTaskResponseDetector → agentUsageReminder → interactiveBashSession → editErrorRecovery → delegateTaskRetry → senior-orchestratorHook → taskResumeInfo → taskReminder
 
 ## HOW TO ADD
 1. Create `src/hooks/name/` with `index.ts` exporting `createMyHook(ctx)`

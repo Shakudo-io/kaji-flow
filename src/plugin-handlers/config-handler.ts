@@ -215,7 +215,7 @@ export function createConfigHandler(deps: ConfigHandlerDeps) {
       ])
     );
 
-    const isSisyphusEnabled = pluginConfig.orchestrator_config?.disabled !== true;
+    const isOrchestratorEnabled = pluginConfig.orchestrator_config?.disabled !== true;
     const builderEnabled =
       pluginConfig.orchestrator_config?.default_builder_enabled ?? false;
     const plannerEnabled =
@@ -229,15 +229,15 @@ export function createConfigHandler(deps: ConfigHandlerDeps) {
     > & {
       build?: Record<string, unknown>;
       plan?: Record<string, unknown>;
-      explore?: { tools?: Record<string, unknown> };
-      librarian?: { tools?: Record<string, unknown> };
-      "multimodal-looker"?: { tools?: Record<string, unknown> };
+      "context-finder"?: { tools?: Record<string, unknown> };
+      researcher?: { tools?: Record<string, unknown> };
+      "vision-analyst"?: { tools?: Record<string, unknown> };
       "senior-orchestrator"?: { tools?: Record<string, unknown> };
       orchestrator?: { tools?: Record<string, unknown> };
     };
     const configAgent = config.agent as AgentConfig | undefined;
 
-    if (isSisyphusEnabled && builtinAgents.orchestrator) {
+    if (isOrchestratorEnabled && builtinAgents.orchestrator) {
       (config as { default_agent?: string }).default_agent = "orchestrator";
 
       const agentConfig: Record<string, unknown> = {
@@ -326,7 +326,7 @@ export function createConfigHandler(deps: ConfigHandlerDeps) {
           mode: "all" as const,
           prompt: PLANNER_SYSTEM_PROMPT,
           permission: PLANNER_PERMISSION,
-          description: `${configAgent?.plan?.description ?? "Plan agent"} (Prometheus - KajiFlow)`,
+          description: `${configAgent?.plan?.description ?? "Plan agent"} (Planner - KajiFlow)`,
           color: (configAgent?.plan?.color as string) ?? "#FF5722", // Deep Orange - Fire/Flame theme
           ...(temperatureToUse !== undefined ? { temperature: temperatureToUse } : {}),
           ...(topPToUse !== undefined ? { top_p: topPToUse } : {}),
@@ -341,7 +341,7 @@ export function createConfigHandler(deps: ConfigHandlerDeps) {
             : {}),
         };
 
-        // Properly handle prompt_append for Prometheus
+        // Properly handle prompt_append for Planner
         // Extract prompt_append and append it to prompt instead of shallow spread
         // Fixes: https://github.com/code-yeongyu/kajiflow/issues/723
         if (plannerOverride) {
@@ -429,12 +429,12 @@ export function createConfigHandler(deps: ConfigHandlerDeps) {
     const isCliRunMode = process.env.OPENCODE_CLI_RUN_MODE === "true";
     const questionPermission = isCliRunMode ? "deny" : "allow";
     
-    if (agentResult.librarian) {
-      const agent = agentResult.librarian as AgentWithPermission;
+    if (agentResult.researcher) {
+      const agent = agentResult.researcher as AgentWithPermission;
       agent.permission = { ...agent.permission, "grep_app_*": "allow" };
     }
-    if (agentResult["multimodal-looker"]) {
-      const agent = agentResult["multimodal-looker"] as AgentWithPermission;
+    if (agentResult["vision-analyst"]) {
+      const agent = agentResult["vision-analyst"] as AgentWithPermission;
       agent.permission = { ...agent.permission, task: "deny", look_at: "deny" };
     }
     if (agentResult["senior-orchestrator"]) {

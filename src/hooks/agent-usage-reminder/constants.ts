@@ -32,13 +32,13 @@ export const REMINDER_MESSAGE = `
 
 You called a search/fetch tool directly without leveraging specialized agents.
 
-RECOMMENDED: Use task with explore/librarian agents for better results:
+RECOMMENDED: Use task with context-finder/researcher agents for better results:
 
 \`\`\`
 // Parallel exploration - fire multiple agents simultaneously
-task(agent="explore", prompt="Find all files matching pattern X")
-task(agent="explore", prompt="Search for implementation of Y") 
-task(agent="librarian", prompt="Lookup documentation for Z")
+task(agent="context-finder", prompt="Find all files matching pattern X")
+task(agent="context-finder", prompt="Search for implementation of Y") 
+task(agent="researcher", prompt="Lookup documentation for Z")
 
 // Then continue your work while they run in background
 // System will notify you when each completes

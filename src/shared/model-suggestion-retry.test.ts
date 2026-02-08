@@ -247,7 +247,7 @@ describe("promptWithModelSuggestionRetry", () => {
       promptWithModelSuggestionRetry(client as any, {
         path: { id: "session-1" },
         body: {
-          agent: "explore",
+          agent: "context-finder",
           parts: [{ type: "text", text: "hello" }],
           model: { providerID: "anthropic", modelID: "claude-sonet-4" },
         },
@@ -310,7 +310,7 @@ describe("promptWithModelSuggestionRetry", () => {
     await promptWithModelSuggestionRetry(client as any, {
       path: { id: "session-1" },
       body: {
-        agent: "explore",
+        agent: "context-finder",
         system: "You are a helpful agent",
         tools: { task: false },
         parts: [{ type: "text", text: "hello" }],
@@ -321,7 +321,7 @@ describe("promptWithModelSuggestionRetry", () => {
 
     // then call should pass all fields through unchanged
     const call = promptMock.mock.calls[0][0]
-    expect(call.body.agent).toBe("explore")
+    expect(call.body.agent).toBe("context-finder")
     expect(call.body.system).toBe("You are a helpful agent")
     expect(call.body.tools).toEqual({ task: false })
     expect(call.body.variant).toBe("max")

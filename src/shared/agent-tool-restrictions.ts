@@ -12,24 +12,24 @@ const EXPLORATION_AGENT_DENYLIST: Record<string, boolean> = {
 }
 
 const AGENT_RESTRICTIONS: Record<string, Record<string, boolean>> = {
-  explore: EXPLORATION_AGENT_DENYLIST,
+  "context-finder": EXPLORATION_AGENT_DENYLIST,
 
-  librarian: EXPLORATION_AGENT_DENYLIST,
+  researcher: EXPLORATION_AGENT_DENYLIST,
 
-  oracle: {
+  advisor: {
     write: false,
     edit: false,
     task: false,
     call_kaji_agent: false,
   },
 
-  metis: {
+  "requirements-analyst": {
     write: false,
     edit: false,
     task: false,
   },
 
-  momus: {
+  reviewer: {
     write: false,
     edit: false,
     task: false,

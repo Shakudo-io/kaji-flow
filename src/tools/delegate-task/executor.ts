@@ -924,7 +924,7 @@ Available categories: ${categoryNames.join(", ")}`,
   const isUnstableAgent = resolved.config.is_unstable_agent === true || (unstableModel ? unstableModel.includes("gemini") || unstableModel.includes("minimax") : false)
 
   return {
-    agentToUse: "hephaestus",
+    agentToUse: "developer",
     categoryModel,
     categoryPromptAppend,
     modelInfo,
@@ -947,13 +947,13 @@ export async function resolveSubagentExecution(
 
   const agentName = args.subagent_type.trim()
 
-  if (agentName.toLowerCase() === "hephaestus".toLowerCase()) {
+  if (agentName.toLowerCase() === "developer".toLowerCase()) {
     return {
       agentToUse: "",
       categoryModel: undefined,
-      error: `Cannot use subagent_type="${"hephaestus"}" directly. Use category parameter instead (e.g., ${categoryExamples}).
+      error: `Cannot use subagent_type="${"developer"}" directly. Use category parameter instead (e.g., ${categoryExamples}).
 
-Sisyphus-Junior is spawned automatically when you specify a category. Pick the appropriate category for your task domain.`,
+Orchestrator-Junior is spawned automatically when you specify a category. Pick the appropriate category for your task domain.`,
     }
   }
 
@@ -961,7 +961,7 @@ Sisyphus-Junior is spawned automatically when you specify a category. Pick the a
     return {
       agentToUse: "",
       categoryModel: undefined,
-    error: `You are prometheus. You cannot delegate to prometheus via task.
+    error: `You are planner. You cannot delegate to planner via task.
 
 Create the work plan directly - that's your job as the planning agent.`,
     }

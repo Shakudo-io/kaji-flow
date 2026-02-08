@@ -4,11 +4,11 @@ import type { AvailableAgent, AvailableTool, AvailableSkill, AvailableCategory }
 import {
   buildKeyTriggersSection,
   buildToolSelectionTable,
-  buildExploreSection,
-  buildLibrarianSection,
+  buildContextFinderSection,
+  buildResearcherSection,
   buildCategorySkillsDelegationGuide,
   buildDelegationTable,
-  buildOracleSection,
+  buildAdvisorSection,
   buildHardBlocksSection,
   buildAntiPatternsSection,
   categorizeTools,
@@ -102,7 +102,7 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
  * Optimized for:
  * - Goal-oriented autonomous execution (not step-by-step instructions)
  * - Deep exploration before decisive action
- * - Active use of explore/librarian agents for comprehensive context
+ * - Active use of context-finder/researcher agents for comprehensive context
  * - End-to-end task completion without premature stopping
  */
 
@@ -115,11 +115,11 @@ function buildDeveloperPrompt(
 ): string {
   const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills)
   const toolSelection = buildToolSelectionTable(availableAgents, availableTools, availableSkills)
-  const exploreSection = buildExploreSection(availableAgents)
-  const librarianSection = buildLibrarianSection(availableAgents)
+  const contextFinderSection = buildContextFinderSection(availableAgents)
+  const researcherSection = buildResearcherSection(availableAgents)
   const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, availableSkills)
   const delegationTable = buildDelegationTable(availableAgents)
-  const oracleSection = buildOracleSection(availableAgents)
+  const advisorSection = buildAdvisorSection(availableAgents)
   const hardBlocks = buildHardBlocksSection()
   const antiPatterns = buildAntiPatternsSection()
   const todoDiscipline = buildTodoDisciplineSection(useTaskSystem)
@@ -150,7 +150,7 @@ When blocked:
 1. Try a different approach (there's always another way)
 2. Decompose the problem into smaller pieces
 3. Challenge your assumptions
-4. Explore how others solved similar problems
+4. ContextFinder how others solved similar problems
 
 Asking the user is the LAST resort after exhausting creative alternatives.
 Your job is to SOLVE problems, not report them.
@@ -184,7 +184,7 @@ ${keyTriggers}
 |------|--------|--------|
 | **Trivial** | Single file, known location, <10 lines | Direct tools only (UNLESS Key Trigger applies) |
 | **Explicit** | Specific file/line, clear command | Execute directly |
-| **Exploratory** | "How does X work?", "Find Y" | Fire explore (1-3) + tools in parallel |
+| **Exploratory** | "How does X work?", "Find Y" | Fire context-finder (1-3) + tools in parallel |
 | **Open-ended** | "Improve", "Refactor", "Add feature" | Full Execution Loop required |
 | **Ambiguous** | Unclear scope, multiple interpretations | Ask ONE clarifying question |
 
@@ -197,7 +197,7 @@ ${keyTriggers}
 | Situation | Action |
 |-----------|--------|
 | Single valid interpretation | Proceed immediately |
-| Missing info that MIGHT exist | **EXPLORE FIRST** - use tools (gh, git, grep, explore agents) to find it |
+| Missing info that MIGHT exist | **EXPLORE FIRST** - use tools (gh, git, grep, context-finder agents) to find it |
 | Multiple plausible interpretations | Cover ALL likely intents comprehensively, don't ask |
 | Info not findable after exploration | State your best-guess interpretation, proceed with it |
 | Truly impossible to proceed | Ask ONE precise question (LAST RESORT) |
@@ -208,7 +208,7 @@ ${keyTriggers}
 User: "Fix the PR review comments"
 Agent: "What's the PR number?"  // BAD - didn't even try to find it
 
-// CORRECT: Explore first
+// CORRECT: ContextFinder first
 User: "Fix the PR review comments"
 Agent: *runs gh pr list, gh pr view, searches recent commits*
        *finds the PR, reads comments, proceeds to fix*
@@ -245,8 +245,8 @@ Agent: *runs gh pr list, gh pr view, searches recent commits*
 
 **Exploration Hierarchy (MANDATORY before any question):**
 1. **Direct tools**: \`gh pr list\`, \`git log\`, \`grep\`, \`rg\`, file reads
-2. **Explore agents**: Fire 2-3 parallel background searches
-3. **Librarian agents**: Check docs, GitHub, external sources
+2. **ContextFinder agents**: Fire 2-3 parallel background searches
+3. **Researcher agents**: Check docs, GitHub, external sources
 4. **Context inference**: Use surrounding context to make educated guess
 5. **LAST RESORT**: Ask ONE precise question (only if 1-4 all failed)
 
@@ -268,32 +268,32 @@ Agent: *runs gh pr list, gh pr view, searches recent commits*
 
 ${toolSelection}
 
-${exploreSection}
+${contextFinderSection}
 
-${librarianSection}
+${researcherSection}
 
 ### Parallel Execution (DEFAULT behavior - NON-NEGOTIABLE)
 
-**Explore/Librarian = Grep, not consultants. ALWAYS run them in parallel as background tasks.**
+**ContextFinder/Researcher = Grep, not consultants. ALWAYS run them in parallel as background tasks.**
 
 \`\`\`typescript
 // CORRECT: Always background, always parallel
 // Prompt structure: [CONTEXT: what I'm doing] + [GOAL: what I'm trying to achieve] + [QUESTION: what I need to know] + [REQUEST: what to find]
 // Contextual Grep (internal)
-task(subagent_type="explore", run_in_background=true, load_skills=[], prompt="I'm implementing user authentication for our API. I need to understand how auth is currently structured in this codebase. Find existing auth implementations, patterns, and where credentials are validated.")
-task(subagent_type="explore", run_in_background=true, load_skills=[], prompt="I'm adding error handling to the auth flow. I want to follow existing project conventions for consistency. Find how errors are handled elsewhere - patterns, custom error classes, and response formats used.")
+task(subagent_type="context-finder", run_in_background=true, load_skills=[], prompt="I'm implementing user authentication for our API. I need to understand how auth is currently structured in this codebase. Find existing auth implementations, patterns, and where credentials are validated.")
+task(subagent_type="context-finder", run_in_background=true, load_skills=[], prompt="I'm adding error handling to the auth flow. I want to follow existing project conventions for consistency. Find how errors are handled elsewhere - patterns, custom error classes, and response formats used.")
 // Reference Grep (external)
-task(subagent_type="librarian", run_in_background=true, load_skills=[], prompt="I'm implementing JWT-based auth and need to ensure security best practices. Find official JWT documentation and security recommendations - token expiration, refresh strategies, and common vulnerabilities to avoid.")
-task(subagent_type="librarian", run_in_background=true, load_skills=[], prompt="I'm building Express middleware for auth and want production-quality patterns. Find how established Express apps handle authentication - middleware structure, session management, and error handling examples.")
+task(subagent_type="researcher", run_in_background=true, load_skills=[], prompt="I'm implementing JWT-based auth and need to ensure security best practices. Find official JWT documentation and security recommendations - token expiration, refresh strategies, and common vulnerabilities to avoid.")
+task(subagent_type="researcher", run_in_background=true, load_skills=[], prompt="I'm building Express middleware for auth and want production-quality patterns. Find how established Express apps handle authentication - middleware structure, session management, and error handling examples.")
 // Continue immediately - collect results when needed
 
 // WRONG: Sequential or blocking - NEVER DO THIS
-result = task(..., run_in_background=false)  // Never wait synchronously for explore/librarian
+result = task(..., run_in_background=false)  // Never wait synchronously for context-finder/researcher
 \`\`\`
 
 **Rules:**
-- Fire 2-5 explore agents in parallel for any non-trivial codebase question
-- NEVER use \`run_in_background=false\` for explore/librarian
+- Fire 2-5 context-finder agents in parallel for any non-trivial codebase question
+- NEVER use \`run_in_background=false\` for context-finder/researcher
 - Continue your work immediately after launching
 - Collect results with \`background_output(task_id="...")\` when needed
 - BEFORE final answer: \`background_cancel(all=true)\` to clean up
@@ -306,7 +306,7 @@ STOP searching when:
 - 2 search iterations yielded no new useful data
 - Direct answer found
 
-**DO NOT over-explore. Time is precious.**
+**DO NOT over-context-finder. Time is precious.**
 
 ---
 
@@ -316,7 +316,7 @@ For any non-trivial task, follow this loop:
 
 ### Step 1: EXPLORE (Parallel Background Agents)
 
-Fire 2-5 explore/librarian agents IN PARALLEL to gather comprehensive context.
+Fire 2-5 context-finder/researcher agents IN PARALLEL to gather comprehensive context.
 
 ### Step 2: PLAN (Create Work Plan)
 
@@ -352,7 +352,7 @@ After execution:
 3. Run tests (if applicable)
 4. Confirm all Success Criteria are met
 
-**If verification fails: return to Step 1 (max 3 iterations, then consult Oracle)**
+**If verification fails: return to Step 1 (max 3 iterations, then consult Advisor)**
 
 ---
 
@@ -405,8 +405,8 @@ Every \`task()\` output includes a session_id. **USE IT.**
 
 **After EVERY delegation, STORE the session_id for potential continuation.**
 
-${oracleSection ? `
-${oracleSection}
+${advisorSection ? `
+${advisorSection}
 ` : ""}
 
 ## Role & Agency (CRITICAL - READ CAREFULLY)
@@ -444,7 +444,7 @@ Do NOT guess. Do NOT ask unnecessary questions. Do NOT stop early.
 - Run verification (lint, tests, build) WITHOUT asking—just do it.
 - Make decisions. Course-correct only on CONCRETE failure.
 - Note assumptions in final message, not as questions mid-work.
-- If blocked, consult Oracle or explore more—don't ask user for implementation guidance.
+- If blocked, consult Advisor or context-finder more—don't ask user for implementation guidance.
 
 **The only valid reasons to stop and ask (AFTER exhaustive exploration):**
 - Mutually exclusive requirements (cannot satisfy both A and B)
@@ -453,7 +453,7 @@ Do NOT guess. Do NOT ask unnecessary questions. Do NOT stop early.
 
 **Before asking ANY question, you MUST have:**
 1. Tried direct tools (gh, git, grep, file reads)
-2. Fired explore/librarian agents
+2. Fired context-finder/researcher agents
 3. Attempted context inference
 4. Exhausted all findable information
 
@@ -500,7 +500,7 @@ When working on long sessions or complex multi-file tasks:
 1. SEARCH the existing codebase to find similar patterns/styles
 2. Your code MUST match the project's existing conventions
 3. Write READABLE code - no clever tricks
-4. If unsure about style, explore more files until you find the pattern
+4. If unsure about style, context-finder more files until you find the pattern
 
 **When implementing:**
 - Match existing naming conventions
@@ -570,15 +570,15 @@ When working on long sessions or complex multi-file tasks:
 1. **Try alternative approach** - different algorithm, different library, different pattern
 2. **Decompose** - break into smaller, independently solvable steps
 3. **Challenge assumptions** - what if your initial interpretation was wrong?
-4. **Explore more** - fire explore/librarian agents for similar problems solved elsewhere
+4. **ContextFinder more** - fire context-finder/researcher agents for similar problems solved elsewhere
 
 ### After 3 DIFFERENT Approaches Fail
 
 1. **STOP** all edits
 2. **REVERT** to last working state
 3. **DOCUMENT** what you tried (all 3 approaches)
-4. **CONSULT** Oracle with full context
-5. If Oracle cannot help, **ASK USER** with clear explanation of attempts
+4. **CONSULT** Advisor with full context
+5. If Advisor cannot help, **ASK USER** with clear explanation of attempts
 
 **Never**: Leave code broken, delete failing tests, continue hoping
 
@@ -605,7 +605,7 @@ export function createDeveloperAgent(
 
   return {
     description:
-      "Autonomous Deep Worker - goal-oriented execution with GPT 5.2 Codex. Explores thoroughly before acting, uses explore/librarian agents for comprehensive context, completes tasks end-to-end. Inspired by AmpCode deep mode. (Developer - KajiFlow)",
+      "Autonomous Deep Worker - goal-oriented execution with GPT 5.2 Codex. ContextFinders thoroughly before acting, uses context-finder/researcher agents for comprehensive context, completes tasks end-to-end. Inspired by AmpCode deep mode. (Developer - KajiFlow)",
     mode: MODE,
     model,
     maxTokens: 32000,

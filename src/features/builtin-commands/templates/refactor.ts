@@ -80,7 +80,7 @@ Should I proceed with [recommendation], or would you prefer differently?
 
 \`\`\`
 TodoWrite([
-  {"id": "phase-1", "content": "PHASE 1: Codebase Analysis - launch parallel explore agents", "status": "pending", "priority": "high"},
+  {"id": "phase-1", "content": "PHASE 1: Codebase Analysis - launch parallel context-finder agents", "status": "pending", "priority": "high"},
   {"id": "phase-2", "content": "PHASE 2: Build Codemap - map dependencies and impact zones", "status": "pending", "priority": "high"},
   {"id": "phase-3", "content": "PHASE 3: Test Assessment - analyze test coverage and verification strategy", "status": "pending", "priority": "high"},
   {"id": "phase-4", "content": "PHASE 4: Plan Generation - invoke Plan agent for detailed refactoring plan", "status": "pending", "priority": "high"},
@@ -95,14 +95,14 @@ TodoWrite([
 
 **Mark phase-1 as in_progress.**
 
-## 1.1: Launch Parallel Explore Agents (BACKGROUND)
+## 1.1: Launch Parallel ContextFinder Agents (BACKGROUND)
 
 Fire ALL of these simultaneously using \`call_kaji_agent\`:
 
 \`\`\`
 // Agent 1: Find the refactoring target
 call_kaji_agent(
-  subagent_type="explore",
+  subagent_type="context-finder",
   run_in_background=true,
   prompt="Find all occurrences and definitions of [TARGET]. 
   Report: file paths, line numbers, usage patterns."
@@ -110,7 +110,7 @@ call_kaji_agent(
 
 // Agent 2: Find related code
 call_kaji_agent(
-  subagent_type="explore", 
+  subagent_type="context-finder", 
   run_in_background=true,
   prompt="Find all code that imports, uses, or depends on [TARGET].
   Report: dependency chains, import graphs."
@@ -118,7 +118,7 @@ call_kaji_agent(
 
 // Agent 3: Find similar patterns
 call_kaji_agent(
-  subagent_type="explore",
+  subagent_type="context-finder",
   run_in_background=true,
   prompt="Find similar code patterns to [TARGET] in the codebase.
   Report: analogous implementations, established conventions."
@@ -126,7 +126,7 @@ call_kaji_agent(
 
 // Agent 4: Find tests
 call_kaji_agent(
-  subagent_type="explore",
+  subagent_type="context-finder",
   run_in_background=true,
   prompt="Find all test files related to [TARGET].
   Report: test file paths, test case names, coverage indicators."
@@ -134,7 +134,7 @@ call_kaji_agent(
 
 // Agent 5: Architecture context
 call_kaji_agent(
-  subagent_type="explore",
+  subagent_type="context-finder",
   run_in_background=true,
   prompt="Find architectural patterns and module organization around [TARGET].
   Report: module boundaries, layer structure, design patterns in use."
@@ -275,7 +275,7 @@ ls -la *_test.go
 \`\`\`
 // Find all tests related to target
 call_kaji_agent(
-  subagent_type="explore",
+  subagent_type="context-finder",
   run_in_background=false,  // Need this synchronously
   prompt="Analyze test coverage for [TARGET]:
   1. Which test files cover this code?
@@ -598,7 +598,7 @@ Use \`ast_grep_search\` and \`ast_grep_replace\` for structural transformations.
 **Critical**: Always \`dryRun=true\` first, review, then execute.
 
 ## Agents
-- \`explore\`: Parallel codebase pattern discovery
+- \`context-finder\`: Parallel codebase pattern discovery
 - \`plan\`: Detailed refactoring plan generation
 - \`advisor\`: Read-only consultation for complex architectural decisions and debugging
 - \`researcher\`: **Use proactively** when encountering deprecated methods or library migration tasks. Query official docs and OSS examples for modern replacements.

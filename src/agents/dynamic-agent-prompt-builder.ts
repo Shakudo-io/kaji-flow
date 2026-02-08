@@ -106,35 +106,35 @@ export function buildToolSelectionTable(
   }
 
   rows.push("")
-  rows.push("**Default flow**: explore/librarian (background) + tools → oracle (if required)")
+  rows.push("**Default flow**: context-finder/researcher (background) + tools → advisor (if required)")
 
   return rows.join("\n")
 }
 
-export function buildExploreSection(agents: AvailableAgent[]): string {
-  const exploreAgent = agents.find((a) => a.name === "context-finder")
-  if (!exploreAgent) return ""
+export function buildContextFinderSection(agents: AvailableAgent[]): string {
+  const contextFinderAgent = agents.find((a) => a.name === "context-finder")
+  if (!contextFinderAgent) return ""
 
-  const useWhen = exploreAgent.metadata.useWhen || []
-  const avoidWhen = exploreAgent.metadata.avoidWhen || []
+  const useWhen = contextFinderAgent.metadata.useWhen || []
+  const avoidWhen = contextFinderAgent.metadata.avoidWhen || []
 
-  return `### Explore Agent = Contextual Grep
+  return `### ContextFinder Agent = Contextual Grep
 
 Use it as a **peer tool**, not a fallback. Fire liberally.
 
-| Use Direct Tools | Use Explore Agent |
+| Use Direct Tools | Use ContextFinder Agent |
 |------------------|-------------------|
 ${avoidWhen.map((w) => `| ${w} |  |`).join("\n")}
 ${useWhen.map((w) => `|  | ${w} |`).join("\n")}`
 }
 
-export function buildLibrarianSection(agents: AvailableAgent[]): string {
-  const librarianAgent = agents.find((a) => a.name === "researcher")
-  if (!librarianAgent) return ""
+export function buildResearcherSection(agents: AvailableAgent[]): string {
+  const researcherAgent = agents.find((a) => a.name === "researcher")
+  if (!researcherAgent) return ""
 
-  const useWhen = librarianAgent.metadata.useWhen || []
+  const useWhen = researcherAgent.metadata.useWhen || []
 
-  return `### Librarian Agent = Reference Grep
+  return `### Researcher Agent = Reference Grep
 
 Search **external references** (docs, OSS, web). Fire proactively when unfamiliar libraries are involved.
 
@@ -147,7 +147,7 @@ Search **external references** (docs, OSS, web). Fire proactively when unfamilia
 | | Library best practices & quirks |
 | | OSS implementation examples |
 
-**Trigger phrases** (fire librarian immediately):
+**Trigger phrases** (fire researcher immediately):
 ${useWhen.map((w) => `- "${w}"`).join("\n")}`
 }
 
@@ -310,33 +310,33 @@ task(category="...", load_skills=[], run_in_background=false, prompt="...")  // 
 \`\`\``
 }
 
-export function buildOracleSection(agents: AvailableAgent[]): string {
-  const oracleAgent = agents.find((a) => a.name === "advisor")
-  if (!oracleAgent) return ""
+export function buildAdvisorSection(agents: AvailableAgent[]): string {
+  const advisorAgent = agents.find((a) => a.name === "advisor")
+  if (!advisorAgent) return ""
 
-  const useWhen = oracleAgent.metadata.useWhen || []
-  const avoidWhen = oracleAgent.metadata.avoidWhen || []
+  const useWhen = advisorAgent.metadata.useWhen || []
+  const avoidWhen = advisorAgent.metadata.avoidWhen || []
 
-  return `<Oracle_Usage>
-## Oracle — Read-Only High-IQ Consultant
+  return `<Advisor_Usage>
+## Advisor — Read-Only High-IQ Consultant
 
-Oracle is a read-only, expensive, high-quality reasoning model for debugging and architecture. Consultation only.
+Advisor is a read-only, expensive, high-quality reasoning model for debugging and architecture. Consultation only.
 
 ### WHEN to Consult:
 
 | Trigger | Action |
 |---------|--------|
-${useWhen.map((w) => `| ${w} | Oracle FIRST, then implement |`).join("\n")}
+${useWhen.map((w) => `| ${w} | Advisor FIRST, then implement |`).join("\n")}
 
 ### WHEN NOT to Consult:
 
 ${avoidWhen.map((w) => `- ${w}`).join("\n")}
 
 ### Usage Pattern:
-Briefly announce "Consulting Oracle for [reason]" before invocation.
+Briefly announce "Consulting Advisor for [reason]" before invocation.
 
 **Exception**: This is the ONLY case where you announce before acting. For all other work, start immediately without status updates.
-</Oracle_Usage>`
+</Advisor_Usage>`
 }
 
 export function buildHardBlocksSection(): string {

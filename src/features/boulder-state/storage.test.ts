@@ -65,7 +65,7 @@ describe("boulder-state", () => {
   })
 
   describe("writeBoulderState", () => {
-    test("should write state and create .sisyphus directory if needed", () => {
+    test("should write state and create .kajiflow/work directory if needed", () => {
       // given - state to write
       const state: BoulderState = {
         active_plan: "/test/plan.md",

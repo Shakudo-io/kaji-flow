@@ -136,7 +136,7 @@ describe("look-at tool", () => {
       const toolContext: ToolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         directory: "/project",
         worktree: "/project",
         abort: new AbortController().signal,
@@ -174,7 +174,7 @@ describe("look-at tool", () => {
       const toolContext: ToolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         directory: "/project",
         worktree: "/project",
         abort: new AbortController().signal,
@@ -234,7 +234,7 @@ describe("look-at tool", () => {
       const toolContext: ToolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         directory: "/project",
         worktree: "/project",
         abort: new AbortController().signal,
@@ -292,7 +292,7 @@ describe("look-at tool", () => {
       const toolContext: ToolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         directory: "/project",
         worktree: "/project",
         abort: new AbortController().signal,
@@ -349,7 +349,7 @@ describe("look-at tool", () => {
       const toolContext: ToolContext = {
         sessionID: "parent-session",
         messageID: "parent-message",
-        agent: "sisyphus",
+        agent: "orchestrator",
         directory: "/project",
         worktree: "/project",
         abort: new AbortController().signal,

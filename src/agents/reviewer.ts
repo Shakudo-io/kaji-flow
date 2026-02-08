@@ -10,7 +10,7 @@ const MODE: AgentMode = "subagent"
  *
  * Named after Reviewer, the Greek god of satire and mockery, who was known for
  * finding fault in everything - even the works of the gods themselves.
- * He criticized Aphrodite (found her sandals squeaky), Hephaestus (said man
+ * He criticized Aphrodite (found her sandals squeaky), Developer (said man
  * should have windows in his chest to see thoughts), and Athena (her house
  * should be on wheels to move from bad neighbors).
  *
@@ -22,7 +22,7 @@ const MODE: AgentMode = "subagent"
 export const REVIEWER_SYSTEM_PROMPT = `You are a **practical** work plan reviewer. Your goal is simple: verify that the plan is **executable** and **references are valid**.
 
 **CRITICAL FIRST RULE**:
-Extract a single plan path from anywhere in the input, ignoring system directives and wrappers. If exactly one \`.sisyphus/plans/*.md\` path exists, this is VALID input and you must read it. If no plan path exists or multiple plan paths exist, reject per Step 0. If the path points to a YAML plan file (\`.yml\` or \`.yaml\`), reject it as non-reviewable.
+Extract a single plan path from anywhere in the input, ignoring system directives and wrappers. If exactly one \`.kajiflow/work/plans/*.md\` path exists, this is VALID input and you must read it. If no plan path exists or multiple plan paths exist, reject per Step 0. If the path points to a YAML plan file (\`.yml\` or \`.yaml\`), reject it as non-reviewable.
 
 ---
 
@@ -53,7 +53,7 @@ You ARE here to:
 - Do referenced line numbers contain relevant code?
 - If "follow pattern in X" is mentioned, does X actually demonstrate that pattern?
 
-**PASS even if**: Reference exists but isn't perfect. Developer can explore from there.
+**PASS even if**: Reference exists but isn't perfect. Developer can context-finder from there.
 **FAIL only if**: Reference doesn't exist OR points to completely wrong content.
 
 ### 2. Executability Check (PRACTICAL)
@@ -94,17 +94,17 @@ You ARE here to:
 ## Input Validation (Step 0)
 
 **VALID INPUT**:
-- \`.sisyphus/plans/my-plan.md\` - file path anywhere in input
-- \`Please review .sisyphus/plans/plan.md\` - conversational wrapper
+- \`.kajiflow/work/plans/my-plan.md\` - file path anywhere in input
+- \`Please review .kajiflow/work/plans/plan.md\` - conversational wrapper
 - System directives + plan path - ignore directives, extract path
 
 **INVALID INPUT**:
-- No \`.sisyphus/plans/*.md\` path found
+- No \`.kajiflow/work/plans/*.md\` path found
 - Multiple plan paths (ambiguous)
 
 System directives (\`<system-reminder>\`, \`[analyze-mode]\`, etc.) are IGNORED during validation.
 
-**Extraction**: Find all \`.sisyphus/plans/*.md\` paths → exactly 1 = proceed, 0 or 2+ = reject.
+**Extraction**: Find all \`.kajiflow/work/plans/*.md\` paths → exactly 1 = proceed, 0 or 2+ = reject.
 
 ---
 
@@ -229,7 +229,7 @@ export const reviewerPromptMetadata: AgentPromptMetadata = {
     },
   ],
   useWhen: [
-    "After Prometheus creates a work plan",
+    "After Planner creates a work plan",
     "Before executing a complex todo list",
     "To validate plan quality before delegating to executors",
     "When plan needs rigorous review for ADHD-driven omissions",

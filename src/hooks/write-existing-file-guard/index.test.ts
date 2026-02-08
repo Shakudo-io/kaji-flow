@@ -202,12 +202,12 @@ describe("createWriteExistingFileGuardHook", () => {
        await expect(result).rejects.toThrow("File already exists. Use edit tool instead.")
      })
 
-    describe(".sisyphus/*.md exception", () => {
-      test("allows write to existing .sisyphus/plans/plan.md", async () => {
+    describe(".kajiflow/work/*.md exception", () => {
+      test("allows write to existing .kajiflow/work/plans/plan.md", async () => {
         //#given
-        const sisyphusDir = path.join(tempDir, ".sisyphus", "plans")
-        fs.mkdirSync(sisyphusDir, { recursive: true })
-        const planFile = path.join(sisyphusDir, "plan.md")
+        const orchestratorDir = path.join(tempDir, ".kajiflow/work", "plans")
+        fs.mkdirSync(orchestratorDir, { recursive: true })
+        const planFile = path.join(orchestratorDir, "plan.md")
         fs.writeFileSync(planFile, "# Existing Plan")
         const input = { tool: "Write", sessionID: "ses_1", callID: "call_1" }
         const output = { args: { filePath: planFile, content: "# Updated Plan" } }
@@ -219,11 +219,11 @@ describe("createWriteExistingFileGuardHook", () => {
         await expect(result).resolves.toBeUndefined()
       })
 
-      test("allows write to existing .sisyphus/notes.md", async () => {
+      test("allows write to existing .kajiflow/work/notes.md", async () => {
         //#given
-        const sisyphusDir = path.join(tempDir, ".sisyphus")
-        fs.mkdirSync(sisyphusDir, { recursive: true })
-        const notesFile = path.join(sisyphusDir, "notes.md")
+        const orchestratorDir = path.join(tempDir, ".kajiflow/work")
+        fs.mkdirSync(orchestratorDir, { recursive: true })
+        const notesFile = path.join(orchestratorDir, "notes.md")
         fs.writeFileSync(notesFile, "# Notes")
         const input = { tool: "Write", sessionID: "ses_1", callID: "call_1" }
         const output = { args: { filePath: notesFile, content: "# Updated Notes" } }
@@ -235,14 +235,14 @@ describe("createWriteExistingFileGuardHook", () => {
         await expect(result).resolves.toBeUndefined()
       })
 
-      test("allows write to existing .sisyphus/*.md using relative path", async () => {
+      test("allows write to existing .kajiflow/work/*.md using relative path", async () => {
         //#given
-        const sisyphusDir = path.join(tempDir, ".sisyphus")
-        fs.mkdirSync(sisyphusDir, { recursive: true })
-        const planFile = path.join(sisyphusDir, "plan.md")
+        const orchestratorDir = path.join(tempDir, ".kajiflow/work")
+        fs.mkdirSync(orchestratorDir, { recursive: true })
+        const planFile = path.join(orchestratorDir, "plan.md")
         fs.writeFileSync(planFile, "# Plan")
         const input = { tool: "Write", sessionID: "ses_1", callID: "call_1" }
-        const output = { args: { filePath: ".sisyphus/plan.md", content: "# Updated" } }
+        const output = { args: { filePath: ".kajiflow/work/plan.md", content: "# Updated" } }
 
         //#when
         const result = hook["tool.execute.before"]?.(input as any, output as any)
@@ -251,11 +251,11 @@ describe("createWriteExistingFileGuardHook", () => {
         await expect(result).resolves.toBeUndefined()
       })
 
-      test("blocks write to existing .sisyphus/file.txt (non-markdown)", async () => {
+      test("blocks write to existing .kajiflow/work/file.txt (non-markdown)", async () => {
         //#given
-        const sisyphusDir = path.join(tempDir, ".sisyphus")
-        fs.mkdirSync(sisyphusDir, { recursive: true })
-        const textFile = path.join(sisyphusDir, "file.txt")
+        const orchestratorDir = path.join(tempDir, ".kajiflow/work")
+        fs.mkdirSync(orchestratorDir, { recursive: true })
+        const textFile = path.join(orchestratorDir, "file.txt")
         fs.writeFileSync(textFile, "content")
         const input = { tool: "Write", sessionID: "ses_1", callID: "call_1" }
         const output = { args: { filePath: textFile, content: "new content" } }
@@ -267,11 +267,11 @@ describe("createWriteExistingFileGuardHook", () => {
         await expect(result).rejects.toThrow("File already exists. Use edit tool instead.")
       })
 
-      test("blocks write when .sisyphus is in parent path but not under ctx.directory", async () => {
+      test("blocks write when .kajiflow/work is in parent path but not under ctx.directory", async () => {
         //#given
-        const fakeSisyphusParent = path.join(os.tmpdir(), ".sisyphus", "evil-project")
-        fs.mkdirSync(fakeSisyphusParent, { recursive: true })
-        const evilFile = path.join(fakeSisyphusParent, "plan.md")
+        const fakeOrchestratorParent = path.join(os.tmpdir(), ".kajiflow/work", "evil-project")
+        fs.mkdirSync(fakeOrchestratorParent, { recursive: true })
+        const evilFile = path.join(fakeOrchestratorParent, "plan.md")
         fs.writeFileSync(evilFile, "# Evil Plan")
         const input = { tool: "Write", sessionID: "ses_1", callID: "call_1" }
         const output = { args: { filePath: evilFile, content: "# Hacked" } }
@@ -283,10 +283,10 @@ describe("createWriteExistingFileGuardHook", () => {
         await expect(result).rejects.toThrow("File already exists. Use edit tool instead.")
 
         // cleanup
-        fs.rmSync(path.join(os.tmpdir(), ".sisyphus"), { recursive: true, force: true })
+        fs.rmSync(path.join(os.tmpdir(), ".kajiflow/work"), { recursive: true, force: true })
       })
 
-      test("blocks write to existing regular file (not in .sisyphus)", async () => {
+      test("blocks write to existing regular file (not in .kajiflow/work)", async () => {
         //#given
         const regularFile = path.join(tempDir, "regular.md")
         fs.writeFileSync(regularFile, "# Regular")

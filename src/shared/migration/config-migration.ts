@@ -63,7 +63,7 @@ export function migrateConfigFile(
   }
 
   if (rawConfig.kaji_agent) {
-    rawConfig.sisyphus_agent = rawConfig.kaji_agent
+    rawConfig.orchestrator_config = rawConfig.kaji_agent
     delete rawConfig.kaji_agent
     needsWrite = true
   }

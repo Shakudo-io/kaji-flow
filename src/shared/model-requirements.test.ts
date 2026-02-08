@@ -7,77 +7,77 @@ import {
 } from "./model-requirements"
 
 describe("AGENT_MODEL_REQUIREMENTS", () => {
-  test("oracle has valid fallbackChain with gpt-5.2 as primary", () => {
-    // given - oracle agent requirement
-    const oracle = AGENT_MODEL_REQUIREMENTS["advisor"]
+  test("advisor has valid fallbackChain with gpt-5.2 as primary", () => {
+    // given - advisor agent requirement
+    const advisor = AGENT_MODEL_REQUIREMENTS["advisor"]
 
-    // when - accessing oracle requirement
+    // when - accessing advisor requirement
     // then - fallbackChain exists with gpt-5.2 as first entry
-    expect(oracle).toBeDefined()
-    expect(oracle.fallbackChain).toBeArray()
-    expect(oracle.fallbackChain.length).toBeGreaterThan(0)
+    expect(advisor).toBeDefined()
+    expect(advisor.fallbackChain).toBeArray()
+    expect(advisor.fallbackChain.length).toBeGreaterThan(0)
 
-    const primary = oracle.fallbackChain[0]
+    const primary = advisor.fallbackChain[0]
     expect(primary.providers).toContain("google")
     expect(primary.model).toBe("gemini-3-pro-preview")
     expect(primary.variant).toBe("high")
   })
 
-  test("sisyphus has claude-opus-4-6 as primary and requiresAnyModel", () => {
-    // #given - sisyphus agent requirement
-    const sisyphus = AGENT_MODEL_REQUIREMENTS["orchestrator"]
+  test("orchestrator has claude-opus-4-6 as primary and requiresAnyModel", () => {
+    // #given - orchestrator agent requirement
+    const orchestrator = AGENT_MODEL_REQUIREMENTS["orchestrator"]
 
-    // #when - accessing Sisyphus requirement
+    // #when - accessing Orchestrator requirement
     // #then - fallbackChain has claude-opus-4-6 first, glm-4.7-free last
-    expect(sisyphus).toBeDefined()
-    expect(sisyphus.fallbackChain).toBeArray()
-    expect(sisyphus.fallbackChain).toHaveLength(5)
-    expect(sisyphus.requiresAnyModel).toBe(true)
+    expect(orchestrator).toBeDefined()
+    expect(orchestrator.fallbackChain).toBeArray()
+    expect(orchestrator.fallbackChain).toHaveLength(5)
+    expect(orchestrator.requiresAnyModel).toBe(true)
 
-    const primary = sisyphus.fallbackChain[0]
+    const primary = orchestrator.fallbackChain[0]
     expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode"])
     expect(primary.model).toBe("claude-opus-4-6")
     expect(primary.variant).toBe("max")
 
-    const last = sisyphus.fallbackChain[4]
+    const last = orchestrator.fallbackChain[4]
     expect(last.providers[0]).toBe("opencode")
     expect(last.model).toBe("glm-4.7-free")
   })
 
-  test("librarian has valid fallbackChain with glm-4.7 as primary", () => {
-    // given - librarian agent requirement
-    const librarian = AGENT_MODEL_REQUIREMENTS["researcher"]
+  test("researcher has valid fallbackChain with glm-4.7 as primary", () => {
+    // given - researcher agent requirement
+    const researcher = AGENT_MODEL_REQUIREMENTS["researcher"]
 
-    // when - accessing librarian requirement
+    // when - accessing researcher requirement
     // then - fallbackChain exists with glm-4.7 as first entry
-    expect(librarian).toBeDefined()
-    expect(librarian.fallbackChain).toBeArray()
-    expect(librarian.fallbackChain.length).toBeGreaterThan(0)
+    expect(researcher).toBeDefined()
+    expect(researcher.fallbackChain).toBeArray()
+    expect(researcher.fallbackChain.length).toBeGreaterThan(0)
 
-    const primary = librarian.fallbackChain[0]
+    const primary = researcher.fallbackChain[0]
     expect(primary.providers[0]).toBe("anthropic")
     expect(primary.model).toBe("claude-sonnet-4-5-20250929")
   })
 
-  test("explore has valid fallbackChain with grok-code-fast-1 as primary", () => {
-    // given - explore agent requirement
-    const explore = AGENT_MODEL_REQUIREMENTS["context-finder"]
+  test("context-finder has valid fallbackChain with grok-code-fast-1 as primary", () => {
+    // given - context-finder agent requirement
+    const contextFinder = AGENT_MODEL_REQUIREMENTS["context-finder"]
 
-    // when - accessing explore requirement
+    // when - accessing context-finder requirement
     // then - fallbackChain exists with grok-code-fast-1 as first entry, claude-haiku-4-5 as second
-    expect(explore).toBeDefined()
-    expect(explore.fallbackChain).toBeArray()
-    expect(explore.fallbackChain).toHaveLength(3)
+    expect(context-finder).toBeDefined()
+    expect(context-finder.fallbackChain).toBeArray()
+    expect(context-finder.fallbackChain).toHaveLength(3)
 
-    const primary = explore.fallbackChain[0]
+    const primary = context-finder.fallbackChain[0]
     expect(primary.providers).toContain("anthropic")
     expect(primary.model).toBe("claude-sonnet-4-5-20250929")
 
-    const secondary = explore.fallbackChain[1]
+    const secondary = context-finder.fallbackChain[1]
     expect(secondary.providers).toContain("github-copilot")
         expect(secondary.model).toBe("grok-code-fast-1")
 
-    const tertiary = explore.fallbackChain[2]
+    const tertiary = context-finder.fallbackChain[2]
     expect(tertiary.providers).toContain("opencode")
     expect(tertiary.model).toBe("gpt-5-nano")
   })
@@ -97,78 +97,78 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(primary.model).toBe("gemini-3-pro-preview")
   })
 
-  test("prometheus has claude-opus-4-6 as primary", () => {
-    // #given - prometheus agent requirement
-    const prometheus = AGENT_MODEL_REQUIREMENTS["planner"]
+  test("planner has claude-opus-4-6 as primary", () => {
+    // #given - planner agent requirement
+    const planner = AGENT_MODEL_REQUIREMENTS["planner"]
 
-    // #when - accessing Prometheus requirement
+    // #when - accessing Planner requirement
     // #then - claude-opus-4-6 is first
-    expect(prometheus).toBeDefined()
-    expect(prometheus.fallbackChain).toBeArray()
-    expect(prometheus.fallbackChain.length).toBeGreaterThan(1)
+    expect(planner).toBeDefined()
+    expect(planner.fallbackChain).toBeArray()
+    expect(planner.fallbackChain.length).toBeGreaterThan(1)
 
-    const primary = prometheus.fallbackChain[0]
+    const primary = planner.fallbackChain[0]
     expect(primary.model).toBe("claude-opus-4-6")
     expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode"])
     expect(primary.variant).toBe("max")
   })
 
-  test("metis has claude-opus-4-6 as primary", () => {
-    // #given - metis agent requirement
-    const metis = AGENT_MODEL_REQUIREMENTS["requirements-analyst"]
+  test("requirements-analyst has claude-opus-4-6 as primary", () => {
+    // #given - requirements-analyst agent requirement
+    const requirementsAnalyst = AGENT_MODEL_REQUIREMENTS["requirements-analyst"]
 
-    // #when - accessing Metis requirement
+    // #when - accessing RequirementsAnalyst requirement
     // #then - claude-opus-4-6 is first
-    expect(metis).toBeDefined()
-    expect(metis.fallbackChain).toBeArray()
-    expect(metis.fallbackChain.length).toBeGreaterThan(1)
+    expect(requirements-analyst).toBeDefined()
+    expect(requirements-analyst.fallbackChain).toBeArray()
+    expect(requirements-analyst.fallbackChain.length).toBeGreaterThan(1)
 
-    const primary = metis.fallbackChain[0]
+    const primary = requirements-analyst.fallbackChain[0]
     expect(primary.model).toBe("claude-opus-4-6")
     expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode"])
     expect(primary.variant).toBe("max")
   })
 
-  test("momus has valid fallbackChain with gpt-5.2 as primary", () => {
-    // given - momus agent requirement
-    const momus = AGENT_MODEL_REQUIREMENTS["reviewer"]
+  test("reviewer has valid fallbackChain with gpt-5.2 as primary", () => {
+    // given - reviewer agent requirement
+    const reviewer = AGENT_MODEL_REQUIREMENTS["reviewer"]
 
-    // when - accessing Momus requirement
+    // when - accessing Reviewer requirement
     // then - fallbackChain exists with gpt-5.2 as first entry, variant medium
-    expect(momus).toBeDefined()
-    expect(momus.fallbackChain).toBeArray()
-    expect(momus.fallbackChain.length).toBeGreaterThan(0)
+    expect(reviewer).toBeDefined()
+    expect(reviewer.fallbackChain).toBeArray()
+    expect(reviewer.fallbackChain.length).toBeGreaterThan(0)
 
-    const primary = momus.fallbackChain[0]
+    const primary = reviewer.fallbackChain[0]
     expect(primary.model).toBe("gpt-5.2")
     expect(primary.variant).toBe("medium")
     expect(primary.providers[0]).toBe("openai")
   })
 
-  test("atlas has valid fallbackChain with claude-sonnet-4-5-20250929 as primary (kimi-for-coding prioritized)", () => {
-    // given - atlas agent requirement
-    const atlas = AGENT_MODEL_REQUIREMENTS["senior-orchestrator"]
+  test("senior-orchestrator has valid fallbackChain with claude-sonnet-4-5-20250929 as primary (kimi-for-coding prioritized)", () => {
+    // given - senior-orchestrator agent requirement
+    const seniorOrchestrator = AGENT_MODEL_REQUIREMENTS["senior-orchestrator"]
 
-    // when - accessing Atlas requirement
+    // when - accessing SeniorOrchestrator requirement
     // then - fallbackChain exists with claude-sonnet-4-5-20250929 as first entry (kimi-for-coding prioritized)
-    expect(atlas).toBeDefined()
-    expect(atlas.fallbackChain).toBeArray()
-    expect(atlas.fallbackChain.length).toBeGreaterThan(0)
+    expect(senior-orchestrator).toBeDefined()
+    expect(senior-orchestrator.fallbackChain).toBeArray()
+    expect(senior-orchestrator.fallbackChain.length).toBeGreaterThan(0)
 
-    const primary = atlas.fallbackChain[0]
+    const primary = senior-orchestrator.fallbackChain[0]
     expect(primary.model).toBe("claude-sonnet-4-5-20250929")
     expect(primary.providers[0]).toBe("anthropic")
   })
 
-  test("hephaestus requires openai/github-copilot/opencode provider", () => {
-    // #given - hephaestus agent requirement
-    const hephaestus = AGENT_MODEL_REQUIREMENTS["developer"]
+  test("developer requires openai/github-copilot/opencode provider", () => {
+    // #given - developer agent requirement
+    const developer = AGENT_MODEL_REQUIREMENTS["developer"]
 
-    // #when - accessing hephaestus requirement
+    // #when - accessing developer requirement
     // #then - requiresProvider is set to openai, github-copilot, opencode (not requiresModel)
-    expect(hephaestus).toBeDefined()
-    expect(hephaestus.requiresProvider).toEqual(["openai", "github-copilot", "opencode"])
-    expect(hephaestus.requiresModel).toBeUndefined()
+    expect(developer).toBeDefined()
+    expect(developer.requiresProvider).toEqual(["openai", "github-copilot", "opencode"])
+    expect(developer.requiresModel).toBeUndefined()
   })
 
   test("all 10 builtin agents have valid fallbackChain arrays", () => {

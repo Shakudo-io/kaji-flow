@@ -78,7 +78,7 @@ describe("planner-md-only", () => {
       ).rejects.toThrow("can only write/edit .md files")
     })
 
-    test("should allow Planner to write .md files inside .sisyphus/", async () => {
+    test("should allow Planner to write .md files inside .kajiflow/work/", async () => {
       // given
       const hook = createPlannerMdOnlyHook(createMockPluginInput())
       const input = {
@@ -87,7 +87,7 @@ describe("planner-md-only", () => {
         callID: "call-1",
       }
       const output = {
-        args: { filePath: "/tmp/test/.sisyphus/plans/work-plan.md" },
+        args: { filePath: "/tmp/test/.kajiflow/work/plans/work-plan.md" },
       }
 
       // when / #then
@@ -96,7 +96,7 @@ describe("planner-md-only", () => {
       ).resolves.toBeUndefined()
     })
 
-    test("should inject workflow reminder when Planner writes to .sisyphus/plans/", async () => {
+    test("should inject workflow reminder when Planner writes to .kajiflow/work/plans/", async () => {
       // given
       const hook = createPlannerMdOnlyHook(createMockPluginInput())
       const input = {
@@ -105,7 +105,7 @@ describe("planner-md-only", () => {
         callID: "call-1",
       }
       const output: { args: Record<string, unknown>; message?: string } = {
-        args: { filePath: "/tmp/test/.sisyphus/plans/work-plan.md" },
+        args: { filePath: "/tmp/test/.kajiflow/work/plans/work-plan.md" },
       }
 
       // when
@@ -118,7 +118,7 @@ describe("planner-md-only", () => {
       expect(output.message).toContain("MOMUS REVIEW")
     })
 
-    test("should NOT inject workflow reminder for .sisyphus/drafts/", async () => {
+    test("should NOT inject workflow reminder for .kajiflow/work/drafts/", async () => {
       // given
       const hook = createPlannerMdOnlyHook(createMockPluginInput())
       const input = {
@@ -127,7 +127,7 @@ describe("planner-md-only", () => {
         callID: "call-1",
       }
       const output: { args: Record<string, unknown>; message?: string } = {
-        args: { filePath: "/tmp/test/.sisyphus/drafts/notes.md" },
+        args: { filePath: "/tmp/test/.kajiflow/work/drafts/notes.md" },
       }
 
       // when
@@ -137,7 +137,7 @@ describe("planner-md-only", () => {
       expect(output.message).toBeUndefined()
     })
 
-    test("should block Planner from writing .md files outside .sisyphus/", async () => {
+    test("should block Planner from writing .md files outside .kajiflow/work/", async () => {
       // given
       const hook = createPlannerMdOnlyHook(createMockPluginInput())
       const input = {
@@ -152,7 +152,7 @@ describe("planner-md-only", () => {
       // when / #then
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files inside .sisyphus/")
+      ).rejects.toThrow("can only write/edit .md files inside .kajiflow/work/")
     })
 
     test("should block Edit tool for non-.md files", async () => {
@@ -309,7 +309,7 @@ describe("planner-md-only", () => {
 
   describe("with non-Planner agent in message storage", () => {
     beforeEach(() => {
-      setupMessageStorage(TEST_SESSION_ID, "sisyphus")
+      setupMessageStorage(TEST_SESSION_ID, "orchestrator")
     })
 
     test("should not affect non-Planner agents", async () => {
@@ -354,30 +354,30 @@ describe("planner-md-only", () => {
 
   describe("boulder state priority over message files (fixes #927)", () => {
     const BOULDER_DIR = join(tmpdir(), `boulder-test-${randomUUID()}`)
-    const BOULDER_FILE = join(BOULDER_DIR, ".sisyphus", "boulder.json")
+    const BOULDER_FILE = join(BOULDER_DIR, ".kajiflow/work", "boulder.json")
 
     beforeEach(() => {
-      mkdirSync(join(BOULDER_DIR, ".sisyphus"), { recursive: true })
+      mkdirSync(join(BOULDER_DIR, ".kajiflow/work"), { recursive: true })
     })
 
     afterEach(() => {
       rmSync(BOULDER_DIR, { recursive: true, force: true })
     })
 
-    //#given session was started with planner (first message), but /start-work set boulder agent to atlas
+    //#given session was started with planner (first message), but /start-work set boulder agent to senior-orchestrator
     //#when user types "continue" after interruption (memory cleared, falls back to message files)
-    //#then should use boulder state agent (atlas), not message file agent (planner)
+    //#then should use boulder state agent (senior-orchestrator), not message file agent (planner)
     test("should prioritize boulder agent over message file agent", async () => {
       // given - planner in message files (from /plan)
       setupMessageStorage(TEST_SESSION_ID, "planner")
       
-      // given - atlas in boulder state (from /start-work)
+      // given - senior-orchestrator in boulder state (from /start-work)
       writeFileSync(BOULDER_FILE, JSON.stringify({
         active_plan: "/test/plan.md",
         started_at: new Date().toISOString(),
         session_ids: [TEST_SESSION_ID],
         plan_name: "test-plan",
-        agent: "atlas"
+        agent: "senior-orchestrator"
       }))
 
       const hook = createPlannerMdOnlyHook({
@@ -394,15 +394,15 @@ describe("planner-md-only", () => {
         args: { filePath: "/path/to/code.ts" },
       }
 
-      // when / then - should NOT block because boulder says atlas, not planner
+      // when / then - should NOT block because boulder says senior-orchestrator, not planner
       await expect(
         hook["tool.execute.before"](input, output)
       ).resolves.toBeUndefined()
     })
 
     test("should use planner from boulder state when set", async () => {
-      // given - atlas in message files (from some other agent)
-      setupMessageStorage(TEST_SESSION_ID, "atlas")
+      // given - senior-orchestrator in message files (from some other agent)
+      setupMessageStorage(TEST_SESSION_ID, "senior-orchestrator")
       
       // given - planner in boulder state (edge case, but should honor it)
       writeFileSync(BOULDER_FILE, JSON.stringify({
@@ -443,7 +443,7 @@ describe("planner-md-only", () => {
         started_at: new Date().toISOString(),
         session_ids: ["other-session-id"],
         plan_name: "test-plan",
-        agent: "atlas"
+        agent: "senior-orchestrator"
       }))
 
       const hook = createPlannerMdOnlyHook({
@@ -492,7 +492,7 @@ describe("planner-md-only", () => {
       setupMessageStorage(TEST_SESSION_ID, "planner")
     })
 
-     test("should allow Windows-style backslash paths under .sisyphus/", async () => {
+     test("should allow Windows-style backslash paths under .kajiflow/work/", async () => {
        // given
        setupMessageStorage(TEST_SESSION_ID, "planner")
        const hook = createPlannerMdOnlyHook(createMockPluginInput())
@@ -502,7 +502,7 @@ describe("planner-md-only", () => {
          callID: "call-1",
        }
        const output = {
-         args: { filePath: ".sisyphus\\plans\\work-plan.md" },
+         args: { filePath: ".kajiflow/work\\plans\\work-plan.md" },
        }
 
        // when / #then
@@ -511,7 +511,7 @@ describe("planner-md-only", () => {
        ).resolves.toBeUndefined()
      })
 
-     test("should allow mixed separator paths under .sisyphus/", async () => {
+     test("should allow mixed separator paths under .kajiflow/work/", async () => {
        // given
        setupMessageStorage(TEST_SESSION_ID, "planner")
        const hook = createPlannerMdOnlyHook(createMockPluginInput())
@@ -521,7 +521,7 @@ describe("planner-md-only", () => {
          callID: "call-1",
        }
        const output = {
-         args: { filePath: ".sisyphus\\plans/work-plan.MD" },
+         args: { filePath: ".kajiflow/work\\plans/work-plan.MD" },
        }
 
        // when / #then
@@ -540,7 +540,7 @@ describe("planner-md-only", () => {
          callID: "call-1",
        }
        const output = {
-         args: { filePath: ".sisyphus/plans/work-plan.MD" },
+         args: { filePath: ".kajiflow/work/plans/work-plan.MD" },
        }
 
        // when / #then
@@ -549,7 +549,7 @@ describe("planner-md-only", () => {
        ).resolves.toBeUndefined()
      })
 
-     test("should block paths outside workspace root even if containing .sisyphus", async () => {
+     test("should block paths outside workspace root even if containing .kajiflow/work", async () => {
        // given
        setupMessageStorage(TEST_SESSION_ID, "planner")
        const hook = createPlannerMdOnlyHook(createMockPluginInput())
@@ -559,16 +559,16 @@ describe("planner-md-only", () => {
          callID: "call-1",
        }
        const output = {
-         args: { filePath: "/other/project/.sisyphus/plans/x.md" },
+         args: { filePath: "/other/project/.kajiflow/work/plans/x.md" },
        }
 
        // when / #then
        await expect(
          hook["tool.execute.before"](input, output)
-       ).rejects.toThrow("can only write/edit .md files inside .sisyphus/")
+       ).rejects.toThrow("can only write/edit .md files inside .kajiflow/work/")
      })
 
-     test("should allow nested .sisyphus directories (ctx.directory may be parent)", async () => {
+     test("should allow nested .kajiflow/work directories (ctx.directory may be parent)", async () => {
        // given - when ctx.directory is parent of actual project, path includes project name
        setupMessageStorage(TEST_SESSION_ID, "planner")
        const hook = createPlannerMdOnlyHook(createMockPluginInput())
@@ -578,10 +578,10 @@ describe("planner-md-only", () => {
          callID: "call-1",
        }
        const output = {
-         args: { filePath: "src/.sisyphus/plans/x.md" },
+         args: { filePath: "src/.kajiflow/work/plans/x.md" },
        }
 
-       // when / #then - should allow because .sisyphus is in path
+       // when / #then - should allow because .kajiflow/work is in path
        await expect(
          hook["tool.execute.before"](input, output)
        ).resolves.toBeUndefined()
@@ -597,13 +597,13 @@ describe("planner-md-only", () => {
          callID: "call-1",
        }
        const output = {
-         args: { filePath: ".sisyphus/../secrets.md" },
+         args: { filePath: ".kajiflow/work/../secrets.md" },
        }
 
        // when / #then
        await expect(
          hook["tool.execute.before"](input, output)
-       ).rejects.toThrow("can only write/edit .md files inside .sisyphus/")
+       ).rejects.toThrow("can only write/edit .md files inside .kajiflow/work/")
      })
 
      test("should allow case-insensitive .SISYPHUS directory", async () => {
@@ -625,9 +625,9 @@ describe("planner-md-only", () => {
        ).resolves.toBeUndefined()
      })
 
-     test("should allow nested project path with .sisyphus (Windows real-world case)", async () => {
+     test("should allow nested project path with .kajiflow/work (Windows real-world case)", async () => {
        // given - simulates when ctx.directory is parent of actual project
-       // User reported: xauusd-dxy-plan\.sisyphus\drafts\supabase-email-templates.md
+       // User reported: xauusd-dxy-plan\.kajiflow/work\drafts\supabase-email-templates.md
        setupMessageStorage(TEST_SESSION_ID, "planner")
        const hook = createPlannerMdOnlyHook(createMockPluginInput())
        const input = {
@@ -636,7 +636,7 @@ describe("planner-md-only", () => {
          callID: "call-1",
        }
        const output = {
-         args: { filePath: "xauusd-dxy-plan\\.sisyphus\\drafts\\supabase-email-templates.md" },
+         args: { filePath: "xauusd-dxy-plan\\.kajiflow/work\\drafts\\supabase-email-templates.md" },
        }
 
        // when / #then
@@ -655,7 +655,7 @@ describe("planner-md-only", () => {
          callID: "call-1",
        }
        const output = {
-         args: { filePath: "my-project/.sisyphus\\plans/task.md" },
+         args: { filePath: "my-project/.kajiflow/work\\plans/task.md" },
        }
 
        // when / #then
@@ -664,7 +664,7 @@ describe("planner-md-only", () => {
        ).resolves.toBeUndefined()
      })
 
-     test("should block nested project path without .sisyphus", async () => {
+     test("should block nested project path without .kajiflow/work", async () => {
        // given
        setupMessageStorage(TEST_SESSION_ID, "planner")
        const hook = createPlannerMdOnlyHook(createMockPluginInput())

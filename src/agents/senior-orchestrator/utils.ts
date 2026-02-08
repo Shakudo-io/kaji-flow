@@ -1,5 +1,5 @@
 /**
- * Atlas Orchestrator - Shared Utilities
+ * SeniorOrchestrator Orchestrator - Shared Utilities
  *
  * Common functions for building dynamic prompt sections used by both
  * default (Claude-optimized) and GPT-optimized prompts.
@@ -41,7 +41,7 @@ export function buildCategorySection(userCategories?: Record<string, CategoryCon
 
   return `##### Option A: Use CATEGORY (for domain-specific work)
 
-Categories spawn \`Sisyphus-Junior-{category}\` with optimized settings:
+Categories spawn \`Orchestrator-Junior-{category}\` with optimized settings:
 
 | Category | Temperature | Best For |
 |----------|-------------|----------|

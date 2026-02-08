@@ -18,6 +18,7 @@ import {
 } from "./schema"
 
 import type {
+  OrchestratorConfig,
   KajiFlowConfig,
   AgentOverrideConfig,
   HookName,
@@ -33,7 +34,7 @@ import type {
   BackgroundTaskConfig,
   BabysittingConfig,
   NotificationConfig,
-  OrchestratorConfig,
+  
   WebsearchConfig,
   TmuxLayout,
 } from "./schema"
@@ -58,6 +59,7 @@ export {
 }
 
 export type {
+  OrchestratorConfig,
   KajiFlowConfig,
   AgentOverrideConfig,
   HookName,
@@ -73,7 +75,6 @@ export type {
   BackgroundTaskConfig,
   BabysittingConfig,
   NotificationConfig,
-  OrchestratorConfig,
   WebsearchConfig,
   TmuxLayout,
 }
@@ -83,7 +84,6 @@ export type AgentName = string // Fallback
 export type McpName = string
 export type AgentOverrides = Record<string, any>
 export type BuiltinCommandName = string
-export type SisyphusAgentConfig = OrchestratorConfig // Alias
-export type SisyphusConfig = OrchestratorConfig // Alias
-export type SisyphusTasksConfig = any
+export type OrchestratorAgentConfig = OrchestratorConfig // Alias
+export type OrchestratorTasksConfig = any
 export type DynamicContextPruningConfig = any

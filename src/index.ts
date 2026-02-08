@@ -329,7 +329,7 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
     },
   );
 
-  const atlasHook = isHookEnabled("senior-orchestrator")
+  const seniorOrchestratorHook = isHookEnabled("senior-orchestrator")
     ? safeCreateHook("senior-orchestrator", () => createSeniorOrchestratorHook(ctx, { 
         directory: ctx.directory, 
         backgroundManager,
@@ -727,7 +727,7 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
       await ralphLoop?.event(input);
       await stopContinuationGuard?.event(input);
       await compactionTodoPreserver?.event(input);
-      await atlasHook?.handler(input);
+      await seniorOrchestratorHook?.handler(input);
 
       const { event } = input;
       const props = event.properties as Record<string, unknown> | undefined;
@@ -822,14 +822,14 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
       await rulesInjector?.["tool.execute.before"]?.(input, output);
       await tasksTodowriteDisabler?.["tool.execute.before"]?.(input, output);
       await plannerMdOnly?.["tool.execute.before"]?.(input, output);
-      await atlasHook?.["tool.execute.before"]?.(input, output);
+      await seniorOrchestratorHook?.["tool.execute.before"]?.(input, output);
 
       if (input.tool === "task") {
         const args = output.args as Record<string, unknown>;
         const category = typeof args.category === "string" ? args.category : undefined;
         const subagentType = typeof args.subagent_type === "string" ? args.subagent_type : undefined;
         if (category && !subagentType) {
-          args.subagent_type = "hephaestus";
+          args.subagent_type = "developer";
         }
       }
 
@@ -933,7 +933,7 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
       await interactiveBashSession?.["tool.execute.after"](input, output);
       await editErrorRecovery?.["tool.execute.after"](input, output);
       await delegateTaskRetry?.["tool.execute.after"](input, output);
-      await atlasHook?.["tool.execute.after"]?.(input, output);
+      await seniorOrchestratorHook?.["tool.execute.after"]?.(input, output);
       await taskResumeInfo?.["tool.execute.after"]?.(input, output);
     },
 
