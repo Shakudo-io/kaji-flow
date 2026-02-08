@@ -1,3 +1,4 @@
+import { readOpenCodeConfigProviders } from "../shared/opencode-config-reader"
 import { log } from "../shared/logger"
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { BuiltinAgentName, AgentOverrideConfig, AgentOverrides, AgentFactory, AgentPromptMetadata } from "./types"
@@ -234,7 +235,15 @@ export async function createBuiltinAgents(
   uiSelectedModel?: string,
   disabledSkills?: Set<string>
 ): Promise<Record<string, AgentConfig>> {
-  const connectedProviders = readConnectedProvidersCache()
+    let connectedProviders = readConnectedProvidersCache()
+  
+  // Fallback: Read from opencode.json directly if cache is missing
+  if (!connectedProviders || connectedProviders.length === 0) {
+    connectedProviders = readOpenCodeConfigProviders()
+    if (connectedProviders.length > 0) {
+      log("[createBuiltinAgents] Using providers from opencode.json fallback", { connectedProviders })
+    }
+  }
   const availableModels = await fetchAvailableModels(undefined, {
     connectedProviders: connectedProviders ?? undefined,
   })
