@@ -618,7 +618,7 @@ export async function executeSyncTask(
     }
 
     try {
-      const allowTask = isPlanAgent(agentToUse)
+      const allowTask = isPlanAgent(agentToUse || "")
       await promptWithModelSuggestionRetry(client, {
         path: { id: sessionID },
         body: {
@@ -951,7 +951,7 @@ export async function resolveSubagentExecution(
     return {
       agentToUse: "",
       categoryModel: undefined,
-      error: `Cannot use subagent_type="${"developer"}" directly. Use category parameter instead (e.g., ${categoryExamples}).
+      error: `Cannot use subagent_type="developer" directly. Use category parameter instead (e.g., ${categoryExamples}).
 
 Orchestrator-Junior is spawned automatically when you specify a category. Pick the appropriate category for your task domain.`,
     }
