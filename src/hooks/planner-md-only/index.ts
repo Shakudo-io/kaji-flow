@@ -89,7 +89,7 @@ function getAgentFromSession(sessionID: string, directory: string): string | und
   if (memoryAgent) return memoryAgent
 
   // Check boulder state (persisted across restarts) - fixes #927
-  const boulderState = readBoulderState(directory)
+  const boulderState = readBoulderState(directory, sessionID)
   if (boulderState?.session_ids.includes(sessionID) && boulderState.agent) {
     return boulderState.agent
   }

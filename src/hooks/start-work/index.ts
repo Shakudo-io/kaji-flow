@@ -73,7 +73,7 @@ export function createStartWorkHook(ctx: PluginInput) {
 
       updateSessionAgent(input.sessionID, "senior-orchestrator") // Always switch: fixes #1298
 
-      const existingState = readBoulderState(ctx.directory)
+      const existingState = readBoulderState(ctx.directory, input.sessionID)
       const sessionId = input.sessionID
       const timestamp = new Date().toISOString()
 
@@ -100,10 +100,10 @@ The requested plan "${getPlanName(matchedPlan)}" has been completed.
 All ${progress.total} tasks are done. Create a new plan with: /plan "your task"`
           } else {
             if (existingState) {
-              clearBoulderState(ctx.directory)
+              clearBoulderState(ctx.directory, sessionId)
             }
             const newState = createBoulderState(matchedPlan, sessionId, "senior-orchestrator")
-            writeBoulderState(ctx.directory, newState)
+            writeBoulderState(ctx.directory, sessionId, newState)
             
             contextInfo = `
 ## Auto-Selected Plan
@@ -188,7 +188,7 @@ All ${plans.length} plan(s) are complete. Create a new plan with: /plan "your ta
           const planPath = incompletePlans[0]
           const progress = getPlanProgress(planPath)
           const newState = createBoulderState(planPath, sessionId, "senior-orchestrator")
-          writeBoulderState(ctx.directory, newState)
+          writeBoulderState(ctx.directory, sessionId, newState)
 
           contextInfo += `
 

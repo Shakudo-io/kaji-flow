@@ -894,7 +894,7 @@ const KajiFlowPlugin: Plugin = async (ctx) => {
           stopContinuationGuard?.stop(sessionID);
           todoContinuationEnforcer?.cancelAllCountdowns();
           ralphLoop?.cancelLoop(sessionID);
-          clearBoulderState(ctx.directory);
+          clearBoulderState(ctx.directory, sessionID);
           log("[stop-continuation] All continuation mechanisms stopped", {
             sessionID,
           });

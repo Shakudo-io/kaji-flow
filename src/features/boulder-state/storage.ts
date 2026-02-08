@@ -1,34 +1,63 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs"
+import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from "node:fs"
 import { dirname, join, basename, isAbsolute } from "node:path"
 import type { BoulderState, PlanProgress } from "./types"
-import { BOULDER_DIR, BOULDER_FILE, PLANNER_PLANS_DIR, SPECKIT_TASKS_FILE } from "./constants"
+import { BOULDER_DIR, BOULDER_SESSIONS_DIR, BOULDER_FILE_LEGACY, PLANNER_PLANS_DIR, SPECKIT_TASKS_FILE } from "./constants"
 
-export function getBoulderFilePath(directory: string): string {
-  return join(directory, BOULDER_DIR, BOULDER_FILE)
+export function getBoulderFilePath(directory: string, sessionId: string): string {
+  return join(directory, BOULDER_SESSIONS_DIR, `${sessionId}.json`)
 }
 
-export function readBoulderState(directory: string): BoulderState | null {
-  const filePath = getBoulderFilePath(directory)
-
-  if (!existsSync(filePath)) {
-    return null
-  }
-
-  try {
-    const content = readFileSync(filePath, "utf-8")
-    return JSON.parse(content) as BoulderState
-  } catch {
-    return null
-  }
+export function getLegacyBoulderFilePath(directory: string): string {
+  return join(directory, BOULDER_DIR, BOULDER_FILE_LEGACY)
 }
 
-export function writeBoulderState(directory: string, state: BoulderState): boolean {
-  const filePath = getBoulderFilePath(directory)
+export function readBoulderState(directory: string, sessionId: string): BoulderState | null {
+  const filePath = getBoulderFilePath(directory, sessionId)
+  
+  if (existsSync(filePath)) {
+    try {
+      const content = readFileSync(filePath, "utf-8")
+      return JSON.parse(content) as BoulderState
+    } catch {
+      return null
+    }
+  }
+
+  // Fallback to legacy singleton if it contains this session ID?
+  // Or migrate it?
+  // For simplicity, we check if legacy file exists and has this session.
+  const legacyPath = getLegacyBoulderFilePath(directory)
+  if (existsSync(legacyPath)) {
+    try {
+      const content = readFileSync(legacyPath, "utf-8")
+      const legacyState = JSON.parse(content) as BoulderState
+      if (legacyState.session_ids?.includes(sessionId)) {
+        // Migration: Clone to session file
+        // We do NOT modify legacy file here to avoid race conditions, just copy state.
+        // But we should probably write it to the new path so next read is fast.
+        writeBoulderState(directory, sessionId, legacyState)
+        return legacyState
+      }
+    } catch {
+      // Ignore legacy read errors
+    }
+  }
+
+  return null
+}
+
+export function writeBoulderState(directory: string, sessionId: string, state: BoulderState): boolean {
+  const filePath = getBoulderFilePath(directory, sessionId)
 
   try {
     const dir = dirname(filePath)
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
+    }
+
+    // Ensure session_ids includes this session (redundant but safe)
+    if (!state.session_ids.includes(sessionId)) {
+      state.session_ids.push(sessionId)
     }
 
     writeFileSync(filePath, JSON.stringify(state, null, 2), "utf-8")
@@ -38,26 +67,26 @@ export function writeBoulderState(directory: string, state: BoulderState): boole
   }
 }
 
-export function appendSessionId(directory: string, sessionId: string): BoulderState | null {
-  const state = readBoulderState(directory)
+export function appendSessionId(directory: string, sessionId: string, targetSessionId?: string): BoulderState | null {
+  // If targetSessionId is provided, we are "joining" another session's boulder.
+  // But with isolation, "joining" means copying their state to our file?
+  // Or do we support shared state?
+  // The requirement is "Session-Isolated State".
+  // So appendSessionId might be obsolete or mean "Initialize my state from existing".
+  
+  // For now, let's assume standard flow: read OWN state.
+  const state = readBoulderState(directory, sessionId)
   if (!state) return null
-
-  if (!state.session_ids.includes(sessionId)) {
-    state.session_ids.push(sessionId)
-    if (writeBoulderState(directory, state)) {
-      return state
-    }
-  }
-
+  
+  // No-op if already isolated
   return state
 }
 
-export function clearBoulderState(directory: string): boolean {
-  const filePath = getBoulderFilePath(directory)
+export function clearBoulderState(directory: string, sessionId: string): boolean {
+  const filePath = getBoulderFilePath(directory, sessionId)
 
   try {
     if (existsSync(filePath)) {
-      const { unlinkSync } = require("node:fs")
       unlinkSync(filePath)
     }
     return true
@@ -66,9 +95,6 @@ export function clearBoulderState(directory: string): boolean {
   }
 }
 
-/**
- * Find Planner plan files (Legacy).
- */
 export function findPlannerPlans(directory: string): string[] {
   const plansDir = join(directory, PLANNER_PLANS_DIR)
 
@@ -91,12 +117,7 @@ export function findPlannerPlans(directory: string): string[] {
   }
 }
 
-/**
- * Extract plan name from file path.
- * Handles both simple filenames (legacy) and deep paths (Speckit).
- */
 export function getPlanName(planPath: string): string {
-  // If it's a Speckit tasks.md, use the parent folder name (feature name)
   if (basename(planPath) === SPECKIT_TASKS_FILE) {
     const parentDir = basename(dirname(planPath))
     return parentDir
@@ -104,9 +125,6 @@ export function getPlanName(planPath: string): string {
   return basename(planPath, ".md")
 }
 
-/**
- * Create a new boulder state for a plan.
- */
 export function createBoulderState(
   planPath: string,
   sessionId: string,

@@ -530,7 +530,7 @@ export function createSeniorOrchestratorHook(
         log(`[${HOOK_NAME}] session.idle`, { sessionID })
 
         // Read boulder state FIRST to check if this session is part of an active boulder
-        const boulderState = readBoulderState(ctx.directory)
+        const boulderState = readBoulderState(ctx.directory, sessionID)
         const isBoulderSession = boulderState?.session_ids.includes(sessionID) ?? false
 
         const mainSessionID = getMainSessionID()
@@ -754,7 +754,7 @@ export function createSeniorOrchestratorHook(
         const fileChanges = formatFileChanges(gitStats)
         const subagentSessionId = extractSessionIdFromOutput(output.output)
 
-        const boulderState = readBoulderState(ctx.directory)
+        const boulderState = readBoulderState(ctx.directory, input.sessionID || "")
 
         if (boulderState) {
           const progress = getPlanProgress(boulderState.active_plan)
