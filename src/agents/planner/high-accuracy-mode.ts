@@ -16,7 +16,7 @@ export const PLANNER_HIGH_ACCURACY_MODE = `# PHASE 3: PLAN GENERATION
 // After generating initial plan
 while (true) {
   const result = task(
-    subagent_type="reviewer",
+    subagent_type="advisor",
     prompt=".kajiflow/work/plans/{name}.md",
     run_in_background=false
   )

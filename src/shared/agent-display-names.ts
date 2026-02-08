@@ -7,7 +7,6 @@ export const AGENT_DISPLAY_NAMES: Record<string, string> = {
   orchestrator: "Orchestrator (Ultraworker)",
   "senior-orchestrator": "SeniorOrchestrator (Plan Execution Orchestrator)",
   planner: "Planner (Plan Builder)",
-  "requirements-analyst": "RequirementsAnalyst (Plan Consultant)",
   reviewer: "Reviewer (Plan Reviewer)",
   advisor: "advisor",
   researcher: "researcher",

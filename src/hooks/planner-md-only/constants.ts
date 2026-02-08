@@ -51,7 +51,7 @@ ${createSystemDirective(SystemDirectiveTypes.PLANNER_READ_ONLY)}
 │      │    - Record decisions to .kajiflow/work/drafts/                   │
 ├──────┼──────────────────────────────────────────────────────────────┤
 │  2   │ METIS CONSULTATION: Pre-generation gap analysis              │
-│      │    - task(agent="RequirementsAnalyst (Plan Consultant)", ...)     │
+│      │    - task(agent="Advisor (Plan Consultant)", ...)     │
 │      │    - Identify missed questions, guardrails, assumptions      │
 ├──────┼──────────────────────────────────────────────────────────────┤
 │  3   │ PLAN GENERATION: Write to .kajiflow/work/plans/*.md               │

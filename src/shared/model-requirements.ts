@@ -70,24 +70,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "high" },
       { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview" },
     ],
-  },
-  "requirements-analyst": {
-    fallbackChain: [
-      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-opus-4-6", variant: "max" },
-      { providers: ["kimi-for-coding"], model: "k2p5" },
-      { providers: ["opencode"], model: "kimi-k2.5-free" },
-      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "high" },
-      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "high" },
-    ],
-  },
-  reviewer: {
-    fallbackChain: [
-      { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "medium" },
-      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-opus-4-6", variant: "max" },
-      { providers: ["google", "github-copilot", "opencode"], model: "gemini-3-pro-preview", variant: "high" },
-    ],
-  },
-  "senior-orchestrator": {
+  },  "senior-orchestrator": {
     fallbackChain: [
       { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-5-20250929" },
       { providers: ["kimi-for-coding"], model: "k2p5" },

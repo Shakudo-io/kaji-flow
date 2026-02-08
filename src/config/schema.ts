@@ -221,7 +221,6 @@ export const KajiFlowConfigSchema = z.object({
     "senior-orchestrator": AgentOverrideConfigSchema.optional(),
     planner: AgentOverrideConfigSchema.optional(),
     developer: AgentOverrideConfigSchema.optional(),
-    "requirements-analyst": AgentOverrideConfigSchema.optional(),
     reviewer: AgentOverrideConfigSchema.optional(),
     researcher: AgentOverrideConfigSchema.optional(),
     "context-finder": AgentOverrideConfigSchema.optional(),

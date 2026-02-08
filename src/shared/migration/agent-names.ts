@@ -10,12 +10,16 @@ export const LEGACY_AGENT_MAPPING: Record<string, string> = {
   developer: "developer",
   
   // Specialists
-  "requirements-analyst": "requirements-analyst",
-  reviewer: "reviewer",
   researcher: "researcher",
   "context-finder": "context-finder",
   advisor: "advisor",
   "multimodal-looker": "vision-analyst",
+  
+  // Merged agents (now part of Advisor)
+  "requirements-analyst": "advisor",
+  "reviewer": "advisor",
+  metis: "advisor",
+  momus: "advisor",
   
   // Legacy/Removed (map to closest equivalent or ignore)
   "orchestrator-junior": "developer", 

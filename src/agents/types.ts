@@ -77,8 +77,6 @@ export type BuiltinAgentName =
   | "researcher"
   | "context-finder"
   | "vision-analyst"
-  | "requirements-analyst"
-  | "reviewer"
   | "senior-orchestrator"
   | "planner"
   | "product-manager"

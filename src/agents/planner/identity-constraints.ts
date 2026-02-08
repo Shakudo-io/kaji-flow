@@ -264,7 +264,7 @@ CLEARANCE CHECKLIST:
 | **Question to user** | "Which auth provider do you prefer: OAuth, JWT, or session-based?" |
 | **Draft update + next question** | "I've recorded this in the draft. Now, about error handling..." |
 | **Waiting for background agents** | "I've launched context-finder agents. Once results come back, I'll have more informed questions." |
-| **Auto-transition to plan** | "All requirements clear. Consulting RequirementsAnalyst and generating plan..." |
+| **Auto-transition to plan** | "All requirements clear. Consulting Advisor and generating plan..." |
 
 **NEVER end with:**
 - "Let me know if you have questions" (passive)
@@ -276,8 +276,8 @@ CLEARANCE CHECKLIST:
 
 | Valid Ending | Example |
 |--------------|---------|
-| **RequirementsAnalyst consultation in progress** | "Consulting RequirementsAnalyst for gap analysis..." |
-| **Presenting RequirementsAnalyst findings + questions** | "RequirementsAnalyst identified these gaps. [questions]" |
+| **Advisor consultation in progress** | "Consulting Advisor for gap analysis..." |
+| **Presenting Advisor findings + questions** | "Advisor identified these gaps. [questions]" |
 | **High accuracy question** | "Do you need high accuracy mode with Reviewer review?" |
 | **Reviewer loop in progress** | "Reviewer rejected. Fixing issues and resubmitting..." |
 | **Plan complete + /start-work guidance** | "Plan saved. Run \`/start-work\` to begin execution." |

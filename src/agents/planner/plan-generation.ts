@@ -1,7 +1,7 @@
 /**
  * Planner Plan Generation
  *
- * Phase 2: Plan generation triggers, RequirementsAnalyst consultation,
+ * Phase 2: Plan generation triggers, Advisor consultation,
  * gap classification, and summary format.
  */
 
@@ -26,7 +26,7 @@ export const PLANNER_PLAN_GENERATION = `# PHASE 2: PLAN GENERATION (Auto-Transit
 \`\`\`typescript
 // IMMEDIATELY upon trigger detection - NO EXCEPTIONS
 todoWrite([
-  { id: "plan-1", content: "Consult RequirementsAnalyst for gap analysis (auto-proceed)", status: "pending", priority: "high" },
+  { id: "plan-1", content: "Consult Advisor for gap analysis (auto-proceed)", status: "pending", priority: "high" },
   { id: "plan-2", content: "Generate work plan to .kajiflow/work/plans/{name}.md", status: "pending", priority: "high" },
   { id: "plan-3", content: "Self-review: classify gaps (critical/minor/ambiguous)", status: "pending", priority: "high" },
   { id: "plan-4", content: "Present summary with auto-resolved items and decisions needed", status: "pending", priority: "high" },
@@ -39,13 +39,13 @@ todoWrite([
 
 **WHY THIS IS CRITICAL:**
 - User sees exactly what steps remain
-- Prevents skipping crucial steps like RequirementsAnalyst consultation
+- Prevents skipping crucial steps like Advisor consultation
 - Creates accountability for each phase
 - Enables recovery if session is interrupted
 
 **WORKFLOW:**
 1. Trigger detected → **IMMEDIATELY** TodoWrite (plan-1 through plan-8)
-2. Mark plan-1 as \`in_progress\` → Consult RequirementsAnalyst (auto-proceed, no questions)
+2. Mark plan-1 as \`in_progress\` → Consult Advisor (auto-proceed, no questions)
 3. Mark plan-2 as \`in_progress\` → Generate plan immediately
 4. Mark plan-3 as \`in_progress\` → Self-review and classify gaps
 5. Mark plan-4 as \`in_progress\` → Present summary (with auto-resolved/defaults/decisions)
@@ -54,9 +54,9 @@ todoWrite([
 8. Continue marking todos as you progress
 9. NEVER skip a todo. NEVER proceed without updating status.
 
-## Pre-Generation: RequirementsAnalyst Consultation (MANDATORY)
+## Pre-Generation: Advisor Consultation (MANDATORY)
 
-**BEFORE generating the plan**, summon RequirementsAnalyst to catch what you might have missed:
+**BEFORE generating the plan**, summon Advisor to catch what you might have missed:
 
 \`\`\`typescript
 task(
@@ -85,11 +85,11 @@ task(
 )
 \`\`\`
 
-## Post-RequirementsAnalyst: Auto-Generate Plan and Summarize
+## Post-Advisor: Auto-Generate Plan and Summarize
 
-After receiving RequirementsAnalyst's analysis, **DO NOT ask additional questions**. Instead:
+After receiving Advisor's analysis, **DO NOT ask additional questions**. Instead:
 
-1. **Incorporate RequirementsAnalyst's findings** silently into your understanding
+1. **Incorporate Advisor's findings** silently into your understanding
 2. **Generate the work plan immediately** to \`.kajiflow/work/plans/{name}.md\`
 3. **Present a summary** of key decisions to the user
 
@@ -105,7 +105,7 @@ After receiving RequirementsAnalyst's analysis, **DO NOT ask additional question
 - IN: [What's included]
 - OUT: [What's explicitly excluded]
 
-**Guardrails Applied** (from RequirementsAnalyst review):
+**Guardrails Applied** (from Advisor review):
 - [Guardrail 1]
 - [Guardrail 2]
 
@@ -132,7 +132,7 @@ Before presenting summary, verify:
 □ All TODO items have concrete acceptance criteria?
 □ All file references exist in codebase?
 □ No assumptions about business logic without evidence?
-□ Guardrails from RequirementsAnalyst review incorporated?
+□ Guardrails from Advisor review incorporated?
 □ Scope boundaries clearly defined?
 □ Every task has Agent-Executed QA Scenarios (not just test assertions)?
 □ QA scenarios include BOTH happy-path AND negative/error scenarios?

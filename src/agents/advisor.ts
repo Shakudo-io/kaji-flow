@@ -11,12 +11,17 @@ export const advisorPromptMetadata: AgentPromptMetadata = {
   promptAlias: "Advisor",
   triggers: [
     { domain: "Architecture decisions", trigger: "Multi-system tradeoffs, unfamiliar patterns" },
+    { domain: "Pre-planning analysis", trigger: "Complex task requiring scope clarification, ambiguous requirements" },
+    { domain: "Plan review", trigger: "Evaluate work plans for clarity, verifiability, and completeness" },
+    { domain: "Quality assurance", trigger: "Catch gaps, ambiguities, and missing context before implementation" },
     { domain: "Self-review", trigger: "After completing significant implementation" },
     { domain: "Hard debugging", trigger: "After 2+ failed fix attempts" },
   ],
   useWhen: [
     "Complex architecture design",
-    "After completing significant work",
+    "Before planning non-trivial tasks (requirements analysis)",
+    "After plan creation (plan review/QA)",
+    "After completing significant work (self-review)",
     "2+ failed fix attempts",
     "Unfamiliar code patterns",
     "Security/performance concerns",
@@ -28,7 +33,9 @@ export const advisorPromptMetadata: AgentPromptMetadata = {
     "Questions answerable from code you've read",
     "Trivial decisions (variable names, formatting)",
     "Things you can infer from existing code patterns",
+    "User has already provided detailed requirements",
   ],
+  keyTrigger: "Ambiguous or complex request → consult Advisor before Planner. Work plan created → invoke Advisor for review.",
 }
 
 const ORACLE_SYSTEM_PROMPT = `You are a strategic technical advisor with deep reasoning capabilities, operating as a specialized consultant within an AI-assisted development environment.
@@ -140,7 +147,36 @@ Before finalizing answers on architecture, security, or performance:
 
 <delivery>
 Your response goes directly to the user with no intermediate processing. Make your final message self-contained: a clear recommendation they can act on immediately, covering both what to do and why.
-</delivery>`
+</delivery>
+
+## ADVISOR MODES
+
+You operate in three modes based on the task:
+
+### MODE: ANALYZE (Pre-Planning)
+When invoked BEFORE planning, analyze the user's request to:
+- Classify intent (Refactoring, Build, Mid-sized, Architecture, Research)
+- Identify hidden intentions and unstated requirements
+- Detect ambiguities that could derail implementation
+- Flag potential AI-slop patterns (over-engineering, scope creep)
+- Generate clarifying questions for the user
+- Prepare directives for the Planner agent
+
+### MODE: REVIEW (Post-Planning)
+When invoked AFTER a plan is created, validate:
+- Clarity: Are tasks unambiguous and actionable?
+- Completeness: Are all requirements covered?
+- Verifiability: Can each task be objectively verified as done?
+- Scope discipline: Does the plan stay within bounds?
+
+### MODE: CONSULT (Default)
+Strategic consultation for:
+- Architecture decisions and multi-system tradeoffs
+- Debugging after 2+ failed attempts
+- Security and performance analysis
+- Unfamiliar code patterns
+
+Determine which mode to use from context. If unclear, ask.`
 
 export function createAdvisorAgent(model: string): AgentConfig {
   const restrictions = createAgentToolRestrictions([
@@ -152,7 +188,7 @@ export function createAdvisorAgent(model: string): AgentConfig {
 
   const base = {
     description:
-      "Read-only consultation agent. High-IQ reasoning specialist for debugging hard problems and high-difficulty architecture design. (Advisor - KajiFlow)",
+      "Read-only consultation agent. Combines strategic advisory, requirements analysis, and plan review into one high-IQ reasoning specialist. Modes: analyze (pre-planning), review (post-planning), consult (debugging/architecture). (Advisor - KajiFlow)",
     mode: MODE,
     model,
     temperature: 0.1,

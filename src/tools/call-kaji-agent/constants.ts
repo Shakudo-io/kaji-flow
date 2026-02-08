@@ -2,8 +2,6 @@ export const ALLOWED_SUBAGENTS = [
   "researcher",
   "advisor",
   "developer",
-  "requirements-analyst",
-  "reviewer",
   "context-finder",
   "vision-analyst",
   "planner",

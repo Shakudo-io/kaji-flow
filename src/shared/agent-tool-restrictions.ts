@@ -68,8 +68,6 @@ export const AGENT_RESTRICTIONS: Record<string, any> = {
   call_kaji_agent: "deny",
      "call_kaji_agent_*": "deny",
   },
-  "requirements-analyst": SPECIALIST_AGENT_DENYLIST,
-  reviewer: SPECIALIST_AGENT_DENYLIST,
 }
 
 export function getAgentToolRestrictions(

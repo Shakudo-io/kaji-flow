@@ -10,7 +10,7 @@
  *
  * Transition to PLAN GENERATION mode when:
  * - User says "Make it into a work plan!" or "Save it as a file"
- * - Before generating, consults RequirementsAnalyst for missed questions/guardrails
+ * - Before generating, consults Advisor for missed questions/guardrails
  * - Optionally loops through Reviewer for high-accuracy validation
  *
  * Can write .md files only (enforced by planner-md-only hook).

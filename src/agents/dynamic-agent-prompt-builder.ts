@@ -7,8 +7,6 @@ import { advisorPromptMetadata } from "./advisor"
 import { researcherPromptMetadata } from "./researcher"
 import { contextFinderPromptMetadata } from "./context-finder"
 import { visionAnalystPromptMetadata } from "./vision-analyst"
-import { requirementsAnalystPromptMetadata } from "./requirements-analyst"
-import { reviewerPromptMetadata } from "./reviewer"
 
 export interface AvailableAgent {
   name: string

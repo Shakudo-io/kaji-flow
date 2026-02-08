@@ -8,9 +8,7 @@ import { createAdvisorAgent, advisorPromptMetadata } from "./advisor"
 import { createResearcherAgent, researcherPromptMetadata } from "./researcher"
 import { createContextFinderAgent, contextFinderPromptMetadata } from "./context-finder"
 import { createVisionAnalystAgent, visionAnalystPromptMetadata } from "./vision-analyst"
-import { createRequirementsAnalystAgent, requirementsAnalystPromptMetadata } from "./requirements-analyst"
 import { createSeniorOrchestratorAgent, seniorOrchestratorPromptMetadata } from "./senior-orchestrator"
-import { createReviewerAgent, reviewerPromptMetadata } from "./reviewer"
 import { createDeveloperAgent } from "./developer"
 import { createProductManagerAgent, productManagerPromptMetadata } from "./product-manager"
 import { createSolutionsArchitectAgent, solutionsArchitectPromptMetadata } from "./solutions-architect"
@@ -33,8 +31,6 @@ const agentSources: Record<BuiltinAgentName, AgentSource> = {
   researcher: createResearcherAgent,
   "context-finder": createContextFinderAgent,
   "vision-analyst": createVisionAnalystAgent,
-  "requirements-analyst": createRequirementsAnalystAgent,
-  reviewer: createReviewerAgent,
   "senior-orchestrator": createSeniorOrchestratorAgent as unknown as AgentFactory,
   planner: undefined as unknown as AgentFactory,
   "product-manager": createProductManagerAgent,
@@ -48,8 +44,6 @@ const agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> = {
   researcher: researcherPromptMetadata,
   "context-finder": contextFinderPromptMetadata,
   "vision-analyst": visionAnalystPromptMetadata,
-  "requirements-analyst": requirementsAnalystPromptMetadata,
-  reviewer: reviewerPromptMetadata,
   "senior-orchestrator": seniorOrchestratorPromptMetadata,
   "product-manager": productManagerPromptMetadata,
   "solutions-architect": solutionsArchitectPromptMetadata,

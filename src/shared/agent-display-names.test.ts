@@ -58,19 +58,13 @@ describe("getAgentDisplayName", () => {
   })
 
   it("returns display name for requirements-analyst", () => {
-    // given config key "requirements-analyst"
-    const configKey = "requirements-analyst"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-    // then returns "RequirementsAnalyst (Plan Consultant)"
-    expect(result).toBe("RequirementsAnalyst (Plan Consultant)")
   })
 
   it("returns display name for reviewer", () => {
-    // given config key "reviewer"
-    const configKey = "reviewer"
 
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
@@ -129,7 +123,6 @@ describe("getAgentDisplayName", () => {
       orchestrator: "Orchestrator (Ultraworker)",
       senior-orchestrator: "SeniorOrchestrator (Plan Execution Orchestrator)",
       planner: "Planner (Plan Builder)",
-      requirements-analyst: "RequirementsAnalyst (Plan Consultant)",
       reviewer: "Reviewer (Plan Reviewer)",
       advisor: "advisor",
       researcher: "researcher",
