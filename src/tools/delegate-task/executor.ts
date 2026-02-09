@@ -237,24 +237,30 @@ export async function executeSyncContinuation(
   let lastMsgCount = 0
   let stablePolls = 0
 
-  while (Date.now() - pollStart < 60000) {
-    await new Promise(resolve => setTimeout(resolve, timing.POLL_INTERVAL_MS))
+   while (Date.now() - pollStart < 60000) {
+     await new Promise(resolve => setTimeout(resolve, timing.POLL_INTERVAL_MS))
 
-    const elapsed = Date.now() - pollStart
-    if (elapsed < timing.SESSION_CONTINUATION_STABILITY_MS) continue
+     const elapsed = Date.now() - pollStart
+     if (elapsed < timing.SESSION_CONTINUATION_STABILITY_MS) continue
 
-    const messagesCheck = await client.session.messages({ path: { id: args.session_id! } })
-    const msgs = ((messagesCheck as { data?: unknown }).data ?? messagesCheck) as Array<unknown>
-    const currentMsgCount = msgs.length
+     const messagesCheck = await client.session.messages({ path: { id: args.session_id! } })
+     const msgs = ((messagesCheck as { data?: unknown }).data ?? messagesCheck) as Array<unknown>
+     const currentMsgCount = msgs.length
 
-    if (currentMsgCount > 0 && currentMsgCount === lastMsgCount) {
-      stablePolls++
-      if (stablePolls >= timing.STABILITY_POLLS_REQUIRED) break
-    } else {
-      stablePolls = 0
-      lastMsgCount = currentMsgCount
-    }
-  }
+     // Session not in status map = finished or crashed. Exit immediately.
+     if (currentMsgCount === 0) {
+       log("[continuation] No messages found - assuming complete", { sessionID: args.session_id, pollCount: Math.floor((Date.now() - pollStart) / timing.POLL_INTERVAL_MS) })
+       break
+     }
+
+     if (currentMsgCount > 0 && currentMsgCount === lastMsgCount) {
+       stablePolls++
+       if (stablePolls >= timing.STABILITY_POLLS_REQUIRED) break
+     } else {
+       stablePolls = 0
+       lastMsgCount = currentMsgCount
+     }
+   }
 
   const messagesResult = await client.session.messages({
     path: { id: args.session_id! },
@@ -367,37 +373,43 @@ export async function executeUnstableAgentTask(
     let lastMsgCount = 0
     let stablePolls = 0
 
-    while (Date.now() - pollStart < timingCfg.MAX_POLL_TIME_MS) {
-      if (ctx.abort?.aborted) {
-        return `Task aborted (was running in background mode).\n\nSession ID: ${sessionID}`
-      }
+     while (Date.now() - pollStart < timingCfg.MAX_POLL_TIME_MS) {
+       if (ctx.abort?.aborted) {
+         return `Task aborted (was running in background mode).\n\nSession ID: ${sessionID}`
+       }
 
-      await new Promise(resolve => setTimeout(resolve, timingCfg.POLL_INTERVAL_MS))
+       await new Promise(resolve => setTimeout(resolve, timingCfg.POLL_INTERVAL_MS))
 
-      const statusResult = await client.session.status()
-      const allStatuses = (statusResult.data ?? {}) as Record<string, { type: string }>
-      const sessionStatus = allStatuses[sessionID]
+       const statusResult = await client.session.status()
+       const allStatuses = (statusResult.data ?? {}) as Record<string, { type: string }>
+       const sessionStatus = allStatuses[sessionID]
 
-      if (sessionStatus && sessionStatus.type !== "idle") {
-        stablePolls = 0
-        lastMsgCount = 0
-        continue
-      }
+       // Session not in status map = finished or crashed. Exit immediately.
+       if (!sessionStatus) {
+         log("[unstable-agent] Session not found in status map - assuming complete", { sessionID, pollCount: Math.floor((Date.now() - pollStart) / timingCfg.POLL_INTERVAL_MS) })
+         break
+       }
 
-      if (Date.now() - pollStart < timingCfg.MIN_STABILITY_TIME_MS) continue
+       if (sessionStatus.type !== "idle") {
+         stablePolls = 0
+         lastMsgCount = 0
+         continue
+       }
 
-      const messagesCheck = await client.session.messages({ path: { id: sessionID } })
-      const msgs = ((messagesCheck as { data?: unknown }).data ?? messagesCheck) as Array<unknown>
-      const currentMsgCount = msgs.length
+       if (Date.now() - pollStart < timingCfg.MIN_STABILITY_TIME_MS) continue
 
-      if (currentMsgCount === lastMsgCount) {
-        stablePolls++
-        if (stablePolls >= timingCfg.STABILITY_POLLS_REQUIRED) break
-      } else {
-        stablePolls = 0
-        lastMsgCount = currentMsgCount
-      }
-    }
+       const messagesCheck = await client.session.messages({ path: { id: sessionID } })
+       const msgs = ((messagesCheck as { data?: unknown }).data ?? messagesCheck) as Array<unknown>
+       const currentMsgCount = msgs.length
+
+       if (currentMsgCount === lastMsgCount) {
+         stablePolls++
+         if (stablePolls >= timingCfg.STABILITY_POLLS_REQUIRED) break
+       } else {
+         stablePolls = 0
+         lastMsgCount = currentMsgCount
+       }
+     }
 
     const messagesResult = await client.session.messages({ path: { id: sessionID } })
     const messages = ((messagesResult as { data?: unknown }).data ?? messagesResult) as SessionMessage[]
@@ -666,57 +678,63 @@ export async function executeSyncTask(
 
     log("[task] Starting poll loop", { sessionID, agentToUse })
 
-    while (Date.now() - pollStart < syncTiming.MAX_POLL_TIME_MS) {
-      if (ctx.abort?.aborted) {
-        log("[task] Aborted by user", { sessionID })
-        if (toastManager && taskId) toastManager.removeTask(taskId)
-        return `Task aborted.\n\nSession ID: ${sessionID}`
-      }
+     while (Date.now() - pollStart < syncTiming.MAX_POLL_TIME_MS) {
+       if (ctx.abort?.aborted) {
+         log("[task] Aborted by user", { sessionID })
+         if (toastManager && taskId) toastManager.removeTask(taskId)
+         return `Task aborted.\n\nSession ID: ${sessionID}`
+       }
 
-      await new Promise(resolve => setTimeout(resolve, syncTiming.POLL_INTERVAL_MS))
-      pollCount++
+       await new Promise(resolve => setTimeout(resolve, syncTiming.POLL_INTERVAL_MS))
+       pollCount++
 
-      const statusResult = await client.session.status()
-      const allStatuses = (statusResult.data ?? {}) as Record<string, { type: string }>
-      const sessionStatus = allStatuses[sessionID]
+       const statusResult = await client.session.status()
+       const allStatuses = (statusResult.data ?? {}) as Record<string, { type: string }>
+       const sessionStatus = allStatuses[sessionID]
 
-      if (pollCount % 10 === 0) {
-      log("[task] Poll status", {
-          sessionID,
-          pollCount,
-          elapsed: Math.floor((Date.now() - pollStart) / 1000) + "s",
-          sessionStatus: sessionStatus?.type ?? "not_in_status",
-          stablePolls,
-          lastMsgCount,
-        })
-      }
+       if (pollCount % 10 === 0) {
+       log("[task] Poll status", {
+           sessionID,
+           pollCount,
+           elapsed: Math.floor((Date.now() - pollStart) / 1000) + "s",
+           sessionStatus: sessionStatus?.type ?? "not_in_status",
+           stablePolls,
+           lastMsgCount,
+         })
+       }
 
-      if (sessionStatus && sessionStatus.type !== "idle") {
-        stablePolls = 0
-        lastMsgCount = 0
-        continue
-      }
+       // Session not in status map = finished or crashed. Exit immediately.
+       if (!sessionStatus) {
+         log("[task] Session not found in status map - assuming complete", { sessionID, pollCount })
+         break
+       }
 
-      const elapsed = Date.now() - pollStart
-      if (elapsed < syncTiming.MIN_STABILITY_TIME_MS) {
-        continue
-      }
+       if (sessionStatus.type !== "idle") {
+         stablePolls = 0
+         lastMsgCount = 0
+         continue
+       }
 
-      const messagesCheck = await client.session.messages({ path: { id: sessionID } })
-      const msgs = ((messagesCheck as { data?: unknown }).data ?? messagesCheck) as Array<unknown>
-      const currentMsgCount = msgs.length
+       const elapsed = Date.now() - pollStart
+       if (elapsed < syncTiming.MIN_STABILITY_TIME_MS) {
+         continue
+       }
 
-      if (currentMsgCount === lastMsgCount) {
-        stablePolls++
-        if (stablePolls >= syncTiming.STABILITY_POLLS_REQUIRED) {
-        log("[task] Poll complete - messages stable", { sessionID, pollCount, currentMsgCount })
-          break
-        }
-      } else {
-        stablePolls = 0
-        lastMsgCount = currentMsgCount
-      }
-    }
+       const messagesCheck = await client.session.messages({ path: { id: sessionID } })
+       const msgs = ((messagesCheck as { data?: unknown }).data ?? messagesCheck) as Array<unknown>
+       const currentMsgCount = msgs.length
+
+       if (currentMsgCount === lastMsgCount) {
+         stablePolls++
+         if (stablePolls >= syncTiming.STABILITY_POLLS_REQUIRED) {
+         log("[task] Poll complete - messages stable", { sessionID, pollCount, currentMsgCount })
+           break
+         }
+       } else {
+         stablePolls = 0
+         lastMsgCount = currentMsgCount
+       }
+     }
 
     if (Date.now() - pollStart >= syncTiming.MAX_POLL_TIME_MS) {
     log("[task] Poll timeout reached", { sessionID, pollCount, lastMsgCount, stablePolls })
