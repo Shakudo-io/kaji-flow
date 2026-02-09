@@ -1,6 +1,6 @@
 import { tool, type ToolDefinition } from "@opencode-ai/plugin"
 import type { DelegateTaskArgs, ToolContextWithMetadata, DelegateTaskToolOptions } from "./types"
-import { DEFAULT_CATEGORIES, CATEGORY_DESCRIPTIONS } from "./constants"
+import { DEFAULT_CATEGORIES, CATEGORY_DESCRIPTIONS, CATEGORY_DEDICATED_AGENTS } from "./constants"
 import { log } from "../../shared"
 import { buildSystemContent } from "./prompt-builder"
 import type {
@@ -87,9 +87,19 @@ Prompts MUST be in English.`
       log("[delegate-task] execute called", { args: JSON.stringify(args) })
       const ctx = toolContext as ToolContextWithMetadata
 
-      if (args.category && !args.subagent_type) {
-        args.subagent_type = "developer"
-      }
+       if (args.category && !args.subagent_type) {
+         const dedicatedAgent = CATEGORY_DEDICATED_AGENTS[args.category]
+         if (dedicatedAgent) {
+           // Route to dedicated agent instead of developer
+           args.subagent_type = dedicatedAgent
+           log("[delegate-task] category→dedicated agent routing", { category: args.category, subagent_type: args.subagent_type })
+           // Clear category so it flows through subagent execution path
+           args.category = undefined
+         } else {
+           args.subagent_type = "developer"
+           log("[delegate-task] category→developer routing", { category: args.category, subagent_type: args.subagent_type })
+         }
+       }
       await ctx.metadata?.({
         title: args.description,
       })
@@ -124,9 +134,9 @@ Prompts MUST be in English.`
         return executeSyncContinuation(args, ctx, options)
       }
 
-      if (args.category && args.subagent_type && args.subagent_type !== "developer") {
-        return `Invalid arguments: Provide EITHER category OR subagent_type, not both.`
-      }
+       if (args.category && args.subagent_type && args.subagent_type !== "developer" && !Object.values(CATEGORY_DEDICATED_AGENTS).includes(args.subagent_type)) {
+         return `Invalid arguments: Provide EITHER category OR subagent_type, not both.`
+       }
 
       if (!args.category && !args.subagent_type) {
         return `Invalid arguments: Must provide either category or subagent_type.`

@@ -76,6 +76,19 @@ export const DEFAULT_CATEGORIES: Record<string, CategoryConfig> = {
   },
 }
 
+/**
+ * Maps category names to their dedicated agent subagent_type.
+ * When a task is created with a category that has a dedicated agent,
+ * the routing will use that agent instead of defaulting to "developer".
+ */
+export const CATEGORY_DEDICATED_AGENTS: Record<string, string> = {
+  writing: "business-writer",
+  "product-management": "product-manager",
+  "solutions-engineering": "solutions-architect",
+  sales: "sales-engineer",
+  "business-operations": "bizops-manager",
+}
+
 export const PLAN_AGENT_NAMES = ["plan", "planner"]
 export const PLAN_AGENT_IDS = ["plan", "planner"]
 
