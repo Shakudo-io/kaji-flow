@@ -287,11 +287,18 @@ export async function executeSyncContinuation(
     return `No assistant response found.\n\nSession ID: ${args.session_id}`
   }
 
-  const textParts = lastMessage?.parts?.filter((p) => p.type === "text" || p.type === "reasoning") ?? []
-  const textContent = textParts.map((p) => p.text ?? "").filter(Boolean).join("\n")
-  const duration = formatDuration(startTime)
+   const textParts = lastMessage?.parts?.filter((p) => p.type === "text" || p.type === "reasoning") ?? []
+   const textContent = textParts.map((p) => p.text ?? "").filter(Boolean).join("\n")
+   const duration = formatDuration(startTime)
 
-  return `Task continued and completed in ${duration}.
+   // Signal session completion to OpenCode
+   try {
+     await client.session.abort({ path: { id: args.session_id! } })
+   } catch {
+     // Ignore abort errors - session may already be cleaned up
+   }
+
+   return `Task continued and completed in ${duration}.
 
 ---
 
@@ -759,18 +766,25 @@ export async function executeSyncTask(
       return `No assistant response found.\n\nSession ID: ${sessionID}`
     }
 
-    const textParts = lastMessage?.parts?.filter((p) => p.type === "text" || p.type === "reasoning") ?? []
-    const textContent = textParts.map((p) => p.text ?? "").filter(Boolean).join("\n")
+     const textParts = lastMessage?.parts?.filter((p) => p.type === "text" || p.type === "reasoning") ?? []
+     const textContent = textParts.map((p) => p.text ?? "").filter(Boolean).join("\n")
 
-    const duration = formatDuration(startTime)
+     const duration = formatDuration(startTime)
 
-    if (toastManager) {
-      toastManager.removeTask(taskId)
-    }
+     if (toastManager) {
+       toastManager.removeTask(taskId)
+     }
 
-    subagentSessions.delete(sessionID)
+     subagentSessions.delete(sessionID)
 
-    return `Task completed in ${duration}.
+     // Signal session completion to OpenCode
+     try {
+       await client.session.abort({ path: { id: sessionID } })
+     } catch {
+       // Ignore abort errors - session may already be cleaned up
+     }
+
+     return `Task completed in ${duration}.
 
 Agent: ${agentToUse}${args.category ? ` (category: ${args.category})` : ""}
 
