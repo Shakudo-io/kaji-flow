@@ -721,9 +721,9 @@ export function createSeniorOrchestratorHook(
             return // Allow through
           }
           
-          // Soft block: return error with bypass instructions
-          const bypassMessage = errorMessage + "\n\n---\nTo override: Include `" + ORCHESTRATOR_BYPASS_PHRASE + "` in your request to proceed."
-          throw new Error(bypassMessage)
+           // Soft block: return error with bypass instructions
+           const bypassMessage = errorMessage + "\n\n---\nTo override: Include `" + ORCHESTRATOR_BYPASS_PHRASE + "` in your tool's description field to proceed."
+           throw new Error(bypassMessage)
         }
         return
       }
@@ -733,15 +733,16 @@ export function createSeniorOrchestratorHook(
       if (input.tool === "bash" || input.tool === "Bash") {
         const command = (output.args?.command || "") as string
         if (typeof command === "string" && isBashWriteCommand(command)) {
-          // Check for bypass phrase
-          if (command.includes(ORCHESTRATOR_BYPASS_PHRASE)) {
+          // Check for bypass phrase in description field
+          const description = (output.args?.description || "") as string
+          if (description.includes(ORCHESTRATOR_BYPASS_PHRASE)) {
             log(`[${HOOK_NAME}] Orchestrator bash override accepted`, { sessionID: input.sessionID, command: command.substring(0, 100) })
-            output.args.command = command.replace(ORCHESTRATOR_BYPASS_PHRASE, "").trim()
+            output.args.description = description.replace(ORCHESTRATOR_BYPASS_PHRASE, "").trim()
             return
           }
           
           const warning = ORCHESTRATOR_DELEGATION_REQUIRED.replace("$FILE_PATH", "bash: " + command.substring(0, 80))
-          const bypassMessage = warning + "\n\n---\nTo override: Include `" + ORCHESTRATOR_BYPASS_PHRASE + "` in your bash command to proceed."
+          const bypassMessage = warning + "\n\n---\nTo override: Include `" + ORCHESTRATOR_BYPASS_PHRASE + "` in your tool's description field to proceed."
           log(`[${HOOK_NAME}] Blocked bash write operation`, { sessionID: input.sessionID, command: command.substring(0, 100) })
           throw new Error(bypassMessage)
         }
